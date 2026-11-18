@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0B3B3A">
+  <title>SHIHTY+ — دراسة وطنية حول الإنترنت وصحة الطلبة</title>
+  <link rel="icon" href="assets/icone.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/tajawal-arabic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="decor" aria-hidden="true"><span class="d1"></span><span class="d2"></span><span class="d3"></span><span class="d4"></span></div>
+  <div id="bandeau" class="bandeau" hidden></div>
+
+  <header class="entete">
+    <div class="entete-int">
+      <a class="marque" href="./" aria-label="SHIHTY+">
+        <span class="marque-icone" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </span>
+        <span id="marque-nom" class="marque-nom">SHIHTY<b class="plus" aria-hidden="true">+</b></span>
+      </a>
+      <div class="entete-droite">
+        <button type="button" id="album" class="album-btn" hidden><span class="album-icone" aria-hidden="true">🎖️</span><span id="album-bouton-texte" class="album-bouton-texte">ألبومي</span><span id="album-compte" class="album-compte" dir="ltr">0 / 20</span></button>
+        <span id="salutation" class="salutation" hidden></span>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" class="page" tabindex="-1">
+    <p class="chargement">...</p>
+    <noscript><p class="carte">المرجو تفعيل JavaScript في متصفحك للمشاركة في الاستبيان.</p></noscript>
+  </main>
+
+  <footer class="pied">
+    <button type="button" id="lien-aide" class="lien-aide"></button>
+  </footer>
+
+  <dialog id="dialogue-aide" class="dialogue" aria-labelledby="aide-titre"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/schema.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

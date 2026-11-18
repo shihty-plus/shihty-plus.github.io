@@ -1,0 +1,467 @@
+{
+  "_aide": "Textes de l'interface (hors questions). Modifiez uniquement le texte entre guillemets à droite des deux-points.",
+  "marque": "SHIHTY+",
+  "accueil": {
+    "titre": "👀 واش الإنترنت ولى واخد بزاف من وقتك؟",
+    "sous_titre": "شارك(ي) فدراسة وطنية وعاونا نفهمو هاد المشكل وتأثيرو على صحتك!",
+    "badges": [
+      "دراسة وطنية",
+      "من 10 إلى 15 دقيقة",
+      "سرية تامة",
+      "لا توجد إجابة صحيحة أو خاطئة"
+    ],
+    "bouton": "ابدأ",
+    "reprise": "لديك مشاركة لم تكتمل. يمكنك المتابعة من حيث توقفت.",
+    "bouton_reprendre": "متابعة",
+    "bouton_recommencer": "البدء من جديد",
+    "etiquette": "🇲🇦 صحيحتي+ · دراسة وطنية للطلبة الجامعيين",
+    "badges_icones": [
+      "🎓",
+      "⏱️",
+      "🔒",
+      "✅"
+    ],
+    "atouts": [
+      {
+        "icone": "🎁",
+        "titre": "نتائجك فورا",
+        "texte": "بعد كل جزء تكتشف(ين) نتيجتك الشخصية مع نصائح عملية."
+      },
+      {
+        "icone": "🕵️",
+        "titre": "بدون اسم ولا تسجيل",
+        "texte": "لا بريد إلكتروني ولا رقم هاتف: مشاركتك مجهولة تماما."
+      },
+      {
+        "icone": "🧭",
+        "titre": "اكتشف(ي) نفسك",
+        "texte": "شخصيتك، نومك، علاقتك بالهاتف والإنترنت... في دقائق."
+      }
+    ]
+  },
+  "consentement": {
+    "titre": "الموافقة على المشاركة",
+    "paragraphes": [
+      "تهدف هذه الدراسة الوطنية إلى الكشف عن انتشار الإدمانات السلوكية المرتبطة بالإنترنت لدى الطلبة الجامعيين المغاربة وأثرها على صحتهم. جميع الإجابات سرية تماما ولن تُستخدم إلا لأغراض البحث العلمي. بمتابعة الإجابة، فإنك توافق بحرية على المشاركة.",
+      "المرجو الإجابة على كل الأسئلة التي تعنيك."
+    ],
+    "case": "أوافق على المشاركة",
+    "bouton_accepter": "متابعة",
+    "bouton_refuser": "لا أرغب في المشاركة",
+    "erreur": "المرجو وضع علامة على «أوافق على المشاركة» للمتابعة."
+  },
+  "refus": {
+    "titre": "شكرا لك على وقتك",
+    "texte": "لم يتم تسجيل أي معلومة. يمكنك العودة والمشاركة في أي وقت."
+  },
+  "prenom": {
+    "titre": "بماذا تحب(ين) أن نناديك؟",
+    "texte": "اختياري: اسم شخصي أو اسم مستعار، فقط لتخصيص العرض. يبقى في هاتفك ولا يُرسل أبدا إلى الباحثين.",
+    "placeholder": "مثلا: ضياء",
+    "bouton": "التالي",
+    "passer": "تخطي"
+  },
+  "salutation": "مرحبا {prenom}",
+  "navigation": {
+    "suivant": "التالي",
+    "precedent": "السابق",
+    "envoyer": "إرسال إجاباتي",
+    "commencer_section": "لنبدأ 🚀",
+    "progression": "التقدم"
+  },
+  "sections_intro": {
+    "S1": {
+      "message": "",
+      "satellites": [
+        "🎓",
+        "✨",
+        "🤝"
+      ]
+    },
+    "S2": {
+      "message": "أحسنت! لقد أنهيت القسم الأول. استمر(ي) ★",
+      "satellites": [
+        "📱",
+        "🎮",
+        "🤖"
+      ]
+    },
+    "S3": {
+      "message": "رائع! بقي القسم الأخير فقط ★",
+      "satellites": [
+        "🌙",
+        "🏃",
+        "🌱"
+      ]
+    }
+  },
+  "encouragements_parties": {
+    "2D": "هكذا! ★"
+  },
+  "erreurs": {
+    "obligatoire": "🙏 المرجو الإجابة على هذا السؤال قبل المتابعة",
+    "nombre": "🙏 المرجو إدخال رقم بين {min} و{max}",
+    "age_incoherent": "🙏 هذا السن لا يمكن أن يكون أكبر من سنك الحالي",
+    "au_moins_un": "🙏 المرجو اختيار إجابة واحدة على الأقل",
+    "reseaux_plus": "🙏 المرجو تحديد الوسيلة الأكثر استخداما من بين التي اخترتها",
+    "reseaux_moins": "🙏 المرجو تحديد الوسيلة الأقل استخداما (مختلفة عن الأكثر استخداما)",
+    "resume": "بقيت أسئلة بدون إجابة في هذه الصفحة"
+  },
+  "choisir": "اختر(ي)...",
+  "envoi": {
+    "titre": "جاري إرسال إجاباتك...",
+    "texte": "المرجو عدم إغلاق الصفحة.",
+    "echec_titre": "تعذر إرسال الإجابات",
+    "echec_texte": "تحقق(ي) من اتصالك بالإنترنت ثم أعد(ي) المحاولة. إجاباتك محفوظة في هاتفك ولن تضيع.",
+    "reessayer": "إعادة المحاولة",
+    "confirmation": "تم إرسال إجاباتك بنجاح ✔",
+    "demo": "وضع تجريبي: لم يتم ضبط رابط الإرسال، الإجابات لم تُرسل."
+  },
+  "resultats": {
+    "titre": "ملخص التقييمات الصحية",
+    "sous_titre": "فيما يلي ملخص لجميع التقييمات التي قمت بها والتوصيات المخصصة لك",
+    "titre_prenom": "{prenom}، هذه نتائجك",
+    "synthese_titre": "نظرة عامة على صحتك",
+    "resultat": "النتيجة:",
+    "score": "الدرجة",
+    "bas": "منخفض",
+    "haut": "مرتفع",
+    "conseils": "التوصيات",
+    "consulter": "ننصحك بالتحدث مع مصلحة الصحة الجامعية أو مع مختص: طلب المشورة خطوة إيجابية.",
+    "telecharger": "تحميل / طباعة نتائجي (PDF)",
+    "effacer": "مسح نتائجي",
+    "effacer_confirmation": "سيتم مسح نتائجك من هذا الجهاز نهائيا. هل تريد(ين) المتابعة؟",
+    "terminer": "إنهاء",
+    "facettes": "الجوانب الفرعية",
+    "intermediaire_sur": "🎉 نتيجتك جاهزة",
+    "intermediaire_titre": "اكتشف(ي) نتيجتك!",
+    "intermediaire_prenom": "{prenom}، اكتشف(ي) نتيجتك!",
+    "continuer": "متابعة"
+  },
+  "fin": {
+    "titre": "شكرا جزيلا على مشاركتك القيّمة!",
+    "texte": "مساهمتك تساعدنا على فهم أفضل لصحة الطلبة المغاربة.",
+    "contact": "للتواصل مع فريق البحث:"
+  },
+  "aide": {
+    "lien": "تحتاج مساعدة؟",
+    "fermer": "إغلاق"
+  },
+  "saisie": {
+    "bandeau": "وضع الإدخال (خاص بالباحث) — Mode saisie chercheur",
+    "titre": "إدخال استمارة ورقية",
+    "num_formulaire": "رقم الاستمارة – خاص بالباحث",
+    "commencer": "بدء الإدخال",
+    "enregistrer": "حفظ الاستمارة",
+    "succes": "تم حفظ الاستمارة رقم {num} ✔",
+    "nouvelle": "استمارة جديدة",
+    "incomplet": "توجد أسئلة بدون إجابة في هذه الصفحة. هل تريد المتابعة؟ (ستبقى الخانات فارغة)"
+  },
+  "icones": {
+    "S1": "🧑‍🎓",
+    "S2": "🌐",
+    "S3": "💚",
+    "1A": "🪪",
+    "1B": "🏠",
+    "1C": "🎓",
+    "1D": "💬",
+    "1E": "✨",
+    "1F": "🤝",
+    "2A": "📶",
+    "2B": "📱",
+    "2C": "🎮",
+    "2D": "🎲",
+    "2E": "🔒",
+    "2F": "🤖",
+    "3A": "🏃",
+    "3B": "👁️",
+    "3C": "🌙",
+    "3D": "🌀",
+    "3E": "💙",
+    "3F": "🍃",
+    "3G": "🕊️",
+    "3H": "🌱"
+  },
+  "confirmation": {
+    "oui": "نعم، متابعة",
+    "non": "إلغاء"
+  },
+  "_aide_themes": "« themes » : décor de chaque partie. couleur = couleur de la partie ; perso = personnage ; heros = objet animé (anim : balance, pulse, saute, vibre, roule, tourne, court, cligne, pousse, flotte) ; particules = autocollants animés (mouvement : monte, tombe, traverse, scintille, flotte) ; extra = machine (machine à sous) ou saisie (bulle « en train d'écrire »).",
+  "themes": {
+    "1A": {
+      "couleur": "#0D9488",
+      "perso": "🧑‍🎓",
+      "heros": "🪪",
+      "anim": "balance",
+      "particules": [
+        "🎂",
+        "📍",
+        "🏡",
+        "✨"
+      ],
+      "mouvement": "flotte"
+    },
+    "1B": {
+      "couleur": "#F0644F",
+      "perso": "👨‍👩‍👧",
+      "heros": "🏠",
+      "anim": "pulse",
+      "particules": [
+        "❤️",
+        "👵",
+        "👶",
+        "💛"
+      ],
+      "mouvement": "monte"
+    },
+    "1C": {
+      "couleur": "#C8964A",
+      "perso": "👩‍🎓",
+      "heros": "🎓",
+      "anim": "saute",
+      "particules": [
+        "📚",
+        "✏️",
+        "🏛️",
+        "📝"
+      ],
+      "mouvement": "flotte"
+    },
+    "1D": {
+      "couleur": "#FF7F6B",
+      "perso": "🧑‍🤝‍🧑",
+      "heros": "💬",
+      "anim": "pulse",
+      "particules": [
+        "😊",
+        "💞",
+        "☕",
+        "🎉"
+      ],
+      "mouvement": "monte"
+    },
+    "1E": {
+      "couleur": "#0F766E",
+      "perso": "🧑‍🎨",
+      "heros": "🎭",
+      "anim": "balance",
+      "particules": [
+        "✨",
+        "🧩",
+        "🌈",
+        "💡",
+        "⭐"
+      ],
+      "mouvement": "scintille"
+    },
+    "1F": {
+      "couleur": "#D4A24C",
+      "perso": "🤗",
+      "heros": "🤝",
+      "anim": "pulse",
+      "particules": [
+        "💚",
+        "💞",
+        "🤍",
+        "💛"
+      ],
+      "mouvement": "monte"
+    },
+    "2A": {
+      "couleur": "#0D9488",
+      "perso": "🧑‍💻",
+      "heros": "📱",
+      "anim": "vibre",
+      "particules": [
+        "📶",
+        "🌐",
+        "⏰",
+        "🔔"
+      ],
+      "mouvement": "monte"
+    },
+    "2B": {
+      "couleur": "#E0543F",
+      "perso": "🤳",
+      "heros": "📱",
+      "anim": "vibre",
+      "particules": [
+        "❤️",
+        "👍",
+        "💬",
+        "🔔",
+        "😂",
+        "❤️"
+      ],
+      "mouvement": "monte"
+    },
+    "2C": {
+      "couleur": "#14B8A6",
+      "perso": "🧑‍💻",
+      "heros": "🎮",
+      "anim": "vibre",
+      "particules": [
+        "👾",
+        "🕹️",
+        "⭐",
+        "🏆",
+        "👾"
+      ],
+      "mouvement": "traverse"
+    },
+    "2D": {
+      "couleur": "#C8964A",
+      "perso": "🤵",
+      "heros": "🎲",
+      "anim": "roule",
+      "particules": [
+        "🪙",
+        "💰",
+        "🃏",
+        "🪙",
+        "💸"
+      ],
+      "mouvement": "tombe",
+      "extra": "machine"
+    },
+    "2E": {
+      "couleur": "#3F6B68",
+      "perso": "🙈",
+      "heros": "🔒",
+      "anim": "balance",
+      "particules": [
+        "🛡️",
+        "🤫",
+        "🔑"
+      ],
+      "mouvement": "flotte"
+    },
+    "2F": {
+      "couleur": "#0F766E",
+      "perso": "🧑‍💻",
+      "heros": "🤖",
+      "anim": "saute",
+      "particules": [
+        "💬",
+        "⌨️",
+        "💡",
+        "✨"
+      ],
+      "mouvement": "monte",
+      "extra": "saisie"
+    },
+    "3A": {
+      "couleur": "#F0644F",
+      "perso": "🧘",
+      "heros": "🏃",
+      "anim": "court",
+      "particules": [
+        "⚽",
+        "🚴",
+        "💪",
+        "👟"
+      ],
+      "mouvement": "traverse"
+    },
+    "3B": {
+      "couleur": "#14B8A6",
+      "perso": "🧑‍💻",
+      "heros": "👀",
+      "anim": "cligne",
+      "particules": [
+        "💧",
+        "🖥️",
+        "💧",
+        "📱"
+      ],
+      "mouvement": "tombe"
+    },
+    "3C": {
+      "couleur": "#115E59",
+      "perso": "😴",
+      "heros": "🌙",
+      "anim": "balance",
+      "particules": [
+        "💤",
+        "⭐",
+        "✨",
+        "💤",
+        "⭐"
+      ],
+      "mouvement": "monte"
+    },
+    "3D": {
+      "couleur": "#E0543F",
+      "perso": "😰",
+      "heros": "🌀",
+      "anim": "tourne",
+      "particules": [
+        "⚡",
+        "📚",
+        "⏰",
+        "⚡"
+      ],
+      "mouvement": "flotte"
+    },
+    "3E": {
+      "couleur": "#0D9488",
+      "perso": "🤗",
+      "heros": "🌦️",
+      "anim": "flotte",
+      "particules": [
+        "💧",
+        "💙",
+        "🌈",
+        "💧"
+      ],
+      "mouvement": "tombe"
+    },
+    "3F": {
+      "couleur": "#B7853A",
+      "perso": "🧘",
+      "heros": "🍃",
+      "anim": "balance",
+      "particules": [
+        "🎈",
+        "☁️",
+        "🍃",
+        "🎈"
+      ],
+      "mouvement": "monte"
+    },
+    "3G": {
+      "couleur": "#0D9488",
+      "perso": "🤗",
+      "heros": "🕊️",
+      "anim": "flotte",
+      "particules": [
+        "💚",
+        "🤍",
+        "💙"
+      ],
+      "mouvement": "monte"
+    },
+    "3H": {
+      "couleur": "#14B8A6",
+      "perso": "🧘",
+      "heros": "🌱",
+      "anim": "pousse",
+      "particules": [
+        "☀️",
+        "🌸",
+        "🦋",
+        "🌼"
+      ],
+      "mouvement": "flotte"
+    }
+  },
+  "album": {
+    "bouton": "ألبومي",
+    "titre": "ألبوم ملصقاتك",
+    "sous_titre": "كل جزء تنهيه يمنحك ملصقا جديدا. اجمعها كلها!",
+    "nouveau": "🎉 ملصق جديد: {nom}",
+    "compte": "{n} / {total}",
+    "final": "🏅 جمعت كل الملصقات! أنت بطل(ة) SHIHTY+",
+    "verrouille": "لم يُفتح بعد"
+  }
+}

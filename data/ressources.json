@@ -1,0 +1,31 @@
+{
+  "_aide": "Bloc de soutien (§7). À COMPLÉTER ET VALIDER PAR L'ÉQUIPE avant la mise en ligne : le message doit être celui approuvé par le comité d'éthique. Une ressource n'est affichée sur le site que si \"verifie\" vaut true : vérifiez chaque numéro, puis passez \"verifie\" à true. Champs possibles : nom, description, telephone, lien.",
+  "titre": "لست وحدك 💚",
+  "message": "قد تمر(ين) بفترة صعبة، وما تشعر(ين) به مهم. لا تبقَ(ي) وحيدا(ة) مع الأفكار المؤلمة: تحدث(ي) مع شخص تثق(ين) به أو مع مختص. طلب المساعدة علامة قوة.",
+  "titre_ressources": "أين تجد(ين) المساعدة؟",
+  "ressources": [
+    {
+      "nom": "شخص تثق(ين) به",
+      "description": "فرد من العائلة، صديق(ة)، أستاذ(ة): مشاركة ما تشعر(ين) به هي الخطوة الأولى.",
+      "verifie": true
+    },
+    {
+      "nom": "مصلحة الصحة الجامعية / خلية الاستماع بمؤسستك",
+      "description": "À COMPLÉTER : adresse, horaires et téléphone du service de santé / d'écoute de l'université.",
+      "telephone": "",
+      "verifie": false
+    },
+    {
+      "nom": "مركز الطب النفسي الأقرب إليك",
+      "description": "À COMPLÉTER : nom et téléphone du centre de psychiatrie de référence.",
+      "telephone": "",
+      "verifie": false
+    },
+    {
+      "nom": "في حالة الطوارئ",
+      "description": "À COMPLÉTER ET VÉRIFIER : numéro(s) d'urgence au Maroc et consigne (se rendre aux urgences les plus proches).",
+      "telephone": "",
+      "verifie": false
+    }
+  ]
+}
