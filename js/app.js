@@ -10,6 +10,9 @@
   var ECRANS = [];                   // écrans du questionnaire, à plat
   var PARTIES = [];                  // parties du questionnaire (une par autocollant)
   var FIN_PARTIE = {};               // index du dernier écran de questions de chaque partie
+  var UNE_A_LA_FOIS = true;          // une question par écran (sauf mode saisie chercheur)
+  var CTX = { auto: false, sansEmoji: false, heros: '' };   // contexte de l'écran en cours de rendu
+  var SENS = 'avant';                // sens de la dernière navigation (pour l'animation)
   var PILOTES = new Set();           // variables dont dépend une condition d'affichage
   var etat = null;                   // progression en cours
   var params = new URLSearchParams(location.search);
@@ -137,6 +140,23 @@
         var premier = true;
         p.ecrans.forEach(function (elements) {
           var ech = elements.length === 1 && elements[0].type === 'echelle' ? elements[0] : null;
+          if (UNE_A_LA_FOIS && !SAISIE) {
+            if (ech) {
+              ech.items.forEach(function (it, k) {
+                ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, echelle: ech, items: [it],
+                  dernierBloc: k === ech.items.length - 1, debutPartie: premier, unique: true });
+                premier = false;
+              });
+              return;
+            }
+            var attente = [];   // un « message » s'affiche avec la question qui le suit
+            elements.forEach(function (el) {
+              if (el.type === 'message') { attente.push(el); return; }
+              ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: attente.concat([el]), debutPartie: premier, unique: true });
+              attente = []; premier = false;
+            });
+            return;
+          }
           if (!ech) { ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, debutPartie: premier }); premier = false; return; }
           var n = ech.items.length;
           var nb = SAISIE ? 1 : Math.ceil(n / (ech.par_ecran || 5));
@@ -249,21 +269,43 @@
     return h('div', { class: 'options ' + classe, style: '--n:' + n }, opts.map(function (o, i) {
       var id = v + '__' + o.c;
       var input = h('input', { type: 'radio', name: v, id: id, value: String(o.c), checked: Number(etat.reponses[v]) === o.c && !vide(etat.reponses[v]) });
-      input.addEventListener('change', function () { definir(v, o.c); apresChangement(v, input); if (auChoix) auChoix(input); });
-      return h('label', { class: 'option' + (riche ? ' riche' : ''), for: id, style: '--t:' + (n > 1 ? i / (n - 1) : 0) }, [
+      var avecEmoji = riche && o.e && !CTX.sansEmoji;
+      var auto = CTX.auto;
+      input.addEventListener('change', function () {
+        definir(v, o.c);
+        if (avecEmoji && window.FX) { var r = input.parentNode.getBoundingClientRect(); window.FX.envol(o.e, r.left + r.width / 2, r.top + r.height / 2); }
+        apresChangement(v, input);
+        if (auChoix) auChoix(input);
+        if (auto) avanceAutomatique();
+      });
+      return h('label', { class: 'option' + (riche ? ' riche' : '') + (avecEmoji ? ' avec-emoji' : ''), for: id, style: '--t:' + (n > 1 ? i / (n - 1) : 0) }, [
         input,
-        riche ? pastilleOption(genre || 'simple', i, n, o) : null,
+        avecEmoji ? h('span', { class: 'opt-emoji g' + Math.min(3, graphemes(o.e)), 'aria-hidden': 'true', text: o.e }) : (riche ? pastilleOption(genre || 'simple', i, n, o) : null),
         o.emoji ? h('span', { class: 'emoji', 'aria-hidden': 'true', text: o.emoji }) : null,
         h('span', { class: 'option-texte', text: o.t })
       ]);
     }));
   }
 
+  function graphemes(t) {
+    try { if (window.Intl && Intl.Segmenter) return Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(t)).length; } catch (e) { /* ancien navigateur */ }
+    return Math.max(1, Math.round(String(t).replace(/[\uFE0F\u200D]/g, '').length / 2));
+  }
+  function badge(el) {
+    var e = el.emoji || CTX.heros;
+    return (e && UNE_A_LA_FOIS && !SAISIE) ? h('div', { class: 'q-badge', 'aria-hidden': 'true', text: e }) : null;
+  }
+  /* Après une réponse à une question à choix unique : passage automatique à la suivante. */
+  function avanceAutomatique() {
+    var i0 = etat.i;
+    clearTimeout(avanceAutomatique.t);
+    avanceAutomatique.t = setTimeout(function () { if (etat.i === i0 && document.getElementById('btn-suivant')) avancer(); }, 520);
+  }
   function rendreChoix(el) {
     var opts = Schema.options(Q, el.options);
     var classe = el.affichage === 'emojis' ? 'opts-emoji' : (el.affichage === 'numerique' ? 'opts-num' : (opts.length <= 2 ? 'opts-duo' : 'opts-v'));
     return h('fieldset', { class: 'question', 'data-var': el.var }, [
-      h('legend', { text: el.texte }),
+      h('legend', null, [badge(el), el.texte]),
       el.aide ? h('p', { class: 'aide', text: el.aide }) : null,
       groupeRadios(el.var, opts, classe, null, genreDe(el.options))
     ]);
@@ -277,26 +319,28 @@
       retirerErreur(input.closest('.question'));
     });
     input.addEventListener('change', function () { if (PILOTES.has(el.var)) rendreQuestionnaire(true); });
-    return h('div', { class: 'question', 'data-var': el.var }, [h('label', { class: 'titre-question', for: 'c_' + el.var, text: el.texte }), input]);
+    return h('div', { class: 'question', 'data-var': el.var }, [badge(el), h('label', { class: 'titre-question', for: 'c_' + el.var, text: el.texte }), input]);
   }
   function rendreTexte(el) {
     var input = h('input', { type: 'text', class: 'champ', id: 'c_' + el.var, maxlength: '120', autocomplete: 'off', value: etat.reponses[el.var] || '' });
     input.addEventListener('input', function () { definir(el.var, input.value.trim()); retirerErreur(input.closest('.question')); });
-    return h('div', { class: 'question', 'data-var': el.var }, [h('label', { class: 'titre-question', for: 'c_' + el.var, text: el.texte }), input]);
+    return h('div', { class: 'question', 'data-var': el.var }, [badge(el), h('label', { class: 'titre-question', for: 'c_' + el.var, text: el.texte }), input]);
   }
   function rendreListe(el) {
     var sel = h('select', { class: 'champ', id: 'c_' + el.var }, [h('option', { value: '', text: T.choisir })].concat(
       Schema.options(Q, el.options).map(function (o) { return h('option', { value: String(o.c), text: o.t, selected: Number(etat.reponses[el.var]) === o.c }); })));
     sel.addEventListener('change', function () { definir(el.var, sel.value === '' ? '' : Number(sel.value)); apresChangement(el.var, sel); });
-    return h('div', { class: 'question', 'data-var': el.var }, [h('label', { class: 'titre-question', for: 'c_' + el.var, text: el.texte }), sel]);
+    return h('div', { class: 'question', 'data-var': el.var }, [badge(el), h('label', { class: 'titre-question', for: 'c_' + el.var, text: el.texte }), sel]);
   }
   function rendreMultiple(el) {
     return h('fieldset', { class: 'question', 'data-multiple': '1' }, [
-      el.texte ? h('legend', { text: el.texte }) : null,
+      el.texte ? h('legend', null, [badge(el), el.texte]) : badge(el),
       h('div', { class: 'options opts-v' }, el.choix.map(function (c) {
         var input = h('input', { type: 'checkbox', id: 'c_' + c.var, checked: Number(etat.reponses[c.var]) === 1 });
         input.addEventListener('change', function () { definir(c.var, input.checked ? 1 : 0); apresChangement(c.var, input); });
-        return h('label', { class: 'option riche', for: 'c_' + c.var }, [input, h('span', { class: 'pastille-opt p-simple p-case', 'aria-hidden': 'true' }), h('span', { class: 'option-texte', text: c.t })]);
+        return h('label', { class: 'option riche' + (c.e ? ' avec-emoji' : ''), for: 'c_' + c.var }, [input,
+          c.e ? h('span', { class: 'opt-emoji', 'aria-hidden': 'true', text: c.e }) : null,
+          h('span', { class: 'pastille-opt p-simple p-case', 'aria-hidden': 'true' }), h('span', { class: 'option-texte', text: c.t })]);
       }))
     ]);
   }
@@ -316,13 +360,14 @@
       }
       var nbCoches = el.reseaux.filter(coche).length;
       return h('tr', null, [
-        h('th', { scope: 'row' }, [h('label', { for: 'c_' + r.var, text: r.t })]),
+        h('th', { scope: 'row' }, [h('label', { for: 'c_' + r.var }, [r.e ? h('span', { class: 'reseau-emoji', 'aria-hidden': 'true', text: r.e }) : null, r.t])]),
         h('td', null, [cb]),
         h('td', null, [radio(el.var_plus, el.colonne_plus, !coche(r))]),
         h('td', null, [radio(el.var_moins, el.colonne_moins, !coche(r) || nbCoches < 2)])
       ]);
     });
     return h('div', { class: 'question question-reseaux', 'data-reseaux': '1' }, [
+      badge(el),
       h('p', { class: 'avertissement', text: el.avertissement }),
       h('div', { class: 'table-defilante' }, [h('table', { class: 'reseaux' }, [
         h('thead', null, [h('tr', null, [h('td'), h('th', { scope: 'col', text: el.colonne_utilise }), h('th', { scope: 'col', text: el.colonne_plus }), h('th', { scope: 'col', text: el.colonne_moins })])]),
@@ -336,9 +381,10 @@
       var opts = Schema.options(Q, it.options || ech.options);
       var num = ech.affichage === 'numerique';
       var classe = num ? 'opts-num opts-bornes' : (opts.length <= 2 ? 'opts-duo' : 'opts-likert') + (ech.barre ? ' avec-barre' : '');
-      return h('fieldset', { class: 'question item', 'data-var': it.var }, [
-        h('legend', { text: it.texte }),
-        groupeRadios(it.var, opts, classe, SAISIE ? null : allerAuSuivant, genreDe(it.options || ech.options)),
+      if (ecran.unique && !num && opts.length > 2) classe = (opts.length <= 5 && !CTX.sansEmoji && opts[0].e ? 'opts-rangee' : 'opts-v') + (ech.barre ? ' avec-barre' : '');
+      return h('fieldset', { class: 'question item' + (ecran.unique ? ' item-unique' : ''), 'data-var': it.var }, [
+        h('legend', null, [ecran.unique ? badge({}) : null, it.texte]),
+        groupeRadios(it.var, opts, classe, (SAISIE || ecran.unique) ? null : allerAuSuivant, genreDe(it.options || ech.options)),
         it.note ? h('p', { class: 'note', text: it.note }) : null
       ]);
     });
@@ -424,6 +470,15 @@
     ]);
   }
 
+  /* « 3 / 30 » : position de la question dans sa partie (questions affichées seulement). */
+  function compteurPartie(ecran, eff) {
+    var scores = Scoring.calculer(eff.rep), n = 0, pos = 0;
+    ECRANS.forEach(function (e, i) {
+      if (e.type !== 'q' || e.partie !== ecran.partie || !ecranVisible(e, eff, scores)) return;
+      n++; if (i === etat.i) pos = n;
+    });
+    return h('span', { class: 'compteur', dir: 'ltr', text: pos + ' / ' + n });
+  }
   function rendreQuestionnaire(conserverDefilement) {
     var y = window.scrollY;
     var focusId = document.activeElement && document.activeElement.id;
@@ -464,15 +519,21 @@
         h('div', { class: 'nav' }, [precedent, bouton(dernier ? T.navigation.envoyer : T.resultats.continuer, 'btn-principal', avancer, { id: 'btn-suivant' })])
       ];
     } else {
+      var visiblesQ = ecran.elements.filter(function (el) { return eff.visibles.has(el); });
+      var seule = ecran.echelle ? null : visiblesQ.filter(function (el) { return el.type !== 'message'; });
+      CTX.sansEmoji = !!((ecran.echelle && ecran.echelle.sans_emoji) || (seule && seule[0] && seule[0].sans_emoji));
+      CTX.heros = theme(ecran.partie).heros;
+      CTX.auto = !!(ecran.unique && (ecran.echelle ? !ecran.echelle.message_apres || !ecran.dernierBloc : (seule.length === 1 && seule[0].type === 'choix')));
       var contenu = ecran.echelle ? [rendreEchelle(ecran)]
         : ecran.elements.filter(function (el) { return eff.visibles.has(el); }).map(rendreElement);
       noeuds = [
         barreProgression(),
         h('div', { class: 'tete-section' }, [h('p', { class: 'nom-section', text: ecran.section.titre }), stepper(ecran)]),
         SAISIE ? null : cotes(ecran.partie),
-        h('section', { class: 'carte carte-theme' }, [
+        h('section', { class: 'carte carte-theme' + (ecran.unique ? ' carte-question glisse-' + SENS : '') }, [
           SAISIE ? null : bandeauTheme(ecran.partie),
-          h('h2', { class: 'titre-partie' }, [h('span', { class: 'titre-partie-icone', 'aria-hidden': 'true', text: icone(ecran.partie.id) }), h('span', { text: ecran.partie.titre })])
+          h('h2', { class: 'titre-partie' }, [h('span', { class: 'titre-partie-icone', 'aria-hidden': 'true', text: icone(ecran.partie.id) }), h('span', { text: ecran.partie.titre }),
+            ecran.unique ? compteurPartie(ecran, eff) : null])
         ].concat(contenu)),
         h('p', { class: 'resume-erreurs', id: 'resume-erreurs', role: 'alert', hidden: true, text: T.erreurs.resume }),
         h('div', { class: 'nav' }, [
@@ -512,6 +573,7 @@
   }
   function passer() {
     var avant = ECRANS[etat.i];
+    SENS = 'avant';
     var suivant = ecranSuivant(etat.i, 1);
     if (suivant < 0) { envoyer(); return; }
     etat.i = suivant;
@@ -579,6 +641,7 @@
   function reculer() {
     var p = ecranSuivant(etat.i, -1);
     if (p < 0) return;
+    SENS = 'arriere';
     etat.i = p; sauver();
     rendreQuestionnaire(false);
   }

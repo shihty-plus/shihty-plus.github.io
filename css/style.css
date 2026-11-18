@@ -560,3 +560,99 @@ body { background: var(--sarcelle-nuit); }
 @media (min-width: 700px) { .sticker-emoji { width: 72px; height: 72px; font-size: 38px; } .album-grille { grid-template-columns: repeat(5, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .forme { transform: none !important; } .halo, .eclat { display: none !important; } }
 @media print { .formes, .halo, .eclat, .album-btn, .sticker-vol { display: none !important; } .marque-nom { color: #0F766E; } }
+
+/* =====================================================================
+   Une question à la fois : grande carte, emoji de la question, réponses avec emojis
+   ===================================================================== */
+.carte-question { min-height: 0; }
+.glisse-avant { animation: glisse-avant .5s cubic-bezier(.2, .9, .3, 1.15) both; }
+.glisse-arriere { animation: glisse-arriere .5s cubic-bezier(.2, .9, .3, 1.15) both; }
+@keyframes glisse-avant { from { opacity: 0; transform: translateX(-70px) rotate(-2.5deg) scale(.96); } }
+@keyframes glisse-arriere { from { opacity: 0; transform: translateX(70px) rotate(2.5deg) scale(.96); } }
+.carte-question .titre-partie { font-size: 17px; }
+.compteur { margin-inline-start: auto; flex: none; font-size: 13.5px; font-weight: 800; color: var(--accent-fonce); background: var(--accent-clair); border-radius: 999px; padding: 3px 12px; }
+.carte-question .question { margin-top: 14px; text-align: center; }
+.carte-question .question > legend, .carte-question .titre-question { font-size: 22px; line-height: 1.55; margin: 6px auto 18px; text-wrap: balance; text-align: center; width: 100%; }
+.carte-question .item-unique { background: none; border: 0; padding: 0; }
+.carte-question .item-unique legend { float: none; }
+.q-badge { display: grid; place-items: center; width: 76px; height: 76px; margin: 2px auto 4px; border-radius: 26px; font-size: 42px; line-height: 1;
+  background: var(--accent-clair); box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--accent) 30%, #fff), 0 10px 22px color-mix(in srgb, var(--accent) 22%, transparent);
+  animation: badge-arrive .6s cubic-bezier(.2, .9, .3, 1.6) both, rebond 3s ease-in-out .6s infinite; }
+@keyframes badge-arrive { from { transform: scale(0) rotate(-30deg); } }
+.carte-question .consigne { position: static; text-align: center; border-radius: 999px; padding: 6px 16px; font-size: 15px; width: fit-content; max-width: 100%; margin: 14px auto 0; box-shadow: none; }
+.carte-question .options { text-align: start; }
+.carte-question .champ { max-width: 320px; margin-inline: auto; display: block; text-align: center; }
+.carte-question .champ-nombre { max-width: 180px; font-size: 30px; min-height: 64px; }
+.carte-question .table-defilante, .carte-question .avertissement { text-align: start; }
+
+/* réponses avec emoji */
+.opt-emoji { flex: none; display: grid; place-items: center; min-width: 46px; height: 46px; padding: 0 6px; border-radius: 15px; background: #F6F1E7; font-size: 24px; line-height: 1; letter-spacing: -4px; transition: transform .3s cubic-bezier(.2, .9, .3, 1.8), background .15s; }
+.option.avec-emoji { min-height: 62px; }
+.option.avec-emoji:hover .opt-emoji { transform: scale(1.15) rotate(-8deg); }
+.option.avec-emoji:has(input:checked) .opt-emoji { background: #fff; transform: scale(1.22) rotate(-10deg); box-shadow: 0 6px 14px color-mix(in srgb, var(--accent) 35%, transparent); }
+.option.avec-emoji .p-case { display: none; }
+.carte-question .opts-v .option, .carte-question .opts-duo .option { font-size: 17.5px; }
+.carte-question .opts-duo .option.avec-emoji { flex-direction: column; gap: 6px; padding: 14px 8px; min-height: 110px; }
+.carte-question .opts-duo .opt-emoji { width: 58px; height: 58px; font-size: 32px; }
+/* rangée d'emojis (échelles de 3 à 5 réponses) */
+.opts-rangee { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 6px; }
+.opts-rangee .option.riche { flex-direction: column; justify-content: flex-start; gap: 8px; padding: 12px 3px 10px; text-align: center; font-size: 13.5px; line-height: 1.35; min-height: 118px; }
+.opts-rangee .opt-emoji { min-width: 0; width: 100%; max-width: 56px; height: 52px; font-size: 25px; letter-spacing: -6px; }
+.opts-rangee.avec-barre .option.riche { border-inline-start-width: 2px; border-top: 6px solid hsl(calc(var(--t) * 130) 72% 48%); border-top-color: color-mix(in oklab, #14B8A6 calc(var(--t) * 100%), #FF7F6B); }
+.opts-rangee .option.riche:has(input:checked)::after { inset-inline-end: 50%; transform: translateX(50%); }
+.reseau-emoji { margin-inline-end: 6px; font-size: 18px; }
+.envol { position: fixed; z-index: 46; pointer-events: none; transform: translate(-50%, -50%); animation: envol 1.1s cubic-bezier(.2, .7, .3, 1) both; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .25)); }
+@keyframes envol { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.4); } 20% { opacity: 1; transform: translate(-50%, -80%) scale(1.3); } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), -260%) rotate(var(--r)) scale(1.6); } }
+@media (min-width: 700px) {
+  .carte-question .question > legend, .carte-question .titre-question { font-size: 26px; }
+  .q-badge { width: 90px; height: 90px; font-size: 50px; }
+  .opts-rangee .option.riche { font-size: 15px; min-height: 128px; }
+  .opts-rangee .opt-emoji { height: 60px; max-width: 70px; font-size: 30px; }
+  .carte-question .opts-v { max-width: 560px; margin-inline: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .glisse-avant, .glisse-arriere, .q-badge, .envol { animation: none !important; } }
+
+/* correctifs : en-tête compact sur téléphone, emojis multiples, badge dans la légende */
+.entete-int { flex-wrap: nowrap; }
+.marque { white-space: nowrap; flex: none; }
+.entete-droite { min-width: 0; }
+.album-btn, .album-compte, .salutation { white-space: nowrap; }
+@media (max-width: 559px) {
+  .salutation > span:first-child { display: none; }
+  .salutation { padding: 3px; }
+  .album-btn { padding: 4px 10px; }
+  .marque { font-size: 21px; }
+}
+legend .q-badge { margin-bottom: 10px; }
+.opt-emoji { white-space: nowrap; }
+.opt-emoji.g2 { font-size: 19px; letter-spacing: -5px; }
+.opt-emoji.g3 { font-size: 15px; letter-spacing: -4px; }
+.opts-rangee .opt-emoji.g2 { font-size: 18px; }
+.opts-rangee .opt-emoji.g3 { font-size: 14px; }
+@media (min-width: 700px) { .opts-rangee .opt-emoji.g2 { font-size: 23px; } }
+
+/* téléphone : question + réponses visibles sans défiler */
+@media (max-width: 699px) {
+  .page-questionnaire .nom-section { display: none; }
+  .page-questionnaire .stepper { margin-top: 8px; }
+  .page-questionnaire .rond { width: 32px; height: 32px; font-size: 15px; }
+  .page-questionnaire .etape + .etape::before { top: 15px; }
+  .carte-question { --padv: 18px; padding-top: 18px; }
+  .carte-question .bandeau-theme { height: 82px; margin-bottom: 8px; }
+  .carte-question .bt-perso { font-size: 44px; bottom: 16px; }
+  .carte-question .bt-heros { font-size: 36px; top: 12px; }
+  .carte-question .bt-p { font-size: 19px; }
+  .carte-question .machine { top: 10px; transform: scale(.78); transform-origin: top left; }
+  .carte-question .bulle-saisie { top: 12px; transform: scale(.85); }
+  .carte-question .titre-partie { font-size: 15px; padding-bottom: 8px; }
+  .carte-question .titre-partie-icone { width: 34px; height: 34px; font-size: 18px; border-radius: 12px; }
+  .carte-question .question { margin-top: 8px; }
+  .carte-question .question > legend, .carte-question .titre-question { font-size: 19px; margin-bottom: 12px; }
+  .carte-question .q-badge { width: 54px; height: 54px; font-size: 30px; border-radius: 18px; }
+  .carte-question .consigne { font-size: 13.5px; padding: 5px 14px; margin-top: 10px; }
+  .carte-question .options { gap: 8px; }
+  .carte-question .option.avec-emoji { min-height: 54px; }
+  .carte-question .opts-rangee .option.riche { min-height: 104px; padding-top: 10px; }
+  .page-questionnaire .nav { margin-top: 14px; }
+  .toast { top: calc(env(safe-area-inset-top, 0px) + 10px); bottom: auto; }
+}

@@ -142,7 +142,24 @@
     };
   }
 
+  /* ---------- 5. l'emoji de la réponse choisie s'envole ---------- */
+  function envol(emoji, x, y) {
+    if (CALME || !emoji) return;
+    for (var k = 0; k < 3; k++) {
+      var e = document.createElement('span');
+      e.className = 'envol';
+      e.textContent = emoji;
+      e.style.left = x + 'px'; e.style.top = y + 'px';
+      e.style.setProperty('--dx', hasard(-50, 50).toFixed(0) + 'px');
+      e.style.setProperty('--r', hasard(-25, 25).toFixed(0) + 'deg');
+      e.style.animationDelay = (k * 90) + 'ms';
+      e.style.fontSize = (k === 0 ? 34 : 22) + 'px';
+      document.body.appendChild(e);
+      setTimeout(function (n) { return function () { n.remove(); }; }(e), 1300);
+    }
+  }
+
   function init() { creerFormes(); creerHalo(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  window.FX = { eclat: eclat, debloquer: debloquer, calme: CALME };
+  window.FX = { eclat: eclat, debloquer: debloquer, envol: envol, calme: CALME };
 })();
