@@ -920,6 +920,29 @@
       h('p', { class: 'perdu-texte', text: A.perdu_texte || '' })
     ]);
   }
+  /* Illustration animée : une personne de nuit, le visage éclairé par son téléphone ;
+     les réseaux sociaux s'échappent de l'écran et montent sans fin. */
+  function visuelAddiction(V) {
+    var flux = (V.flux || ['❤️']).map(function (e, k) {
+      return h('span', { class: 'av-ico', style: '--k:' + k + ';--dx:' + (((k * 37) % 120) - 60) + 'px;--r:' + (((k * 53) % 50) - 25) + 'deg' }, [h('span', { class: 'sph-em', text: e })]);
+    });
+    return h('div', { class: 'ac-visuel apparait', style: '--k:4', 'aria-hidden': 'true' }, [
+      h('div', { class: 'av-cadre' }, [
+        h('span', { class: 'av-lune sph-em', text: V.lune || '🌙' }),
+        h('span', { class: 'av-heure', dir: 'ltr', text: V.heure || '02:47' }),
+        h('div', { class: 'av-lueur' }),
+        h('div', { class: 'av-flux' }, flux),
+        h('div', { class: 'av-personne' }, [
+          h('span', { class: 'av-tete sph-perso', text: V.tete || '🧑' }),
+          h('span', { class: 'av-main sph-perso', text: V.main || '🤳' })
+        ]),
+        h('span', { class: 'av-bulle' }, [h('span', { class: 'sph-bulle-em', text: V.bulle || '😵‍💫' })]),
+        h('div', { class: 'av-puces' }, (V.puces || []).map(function (p, k) {
+          return h('span', { class: 'av-puce', style: '--k:' + k }, [h('span', { class: 'sph-em', text: p[0] }), h('b', { dir: 'ltr', text: p[1] })]);
+        }))
+      ])
+    ]);
+  }
   function pageAccueil() {
     var enCours = etat.etape === 'questionnaire' || etat.etape === 'prenom' || etat.etape === 'envoi';
     var a = T.accueil, A = T.accueil2;
@@ -949,16 +972,20 @@
     }));
     afficher([
       h('section', { class: 'ac-hero' }, [
-        h('p', { class: 'ac-etiquette apparait', style: '--k:0', text: a.etiquette }),
-        titreAccueil(A.mots),
-        h('p', { class: 'ac-sous apparait', style: '--k:7', text: a.sous_titre }),
-        enCours ? h('p', { class: 'ac-reprise', text: a.reprise }) : null,
-        h('div', { class: 'ac-actions apparait', style: '--k:9' }, [
-          cta(),
-          enCours ? bouton(a.bouton_recommencer, 'btn ac-lien', function () { etat = nouvelEtat(); sauver(); pageConsentement(); })
-            : h('a', { class: 'btn ac-lien', href: '#decouvrir', text: A.decouvrir })
+        h('div', { class: 'ac-grille' }, [
+          visuelAddiction(A.visuel || {}),
+          h('div', { class: 'ac-texte' }, [
+            h('p', { class: 'ac-etiquette apparait', style: '--k:0', text: a.etiquette }),
+            titreAccueil(A.mots),
+            h('p', { class: 'ac-sous apparait', style: '--k:7', text: a.sous_titre }),
+            enCours ? h('p', { class: 'ac-reprise', text: a.reprise }) : null,
+            h('div', { class: 'ac-actions apparait', style: '--k:9' }, [
+              cta(),
+              enCours ? bouton(a.bouton_recommencer, 'btn ac-lien', function () { etat = nouvelEtat(); sauver(); pageConsentement(); })
+                : h('a', { class: 'btn ac-lien', href: '#decouvrir', text: A.decouvrir })
+            ])
+          ])
         ]),
-        scenePerdu(A),
         eventail
       ]),
       h('span', { id: 'decouvrir' }),

@@ -1278,3 +1278,65 @@ body.clair .entete, .page, .pied { position: relative; z-index: 1; }
 @keyframes orbite-tourne { to { rotate: 360deg; } }
 @media (max-width: 600px) { .orbite-icone { --r: 160px; width: 54px; height: 54px; left: -27px; top: -27px; } .orbite-icone .em3d { width: 34px; height: 34px; } .orbite.o1 .orbite-icone { --r: 104px; width: 44px; height: 44px; left: -22px; top: -22px; } .orbite.o1 .orbite-icone .em3d { width: 26px; height: 26px; } .ac-perdu .orbites { scale: 1; } }
 @media (prefers-reduced-motion: reduce) { .orbite, .orbite-icone .sph-em { animation: none !important; } }
+
+/* =====================================================================
+   v8 — accueil : texte à gauche, illustration animée de l'addiction à droite
+   ===================================================================== */
+.ac-grille { width: 100%; max-width: 1180px; display: grid; gap: 26px; align-items: center; }
+.ac-texte { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.ac-visuel { width: min(100%, 420px); justify-self: center; }
+.av-cadre { position: relative; aspect-ratio: 4 / 5; border-radius: 34px; overflow: hidden; isolation: isolate;
+  background: radial-gradient(70% 55% at 50% 78%, #1E3A8A 0%, #111B47 45%, #070B1F 100%); box-shadow: 0 40px 80px rgba(17, 27, 71, .35), inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.av-cadre::after { content: ""; position: absolute; inset: 0; z-index: 6; pointer-events: none; background: radial-gradient(120% 90% at 50% 120%, transparent 50%, rgba(0, 0, 0, .45)); }
+.av-lune { position: absolute; top: 22px; inset-inline-end: 24px; z-index: 1; opacity: .9; }
+.av-lune .em3d { width: 42px; height: 42px; }
+.av-heure { position: absolute; top: 26px; inset-inline-start: 26px; z-index: 1; color: rgba(255, 255, 255, .75); font-weight: 800; font-size: 22px; letter-spacing: 1px; }
+.av-lueur { position: absolute; left: 50%; bottom: 8%; width: 70%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%; z-index: 1;
+  background: radial-gradient(circle, rgba(94, 234, 212, .65), rgba(59, 130, 246, .35) 40%, transparent 70%); filter: blur(14px); animation: lueur-ecran 2.6s steps(1) infinite, respire 3.4s ease-in-out infinite; }
+@keyframes lueur-ecran { 0%, 100% { opacity: .95; } 22% { opacity: .6; } 24% { opacity: 1; } 61% { opacity: .75; } 63% { opacity: .95; } }
+.av-personne { position: absolute; left: 50%; bottom: -6%; translate: -50% 0; z-index: 3; width: 78%; aspect-ratio: 1; }
+.av-tete { position: absolute; left: 50%; top: 4%; translate: -50% 0; font-size: 0; }
+.av-tete .em3d { width: 210px; height: 210px; filter: brightness(.82) saturate(.85) drop-shadow(0 -10px 30px rgba(94, 234, 212, .45)); animation: tete-penche 5s ease-in-out infinite; }
+@keyframes tete-penche { 50% { transform: rotate(-4deg) translateY(4px); } }
+.av-main { position: absolute; left: 50%; bottom: 0; translate: -46% 0; font-size: 0; }
+.av-main .em3d { width: 170px; height: 170px; filter: brightness(.9) drop-shadow(0 0 24px rgba(94, 234, 212, .55)); }
+.av-flux { position: absolute; left: 50%; bottom: 30%; width: 0; height: 0; z-index: 4; }
+.av-ico { position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; display: grid; place-items: center; opacity: 0;
+  animation: monte-flux 4.8s calc(var(--k) * .4s) cubic-bezier(.3, .6, .4, 1) infinite; }
+.av-ico .em3d { width: 40px; height: 40px; filter: drop-shadow(0 0 12px rgba(255, 255, 255, .35)); }
+@keyframes monte-flux { 0% { opacity: 0; transform: translate(0, 0) scale(.3) rotate(0); } 12% { opacity: 1; } 75% { opacity: .9; } 100% { opacity: 0; transform: translate(var(--dx), -330px) scale(1.15) rotate(var(--r)); } }
+.av-bulle { position: absolute; top: 24%; inset-inline-start: 14%; z-index: 5; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: #fff; box-shadow: 0 12px 26px rgba(0, 0, 0, .35); animation: perdu-bulle 3s ease-in-out infinite; }
+.av-bulle .em3d { width: 42px; height: 42px; }
+.av-puces { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.av-puce { position: absolute; display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px 5px 8px; border-radius: 999px; background: #E11D48; color: #fff; font-size: 13px; box-shadow: 0 0 18px rgba(225, 29, 72, .6); direction: ltr;
+  opacity: 0; animation: compteur-pop 6s calc(var(--k) * 1.6s + 1s) cubic-bezier(.2, .9, .3, 1.5) infinite; }
+.av-puce .em3d { width: 18px; height: 18px; }
+.av-puce:nth-child(1) { top: 40%; right: 9%; } .av-puce:nth-child(2) { top: 52%; left: 8%; background: #F59E0B; box-shadow: 0 0 18px rgba(245, 158, 11, .6); } .av-puce:nth-child(3) { top: 30%; right: 30%; background: #2563EB; box-shadow: 0 0 18px rgba(37, 99, 235, .6); }
+@media (min-width: 900px) {
+  .ac-grille { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 40px; padding-inline: 20px; }
+  .ac-texte { align-items: flex-start; text-align: start; }
+  .ac-texte .ac-titre { max-width: 12ch; }
+  .ac-texte .ac-sous { max-width: 460px; }
+  .ac-visuel { width: min(100%, 440px); }
+}
+@media (max-width: 600px) { .av-tete .em3d { width: 160px; height: 160px; } .av-main .em3d { width: 130px; height: 130px; } }
+@media (prefers-reduced-motion: reduce) { .av-ico { animation: none; opacity: .8; } .av-tete .em3d, .av-lueur, .av-puce, .av-bulle { animation: none !important; opacity: 1; } }
+/* texte à gauche, image à droite (indépendamment du sens arabe) ; sur téléphone : texte d'abord */
+.ac-grille { direction: ltr; }
+.ac-texte, .ac-visuel { direction: rtl; }
+.ac-texte { order: 1; } .ac-visuel { order: 2; }
+.ac-visuel { width: min(100%, 360px); }
+.av-heure { inset-inline-start: auto; inset-inline-end: 26px; direction: ltr; }
+.av-lune { inset-inline-end: auto; inset-inline-start: 24px; top: 20px; }
+.av-flux { bottom: 34%; }
+.av-ico { animation-duration: 5.4s; }
+@keyframes monte-flux { 0% { opacity: 0; transform: translate(0, 0) scale(.3) rotate(0); } 12% { opacity: 1; } 70% { opacity: .9; } 100% { opacity: 0; transform: translate(var(--dx), -260px) scale(1.1) rotate(var(--r)); } }
+@media (min-width: 900px) {
+  .ac-texte { align-items: flex-start; text-align: right; }
+  .ac-texte .ac-actions { justify-content: flex-start; }
+  .ac-visuel { width: min(100%, 430px); justify-self: end; }
+}
+.av-cadre { direction: ltr; }
+.av-lune { left: 22px; right: auto; top: 20px; inset-inline-start: auto; inset-inline-end: auto; }
+.av-heure { right: 24px; left: auto; inset-inline-start: auto; inset-inline-end: auto; }
+.av-bulle { left: 12%; right: auto; inset-inline-start: auto; }
