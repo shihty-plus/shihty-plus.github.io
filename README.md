@@ -68,4 +68,6 @@ node --test tests/scoring.test.js
 - `duree_minutes` : temps actif de remplissage (les pauses de plus de 5 minutes ne sont pas comptées).
 - Niveaux exportés (`NIVEAU_…`) : voir la feuille « Dictionnaire » du tableur pour le sens de chaque code.
 - Les échelles de l'annexe B (SAS-SV, IAT, CPUI-9, PPCS-6 séparé, IPAQ-SF, RSES, NMP-Q) ne sont pas implémentées.
+- Parcours en aventure : chaque partie est une « station » sur une île flottante (vol d'arrivée, étudiant qui attend, route des 20 stations). Une échelle entière par page. Illustrations d'étudiants : `assets/etudiants/` + `data/textes.json` → `etudiants.images` (emojis tant que la liste est vide).
+- Activité physique : seulement les 2 questions en jours (les cases IPAQ ont été supprimées).
 - Design SHIHTY+ : palette sarcelle · corail · sable, formes flottantes en parallaxe, clics magiques (éclats + petite vibration sur Android), album de 20 autocollants (un par partie terminée, bouton « ألبومي » en haut). Le résultat de chaque échelle est affiché juste après sa partie (`apres_partie` dans `data/feedback.json`), puis un récapitulatif complet à la fin. Le MINI n'affiche jamais de niveau : seulement le bloc de soutien si une réponse est « نعم ».

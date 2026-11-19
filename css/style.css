@@ -656,3 +656,65 @@ legend .q-badge { margin-bottom: 10px; }
   .page-questionnaire .nav { margin-top: 14px; }
   .toast { top: calc(env(safe-area-inset-top, 0px) + 10px); bottom: auto; }
 }
+
+/* =====================================================================
+   Aventure : stations sur îles flottantes (vol d'arrivée façon « fly-in »)
+   ===================================================================== */
+.q-mini { display: inline-block; margin-inline-end: 8px; font-size: 22px; vertical-align: -3px; }
+.station { position: relative; margin-top: 14px; border-radius: 28px; overflow: hidden; box-shadow: var(--ombre);
+  background: linear-gradient(180deg, #BFE3DD 0%, #E4EEE8 42%, #F6EBD8 78%, var(--carte) 100%); }
+.ciel { position: relative; height: 340px; overflow: hidden; }
+.nuage { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, .85); filter: blur(14px); }
+.nuage.n1 { width: 220px; height: 60px; top: 30px; left: -60px; animation: nuage-vite 2.2s cubic-bezier(.2, .8, .2, 1) both, nuage-derive 22s 2.2s linear infinite alternate; }
+.nuage.n2 { width: 280px; height: 70px; top: 120px; right: -90px; opacity: .7; animation: nuage-vite2 2.4s cubic-bezier(.2, .8, .2, 1) both; }
+.nuage.n3 { width: 180px; height: 46px; bottom: 40px; left: 30%; opacity: .6; animation: nuage-vite 2.8s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes nuage-vite { from { transform: translateX(260px) scale(1.8); } }
+@keyframes nuage-vite2 { from { transform: translateX(-300px) scale(1.8); } }
+@keyframes nuage-derive { to { transform: translateX(60px); } }
+.ile-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.ile-loin { position: absolute; width: 120px; top: 34px; inset-inline-end: 6%; opacity: .45; filter: blur(1.5px) saturate(.6); animation: ile-depart 1.6s cubic-bezier(.2, .8, .2, 1) both, flotte 6s 1.6s ease-in-out infinite; }
+@keyframes ile-depart { from { transform: scale(2.6) translate(-40%, 40%); opacity: .9; filter: blur(0); } }
+.rocher-vol { position: absolute; width: 70px; opacity: 0; pointer-events: none; }
+.rocher-vol.r1 { top: 34%; left: 34%; animation: passe-gauche 1.4s .1s cubic-bezier(.5, 0, .9, .6) both; }
+.rocher-vol.r2 { top: 22%; right: 30%; width: 54px; animation: passe-droite 1.5s .25s cubic-bezier(.5, 0, .9, .6) both; }
+@keyframes passe-gauche { 0% { opacity: .9; transform: scale(.4); filter: blur(0); } 100% { opacity: 0; transform: translate(-260px, -40px) scale(3.2); filter: blur(7px); } }
+@keyframes passe-droite { 0% { opacity: .9; transform: scale(.4); filter: blur(0); } 100% { opacity: 0; transform: translate(260px, -70px) scale(3); filter: blur(7px); } }
+.ile-arrivee { position: absolute; left: 50%; bottom: 16px; width: 270px; transform: translateX(-50%); animation: ile-arrivee 1.7s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes ile-arrivee { 0% { transform: translate(-50%, -70px) scale(.22); opacity: 0; filter: blur(10px); } 55% { opacity: 1; filter: blur(0); } 100% { transform: translate(-50%, 0) scale(1); } }
+.ile-corps { animation: flotte 5.5s 1.7s ease-in-out infinite; }
+.brume { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(70% 60% at 50% 55%, rgba(255, 255, 255, .95), rgba(255, 255, 255, .6) 60%, transparent 100%); animation: brume-sort 1.3s ease-out both; }
+@keyframes brume-sort { to { opacity: 0; transform: scale(1.4); } }
+.etudiant { position: absolute; left: 50%; bottom: calc(100% - 64px); transform: translateX(-35%); animation: etudiant-arrive .7s 1.25s cubic-bezier(.2, .9, .3, 1.5) both; }
+@keyframes etudiant-arrive { from { opacity: 0; transform: translate(-35%, 40px) scale(.3); } }
+.etudiant-emoji { display: block; font-size: 92px; line-height: 1; filter: drop-shadow(0 10px 10px rgba(4, 47, 46, .3)); animation: rebond 3s 2s ease-in-out infinite; }
+.etudiant-img { display: block; height: 180px; width: auto; max-width: none; filter: drop-shadow(0 10px 12px rgba(4, 47, 46, .3)); animation: rebond 3.4s 2s ease-in-out infinite; }
+.ile-objet { position: absolute; bottom: calc(100% - 58px); inset-inline-start: 12%; font-size: 40px; line-height: 1; animation-delay: 1.6s; filter: drop-shadow(0 6px 6px rgba(0, 0, 0, .25)); }
+.bulle-parole { position: absolute; bottom: calc(100% + 54px); inset-inline-end: -14px; width: 200px; background: #fff; color: var(--texte); border-radius: 18px; padding: 10px 13px; font-size: 14px; font-weight: 700; line-height: 1.5; box-shadow: 0 10px 24px rgba(4, 47, 46, .2); animation: bulle-pop .5s 1.75s cubic-bezier(.2, .9, .3, 1.6) both; }
+.bulle-parole::after { content: ""; position: absolute; bottom: -9px; inset-inline-start: 36px; border: 10px solid transparent; border-top-color: #fff; border-bottom: 0; }
+@keyframes bulle-pop { from { opacity: 0; transform: scale(.3) translateY(20px); } }
+.station-info { position: relative; background: var(--carte); border-radius: 26px 26px 0 0; margin-top: -18px; padding: 18px 18px 22px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.monde { background: var(--sable); color: #3D2A0C; font-weight: 800; border-radius: 999px; padding: 3px 16px; font-size: 15px; }
+.station-num { color: var(--accent); font-weight: 800; font-size: 14.5px; letter-spacing: .3px; }
+.station-titre { font-size: 26px; font-weight: 800; line-height: 1.35; color: color-mix(in srgb, var(--accent) 70%, #111827); text-wrap: balance; }
+.station-info .nav { width: 100%; }
+.route { position: relative; width: 100%; margin: 14px 0 2px; padding: 22px 2px 6px; }
+.route-ligne { position: absolute; left: 6px; right: 6px; top: 37px; border-top: 3px dashed #DCD3C2; }
+.route-noeuds { position: relative; display: flex; justify-content: space-between; align-items: center; }
+.route-noeud { display: grid; place-items: center; width: 13px; height: 13px; border-radius: 50%; background: #E8E2D6; font-size: 8px; font-weight: 800; color: #042F2E; flex: none; }
+.route-noeud.fait { background: var(--sarcelle-vif); }
+.route-noeud.nouveau-monde { box-shadow: 0 0 0 3px var(--sable-clair); }
+.route-noeud.ici { width: 32px; height: 32px; font-size: 17px; background: #fff; box-shadow: 0 0 0 3px var(--accent), 0 0 0 9px color-mix(in srgb, var(--accent) 25%, transparent); animation: battement 1.8s ease-in-out infinite; }
+.route-avatar { position: absolute; top: -6px; left: 0; font-size: 22px; transform: translateX(-50%); transition: left .9s cubic-bezier(.3, .7, .3, 1); }
+.route-avatar.saute { animation: saut .9s cubic-bezier(.3, .7, .3, 1); }
+@keyframes saut { 50% { transform: translate(-50%, -22px) rotate(-12deg); } }
+@media (min-width: 700px) {
+  .ciel { height: 410px; }
+  .ile-arrivee { width: 340px; }
+  .etudiant-emoji { font-size: 116px; }
+  .etudiant-img { height: 230px; }
+  .bulle-parole { width: 230px; font-size: 15px; inset-inline-end: -60px; }
+  .station-titre { font-size: 32px; }
+  .route-noeud { width: 16px; height: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .station * { animation: none !important; opacity: 1; } .brume, .rocher-vol { display: none; } }
+@media print { .station { display: none; } }

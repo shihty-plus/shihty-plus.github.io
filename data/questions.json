@@ -2650,23 +2650,6 @@
                 "options": "jours_0_7",
                 "affichage": "numerique",
                 "emoji": "🚴"
-              },
-              {
-                "type": "multiple",
-                "min": 0,
-                "choix": [
-                  {
-                    "var": "AP_pas_intense",
-                    "t": "لا أقوم بأي نشاط بدني مرتفع الشدة",
-                    "e": "🏋️"
-                  },
-                  {
-                    "var": "AP_pas_marche",
-                    "t": "لا أقوم بممارسة المشي إطلاقا",
-                    "e": "🚶"
-                  }
-                ],
-                "emoji": "🧘"
               }
             ]
           ]

@@ -10,7 +10,7 @@
   var ECRANS = [];                   // écrans du questionnaire, à plat
   var PARTIES = [];                  // parties du questionnaire (une par autocollant)
   var FIN_PARTIE = {};               // index du dernier écran de questions de chaque partie
-  var UNE_A_LA_FOIS = true;          // une question par écran (sauf mode saisie chercheur)
+  var UNE_A_LA_FOIS = false;         // false : une échelle entière par page (demande de l'équipe)
   var CTX = { auto: false, sansEmoji: false, heros: '' };   // contexte de l'écran en cours de rendu
   var SENS = 'avant';                // sens de la dernière navigation (pour l'animation)
   var PILOTES = new Set();           // variables dont dépend une condition d'affichage
@@ -135,9 +135,10 @@
     ECRANS = [];
     var apres = (!SAISIE && F.apres_partie) || {};
     Q.sections.forEach(function (s, iS) {
-      if (!SAISIE) ECRANS.push({ type: 'intro', section: s, iSection: iS });
       s.parties.forEach(function (p, iP) {
         var premier = true;
+        // une station (île) avant chaque partie : l'étudiant y attend le participant
+        if (!SAISIE) ECRANS.push({ type: 'station', section: s, partie: p, iPartie: iP, iSection: iS, debutSection: iP === 0 });
         p.ecrans.forEach(function (elements) {
           var ech = elements.length === 1 && elements[0].type === 'echelle' ? elements[0] : null;
           if (UNE_A_LA_FOIS && !SAISIE) {
@@ -159,7 +160,7 @@
           }
           if (!ech) { ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, debutPartie: premier }); premier = false; return; }
           var n = ech.items.length;
-          var nb = SAISIE ? 1 : Math.ceil(n / (ech.par_ecran || 5));
+          var nb = 1;   // toute l'échelle sur une seule page
           var taille = Math.ceil(n / nb);
           for (var k = 0; k < nb; k++) {
             ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, echelle: ech,
@@ -193,7 +194,7 @@
     return !!e && !vide(scores[e.score]) && !vide(scores[e.niveau]);
   }
   function ecranVisible(e, eff, scores) {
-    if (e.type === 'intro') return true;
+    if (e.type === 'intro' || e.type === 'station') return true;
     if (e.type === 'resultat') return resultatDisponible(e.cle, eff.rep, scores);
     return e.elements.some(function (el) { return Schema.varsElement(el).length && eff.visibles.has(el); });
   }
@@ -292,8 +293,10 @@
     return Math.max(1, Math.round(String(t).replace(/[\uFE0F\u200D]/g, '').length / 2));
   }
   function badge(el) {
+    if (SAISIE) return null;
+    if (!UNE_A_LA_FOIS) return el.emoji ? h('span', { class: 'q-mini', 'aria-hidden': 'true', text: el.emoji }) : null;
     var e = el.emoji || CTX.heros;
-    return (e && UNE_A_LA_FOIS && !SAISIE) ? h('div', { class: 'q-badge', 'aria-hidden': 'true', text: e }) : null;
+    return e ? h('div', { class: 'q-badge', 'aria-hidden': 'true', text: e }) : null;
   }
   /* Après une réponse à une question à choix unique : passage automatique à la suivante. */
   function avanceAutomatique() {
@@ -307,8 +310,12 @@
     return h('fieldset', { class: 'question', 'data-var': el.var }, [
       h('legend', null, [badge(el), el.texte]),
       el.aide ? h('p', { class: 'aide', text: el.aide }) : null,
-      groupeRadios(el.var, opts, classe, null, genreDe(el.options))
+      avecSansEmoji(el.sans_emoji, function () { return groupeRadios(el.var, opts, classe, null, genreDe(el.options)); })
     ]);
+  }
+  function avecSansEmoji(sans, f) {
+    var avant = CTX.sansEmoji; CTX.sansEmoji = avant || !!sans;
+    try { return f(); } finally { CTX.sansEmoji = avant; }
   }
   function rendreNombre(el) {
     var input = h('input', { type: 'number', inputmode: 'numeric', class: 'champ champ-nombre', id: 'c_' + el.var, min: el.min, max: el.max, step: '1',
@@ -381,7 +388,8 @@
       var opts = Schema.options(Q, it.options || ech.options);
       var num = ech.affichage === 'numerique';
       var classe = num ? 'opts-num opts-bornes' : (opts.length <= 2 ? 'opts-duo' : 'opts-likert') + (ech.barre ? ' avec-barre' : '');
-      if (ecran.unique && !num && opts.length > 2) classe = (opts.length <= 5 && !CTX.sansEmoji && opts[0].e ? 'opts-rangee' : 'opts-v') + (ech.barre ? ' avec-barre' : '');
+      if (!num && opts.length > 2 && opts.length <= 5 && !CTX.sansEmoji && opts[0].e && !SAISIE) classe = 'opts-rangee' + (ech.barre ? ' avec-barre' : '');
+      else if (ecran.unique && !num && opts.length > 2) classe = (opts.length <= 5 && !CTX.sansEmoji && opts[0].e ? 'opts-rangee' : 'opts-v') + (ech.barre ? ' avec-barre' : '');
       return h('fieldset', { class: 'question item' + (ecran.unique ? ' item-unique' : ''), 'data-var': it.var }, [
         h('legend', null, [ecran.unique ? badge({}) : null, it.texte]),
         groupeRadios(it.var, opts, classe, (SAISIE || ecran.unique) ? null : allerAuSuivant, genreDe(it.options || ech.options)),
@@ -470,6 +478,82 @@
     ]);
   }
 
+  /* ---------- stations : chaque partie est une île flottante où un étudiant attend ---------- */
+  var PERSOS_DEFAUT = ['🧑‍🎓', '👩‍🎓', '👨‍🎓', '🧑‍💻', '👩‍💻', '🧑‍🏫'];
+  function ileSVG(id) {
+    return '<svg viewBox="0 0 320 210" class="ile-svg" aria-hidden="true">' +
+      '<defs><linearGradient id="roc' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9A26A"/><stop offset=".55" stop-color="#9C7445"/><stop offset="1" stop-color="#5E4429"/></linearGradient>' +
+      '<linearGradient id="her' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5EEAD4"/><stop offset="1" stop-color="#0D9488"/></linearGradient></defs>' +
+      '<path d="M18 62 C 40 40 120 34 160 36 C 210 34 290 42 304 62 C 290 98 248 112 226 140 C 204 168 186 196 160 204 C 136 196 120 170 100 146 C 76 118 34 100 18 62 Z" fill="url(#roc' + id + ')"/>' +
+      '<path d="M70 96 L 92 128 M 230 92 L 210 130 M 150 120 L 158 176" stroke="#5E4429" stroke-width="3" stroke-linecap="round" opacity=".45"/>' +
+      '<ellipse cx="160" cy="58" rx="146" ry="30" fill="url(#her' + id + ')"/>' +
+      '<path d="M22 60 q10 -18 18 -2 q6 -16 14 0 q8 -14 14 2 M250 52 q8 -16 16 0 q8 -14 14 2 q6 -12 12 4 M120 40 q6 -12 12 0 q6 -10 10 2" fill="#14B8A6" stroke="#0F766E" stroke-width="2"/>' +
+      '<circle cx="64" cy="50" r="5" fill="#FF7F6B"/><circle cx="256" cy="46" r="4" fill="#E2B970"/><circle cx="196" cy="40" r="3.500" fill="#FF7F6B"/>' +
+      '<path d="M120 196 q-4 10 2 14 M196 182 q4 12 -2 16 M150 204 q2 6 -1 8" stroke="#0F766E" stroke-width="2.500" fill="none" stroke-linecap="round"/>' +
+      '</svg>';
+  }
+  function etudiant(num) {
+    var imgs = (T.etudiants && T.etudiants.images) || [];
+    var emoji = PERSOS_DEFAUT[num % PERSOS_DEFAUT.length];
+    if (imgs.length) {
+      var img = h('img', { class: 'etudiant-img', src: imgs[num % imgs.length], alt: '' });
+      img.addEventListener('error', function () { img.replaceWith(h('span', { class: 'etudiant-emoji', text: emoji })); });
+      return img;
+    }
+    return h('span', { class: 'etudiant-emoji', text: emoji });
+  }
+  function rendreStation(ecran, precedent) {
+    var p = ecran.partie, th = theme(p), num = PARTIES.indexOf(p) + 1, v = T.voyage;
+    var intro = (T.sections_intro || {})[ecran.section.id] || {};
+    var monde = ecran.debutSection ? (v.mondes || {})[ecran.section.id] : null;
+    var route = h('div', { class: 'route', 'aria-label': v.route, 'data-de': String(Math.max(0, num - 2)), 'data-a': String(num - 1) }, [
+      h('div', { class: 'route-ligne' }),
+      h('div', { class: 'route-noeuds' }, PARTIES.map(function (q, k) {
+        var st = k < num - 1 ? 'fait' : (k === num - 1 ? 'ici' : 'apres');
+        return h('span', { class: 'route-noeud ' + st + (k > 0 && q.id.charAt(0) !== PARTIES[k - 1].id.charAt(0) ? ' nouveau-monde' : ''), title: q.titre, text: st === 'fait' ? '✓' : (st === 'ici' ? icone(q.id) : '') });
+      })),
+      h('span', { class: 'route-avatar', 'aria-hidden': 'true', text: '🎒' })
+    ]);
+    return [
+      barreProgression(),
+      h('section', { class: 'station', style: '--accent:' + th.couleur }, [
+        h('div', { class: 'ciel', 'aria-hidden': 'true' }, [
+          h('span', { class: 'nuage n1' }), h('span', { class: 'nuage n2' }), h('span', { class: 'nuage n3' }),
+          h('div', { class: 'ile ile-loin', html: ileSVG('l' + num) }),
+          h('div', { class: 'rocher-vol r1', html: ileSVG('a' + num) }),
+          h('div', { class: 'rocher-vol r2', html: ileSVG('b' + num) }),
+          h('div', { class: 'ile ile-arrivee' }, [
+            h('div', { class: 'ile-corps', html: ileSVG('m' + num) }),
+            h('span', { class: 'ile-objet anim-' + th.anim, text: th.heros }),
+            h('div', { class: 'etudiant' }, [etudiant(num)]),
+            h('div', { class: 'bulle-parole', text: v.bulle })
+          ]),
+          h('span', { class: 'brume' })
+        ]),
+        h('div', { class: 'station-info' }, [
+          monde ? h('p', { class: 'monde', text: monde }) : null,
+          ecran.debutSection && intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
+          h('p', { class: 'station-num', text: v.station.replace('{n}', num).replace('{total}', PARTIES.length) }),
+          h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
+          route,
+          h('div', { class: 'nav' }, [precedent, bouton(v.entrer, 'btn-principal', avancer, { id: 'btn-suivant' })])
+        ])
+      ])
+    ];
+  }
+  /* L'avatar 🎒 saute de la station précédente à la nouvelle. */
+  function lancerRoute() {
+    var r = app.querySelector('.route'); if (!r) return;
+    var noeuds = r.querySelectorAll('.route-noeud'), av = r.querySelector('.route-avatar');
+    function placer(k) {
+      var n = noeuds[k]; if (!n) return;
+      var rr = r.getBoundingClientRect(), nr = n.getBoundingClientRect();
+      av.style.left = (nr.left - rr.left + nr.width / 2) + 'px';
+    }
+    placer(Number(r.getAttribute('data-de')));
+    requestAnimationFrame(function () { setTimeout(function () { av.classList.add('saute'); placer(Number(r.getAttribute('data-a'))); }, 650); });
+  }
+
   /* « 3 / 30 » : position de la question dans sa partie (questions affichées seulement). */
   function compteurPartie(ecran, eff) {
     var scores = Scoring.calculer(eff.rep), n = 0, pos = 0;
@@ -488,7 +572,10 @@
     var precedent = ecranSuivant(etat.i, -1) >= 0 ? bouton(T.navigation.precedent, 'btn-gris', reculer) : h('span');
     var noeuds, classe = 'page-questionnaire';
 
-    if (ecran.type === 'intro') {
+    if (ecran.type === 'station') {
+      noeuds = rendreStation(ecran, precedent);
+      classe = 'page-questionnaire page-station';
+    } else if (ecran.type === 'intro') {
       var intro = (T.sections_intro || {})[ecran.section.id] || {};
       noeuds = [
         barreProgression(),
@@ -544,6 +631,7 @@
     }
     app.className = 'page ' + classe;
     appliquerTheme(ecran.type === 'intro' ? null : ecran.partie);
+    if (ecran.type === 'station') setTimeout(lancerRoute, 0);
     majAlbum(!SAISIE);
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (conserverDefilement) {

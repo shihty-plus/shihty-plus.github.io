@@ -210,7 +210,6 @@ test('choix multiples : une colonne 0/1 par option ; réseaux « plus » / « mo
   const jv = Schema.effectives(Q, { JV_essaye: 1, JV_actuel: 1, JV_type_action: 1 }).rep;
   assert.equal(jv.JV_type_action, 1); assert.equal(jv.JV_type_fiction, 0);
   assert.equal(Schema.effectives(Q, { JV_essaye: 0 }).rep.JV_type_action, undefined);
-  assert.equal(Schema.effectives(Q, {}).rep.AP_pas_marche, 0);
 });
 
 test('colonnes du tableur : ordre, unicité, nombre d\'items par instrument', () => {

@@ -1,0 +1,2 @@
+Déposez ici les illustrations d'étudiants (PNG à fond transparent, environ 600 px de haut),
+puis ajoutez leurs chemins dans data/textes.json → etudiants → images.
