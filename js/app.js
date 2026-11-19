@@ -58,7 +58,7 @@
   }
   function afficher(noeuds, classe) {
     app.className = 'page ' + (classe || '');
-    document.body.classList.toggle('clair', classe === 'page-accueil');
+    document.body.classList.add('clair');
     app.style.removeProperty('--accent');
     majAlbum(false);
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
@@ -528,17 +528,10 @@
     return [
       barreProgression(),
       h('section', { class: 'station', style: '--accent:' + th.couleur }, [
-        h('div', { class: 'ciel', 'aria-hidden': 'true' }, [
-          h('span', { class: 'nuage n1' }), h('span', { class: 'nuage n2' }), h('span', { class: 'nuage n3' }),
-          h('div', { class: 'ile ile-loin', html: ileSVG('l' + num) }),
-          h('div', { class: 'rocher-vol r1', html: ileSVG('a' + num) }),
-          h('div', { class: 'rocher-vol r2', html: ileSVG('b' + num) }),
-          h('div', { class: 'ile ile-arrivee' }, [
-            h('div', { class: 'ile-corps', html: ileSVG('m' + num) }),
-            h('span', { class: 'ile-objet anim-' + th.anim, text: th.heros }),
-            h('div', { class: 'etudiant' }, [etudiant(num)]),
-            h('div', { class: 'bulle-parole', text: v.bulle })
-          ]),
+        h('div', { class: 'ciel ciel3d', 'aria-hidden': 'true' }, [
+          window.Sphere ? Sphere.creer([th.heros, icone(p.id)].concat(th.particules || []), { n: 30, rayon: 150, classe: 'sph-station' }) : null,
+          h('div', { class: 'sph-perso' }, [h('span', { text: (T.etudiants3d || ['🧑‍🎓'])[(num - 1) % (T.etudiants3d || ['🧑‍🎓']).length] })]),
+          h('div', { class: 'bulle-parole', text: v.bulle }),
           h('span', { class: 'brume' })
         ]),
         h('div', { class: 'station-info' }, [
@@ -629,7 +622,7 @@
         barreProgression(),
         h('div', { class: 'tete-section' }, [h('p', { class: 'nom-section', text: ecran.section.titre }), stepper(ecran)]),
         SAISIE ? null : cotes(ecran.partie),
-        h('section', { class: 'carte carte-theme' + (ecran.unique ? ' carte-question glisse-' + SENS : '') }, [
+        h('section', { class: 'carte carte-theme glisse-' + SENS + (ecran.unique ? ' carte-question' : '') }, [
           SAISIE ? null : bandeauTheme(ecran.partie),
           h('h2', { class: 'titre-partie' }, [h('span', { class: 'titre-partie-icone', 'aria-hidden': 'true', text: icone(ecran.partie.id) }), h('span', { text: ecran.partie.titre }),
             ecran.unique ? compteurPartie(ecran, eff) : null])
@@ -642,7 +635,7 @@
       ];
     }
     app.className = 'page ' + classe;
-    document.body.classList.remove('clair');
+    document.body.classList.add('clair');
     appliquerTheme(ecran.type === 'intro' ? null : ecran.partie);
     if (ecran.type === 'station') setTimeout(lancerRoute, 0);
     majAlbum(!SAISIE);
@@ -917,6 +910,18 @@
       return h('span', { class: 'mot ' + (m[1] === 'b' ? 'fort' : 'leger'), style: '--k:' + k }, [h('span', { class: 'mot-in', text: m[0] })]);
     }).reduce(function (acc, x) { acc.push(x, ' '); return acc; }, []));
   }
+  /* Un(e) étudiant(e) perdu(e) dans son téléphone, au centre d'une sphère de réseaux sociaux qui tourne. */
+  function scenePerdu(A) {
+    return h('section', { class: 'ac-perdu', 'aria-hidden': 'true' }, [
+      window.Sphere ? Sphere.creer(A.sphere || ['📱'], { n: 46, rayon: 230, classe: 'sph-accueil' }) : null,
+      h('div', { class: 'perdu-perso' }, [
+        h('span', { class: 'sph-perso', text: A.perdu || '🤳' }),
+        h('span', { class: 'perdu-bulle' }, [h('span', { class: 'sph-bulle-em', text: A.perdu_bulle || '😵‍💫' })]),
+        h('span', { class: 'perdu-lueur' })
+      ]),
+      h('p', { class: 'perdu-texte', text: A.perdu_texte || '' })
+    ]);
+  }
   function pageAccueil() {
     var enCours = etat.etape === 'questionnaire' || etat.etape === 'prenom' || etat.etape === 'envoi';
     var a = T.accueil, A = T.accueil2;
@@ -955,6 +960,7 @@
           enCours ? bouton(a.bouton_recommencer, 'btn ac-lien', function () { etat = nouvelEtat(); sauver(); pageConsentement(); })
             : h('a', { class: 'btn ac-lien', href: '#decouvrir', text: A.decouvrir })
         ]),
+        scenePerdu(A),
         eventail
       ]),
       h('span', { id: 'decouvrir' }),
@@ -1013,6 +1019,13 @@
       lignes.forEach(function (l) { l.style.transform = 'translateX(' + (Number(l.getAttribute('data-sens')) * (p - .5) * 40).toFixed(2) + '%)'; });
     }
     if (sec && !CALME) { window.addEventListener('scroll', glisse, { passive: true }); glisse(); }
+    var perdu = app.querySelector('.ac-perdu'), sph = perdu && perdu.querySelector('.sph');
+    function grandit() {
+      if (!document.body.contains(perdu)) { window.removeEventListener('scroll', grandit); return; }
+      var r = perdu.getBoundingClientRect(), p = Math.max(0, Math.min(1, (window.innerHeight - r.top) / (window.innerHeight + r.height)));
+      sph.style.setProperty('--zoom', (0.75 + p * 0.75).toFixed(3));
+    }
+    if (sph && !CALME) { window.addEventListener('scroll', grandit, { passive: true }); grandit(); }
   }
   function reprendre() {
     if (etat.etape === 'envoi') envoyer();
