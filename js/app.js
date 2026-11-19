@@ -687,10 +687,59 @@
     }
     if (SAISIE) { montrer(); return; }
     // entrer dans une station : une porte s'ouvre
-    if (avant.type === 'station' && e2.type === 'q' && window.FX) { window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer); return; }
+    if (avant.type === 'station' && e2.type === 'q' && window.FX) {
+      miniJeu(avant, function () { window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer); });
+      return;
+    }
     // nouvelle station : l'étudiant marche sur la carte de la station précédente à la suivante
     if (e2.type === 'station') { voyageCarte(PARTIES.indexOf(e2.partie) - 1, PARTIES.indexOf(e2.partie), montrer); return; }
     montrer();
+  }
+
+  /* ---------- mini-jeu de 8 secondes avant chaque partie (casser la sensation de longueur) ---------- */
+  function miniJeu(station, fini) {
+    var J = T.jeu, sid = station.section.id, but = 5, duree = 8000, pris = 0, fin = false, minuteurs = [];
+    if (!J || (window.FX && window.FX.calme)) { fini(); return; }
+    var cibles = (J.cibles || {})[sid] || ['⭐'];
+    var compte = h('span', { class: 'jeu-compte', dir: 'ltr', text: '0 / ' + but });
+    var barre = h('div', { class: 'jeu-temps-barre' });
+    var arene = h('div', { class: 'jeu-arene', style: '--c:' + theme(station.partie).couleur });
+    var passer = h('button', { type: 'button', class: 'btn btn-fantome jeu-passer', text: J.passer });
+    var fond = h('div', { class: 'jeu-mini', role: 'dialog', 'aria-label': J.titre }, [
+      h('div', { class: 'jeu-tete' }, [h('strong', { text: J.titre }), compte]),
+      h('p', { class: 'jeu-consigne', text: (J.consignes || {})[sid] || '' }),
+      h('div', { class: 'jeu-temps' }, [barre]),
+      arene, passer
+    ]);
+    document.body.appendChild(fond);
+    function terminer(message) {
+      if (fin) return; fin = true;
+      minuteurs.forEach(clearTimeout); clearInterval(apparition);
+      etat.points = (etat.points || 0) + pris; sauver();
+      arene.replaceChildren(h('div', { class: 'jeu-fin' }, [h('p', { class: 'jeu-fin-msg', text: message }), h('p', { class: 'jeu-fin-total', text: J.total.replace('{n}', etat.points) })]));
+      if (pris >= but) confettis();
+      setTimeout(function () { fond.classList.add('sortie'); setTimeout(function () { fond.remove(); }, 350); fini(); }, pris >= but ? 1100 : 900);
+    }
+    function cible() {
+      if (fin) return;
+      var r = arene.getBoundingClientRect();
+      var b = h('button', { type: 'button', class: 'jeu-cible', 'aria-label': '+1', text: cibles[Math.floor(Math.random() * cibles.length)],
+        style: 'left:' + (8 + Math.random() * 76).toFixed(1) + '%;top:' + (10 + Math.random() * 70).toFixed(1) + '%' });
+      b.addEventListener('pointerdown', function (e) {
+        e.preventDefault(); if (fin || b.classList.contains('pris')) return;
+        b.classList.add('pris'); pris++; compte.textContent = pris + ' / ' + but;
+        if (window.FX) window.FX.eclat(e.clientX, e.clientY, 14);
+        setTimeout(function () { b.remove(); }, 300);
+        if (pris >= but) terminer(J.gagne.replace('{n}', pris));
+      });
+      arene.appendChild(b);
+      minuteurs.push(setTimeout(function () { if (!b.classList.contains('pris')) { b.classList.add('rate'); setTimeout(function () { b.remove(); }, 300); } }, 1700));
+    }
+    var apparition = setInterval(cible, 560);
+    setTimeout(cible, 150);
+    requestAnimationFrame(function () { barre.style.transition = 'transform ' + duree + 'ms linear'; barre.style.transform = 'scaleX(0)'; });
+    minuteurs.push(setTimeout(function () { terminer(pris ? J.gagne.replace('{n}', pris) : J.temps); }, duree));
+    passer.addEventListener('click', function () { terminer(J.temps); });
   }
 
   /* ---------- carte de la route : chemin sinueux à travers les 3 mondes ---------- */
@@ -880,6 +929,26 @@
       ])
     ]);
   }
+  /* Scène néon « vidéo en boucle » : un étudiant en pixel art hypnotisé par son téléphone, entouré d'applis. */
+  function sceneNeon() {
+    var apps = [['❤️', 'a1'], ['▶️', 'a2'], ['💬', 'a3'], ['📸', 'a4'], ['🎵', 'a5'], ['🎮', 'a6'], ['🔔', 'a7'], ['🎲', 'a8'], ['🤖', 'a9']];
+    var garcon = window.Pixel ? Pixel.canvas('garcon') : h('span');
+    var fille = window.Pixel ? Pixel.canvas('fille') : h('span');
+    var deco = [];
+    if (window.Pixel) {
+      [['coeur', '#F7C6D9', 'd1'], ['etoile', '#FDE68A', 'd2'], ['coeur', '#C9A7F5', 'd3'], ['etoile', '#C7DCF6', 'd4'], ['coeur', '#FF7F6B', 'd5']].forEach(function (m) {
+        var c = Pixel.canvas(m[0], m[1]); c.className = 'pixel-deco ' + m[2]; deco.push(c);
+      });
+    }
+    return h('div', { class: 'scene-neon', 'aria-hidden': 'true' }, [
+      h('div', { class: 'neon-lumiere l-bleu' }), h('div', { class: 'neon-lumiere l-rose' }),
+      h('div', { class: 'neon-apps' }, apps.map(function (a) { return h('span', { class: 'neon-app ' + a[1], text: a[0] }); })),
+      h('div', { class: 'neon-garcon' }, [h('div', { class: 'neon-lueur' }), garcon]),
+      h('div', { class: 'neon-compteurs' }, (T.accueil.neon_compteurs || []).map(function (t, k) { return h('span', { class: 'neon-compteur', style: '--k:' + k, text: t }); })),
+      h('div', { class: 'neon-fille' }, [fille, h('span', { class: 'neon-bulle', text: 'هيا نرتاحو شوية! 💚' })]),
+      h('div', { class: 'neon-lignes' })
+    ].concat(deco));
+  }
   function sticker(pose, genre, classe, texte) {
     return h('div', { class: 'etu-sticker ' + classe, 'aria-hidden': 'true', html: window.Etudiant ? Etudiant.svg({ pose: pose, genre: genre, texte: texte }) : '' });
   }
@@ -901,17 +970,7 @@
         h('p', { class: 'hero-sous-titre apparait', style: '--k:6', text: a.sous_titre }),
         enCours ? h('p', { class: 'message', text: a.reprise }) : null,
         actions,
-        h('div', { class: 'scene2' }, [
-          h('div', { class: 'halo-scene' }),
-          h('div', { class: 'anneau-orbite o1' }), h('div', { class: 'anneau-orbite o2' }),
-          telephoneHero(),
-          sticker('megaphone', 'h', 's-gauche-haut'),
-          sticker('telephone', 'f', 's-droite-haut'),
-          sticker('manette', 'h', 's-gauche-bas'),
-          sticker('idee', 'f', 's-droite-bas'),
-          h('span', { class: 'flottant f1', 'aria-hidden': 'true', text: '❤️' }), h('span', { class: 'flottant f2', 'aria-hidden': 'true', text: '🔔' }),
-          h('span', { class: 'flottant f3', 'aria-hidden': 'true', text: '💬' }), h('span', { class: 'flottant f4', 'aria-hidden': 'true', text: '🎲' })
-        ])
+        sceneNeon()
       ]),
       bandeauDefilant(a.marquee || [], false),
       bandeauDefilant((a.marquee || []).slice().reverse(), true),

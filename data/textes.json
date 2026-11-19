@@ -93,7 +93,13 @@
         "t": "مجهول وسري"
       }
     ],
-    "cta_titre": "مستعد(ة) للرحلة؟"
+    "cta_titre": "مستعد(ة) للرحلة؟",
+    "neon_compteurs": [
+      "❤️ 1.2k",
+      "🔔 99+",
+      "💬 37",
+      "⏱️ 7h"
+    ]
   },
   "consentement": {
     "titre": "الموافقة على المشاركة",
@@ -540,5 +546,35 @@
   "etudiants": {
     "_aide": "Illustrations d'étudiants affichées sur les îles des stations. Mettez les fichiers PNG (fond transparent) dans assets/etudiants/ puis listez-les ici, par ex. \"assets/etudiants/etudiant-1.png\". Tant que la liste est vide, des personnages emoji sont utilisés.",
     "images": []
+  },
+  "jeu": {
+    "titre": "🎮 لعبة سريعة!",
+    "consignes": {
+      "S1": "اجمع(ي) 5 نجوم ⭐ بسرعة!",
+      "S2": "أطفئ(ي) 5 إشعارات 🔔 قبل أن تختفي!",
+      "S3": "التقط(ي) 5 قلوب 💚!"
+    },
+    "cibles": {
+      "S1": [
+        "⭐",
+        "🌟",
+        "✨"
+      ],
+      "S2": [
+        "🔔",
+        "❤️",
+        "💬",
+        "📩"
+      ],
+      "S3": [
+        "💚",
+        "💙",
+        "🧡"
+      ]
+    },
+    "gagne": "🎉 رائع! +{n} نقاط",
+    "temps": "⏱️ انتهى الوقت! لا بأس، لنكمل",
+    "passer": "تخطي",
+    "total": "مجموع نقاطك: {n} ⭐"
   }
 }
