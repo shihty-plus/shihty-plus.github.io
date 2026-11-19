@@ -159,7 +159,33 @@
     }
   }
 
-  function init() { creerFormes(); creerHalo(); }
+  /* ---------- 6. projecteur qui suit la souris, téléphone 3D qui s'incline, boutons magnétiques ---------- */
+  function suivrePointeur() {
+    if (CALME) return;
+    var racine = document.documentElement, attente = false, ex = 0, ey = 0;
+    window.addEventListener('pointermove', function (e) {
+      ex = e.clientX; ey = e.clientY;
+      if (attente) return; attente = true;
+      requestAnimationFrame(function () {
+        attente = false;
+        racine.style.setProperty('--px', (ex / window.innerWidth * 100).toFixed(1) + '%');
+        racine.style.setProperty('--py', (ey / window.innerHeight * 100).toFixed(1) + '%');
+        var tel = document.querySelector('.tel3d-corps');
+        if (tel) {
+          var r = tel.getBoundingClientRect(), dx = (ex - (r.left + r.width / 2)) / window.innerWidth, dy = (ey - (r.top + r.height / 2)) / window.innerHeight;
+          tel.style.setProperty('--ry', (dx * 30).toFixed(2) + 'deg');
+          tel.style.setProperty('--rx', (-dy * 24).toFixed(2) + 'deg');
+        }
+        document.querySelectorAll('.magnetique').forEach(function (b) {
+          var r = b.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, d = Math.hypot(ex - cx, ey - cy);
+          if (d < 140) b.style.transform = 'translate(' + ((ex - cx) * .22).toFixed(1) + 'px,' + ((ey - cy) * .3).toFixed(1) + 'px)';
+          else if (b.style.transform) b.style.transform = '';
+        });
+      });
+    }, { passive: true });
+  }
+
+  function init() { creerFormes(); creerHalo(); suivrePointeur(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window.FX = { eclat: eclat, debloquer: debloquer, envol: envol, calme: CALME };
 })();

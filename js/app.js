@@ -500,8 +500,18 @@
       img.addEventListener('error', function () { img.replaceWith(h('span', { class: 'etudiant-emoji', text: emoji })); });
       return img;
     }
+    if (window.Etudiant) {
+      var pose = POSES_STATION[(PARTIES[num - 1] || {}).id] || ['salut', 'f'];
+      return h('div', { class: 'etudiant-svg', html: Etudiant.svg({ pose: pose[0], genre: pose[1], texte: pose[2] }) });
+    }
     return h('span', { class: 'etudiant-emoji', text: emoji });
   }
+  var POSES_STATION = {
+    '1A': ['salut', 'f'], '1B': ['pancarte', 'h', '🏠'], '1C': ['livre', 'f'], '1D': ['salut', 'h'], '1E': ['idee', 'f'], '1F': ['megaphone', 'h'],
+    '2A': ['telephone', 'f'], '2B': ['telephone', 'h'], '2C': ['manette', 'f'], '2D': ['des', 'h'], '2E': ['pancarte', 'f', '🔒'], '2F': ['laptop', 'h'],
+    '3A': ['salut', 'f'], '3B': ['livre', 'h'], '3C': ['pancarte', 'f', '💤'], '3D': ['laptop', 'h'], '3E': ['idee', 'f'], '3F': ['megaphone', 'h'],
+    '3G': ['pancarte', 'f', '💚'], '3H': ['salut', 'h']
+  };
   function rendreStation(ecran, precedent) {
     var p = ecran.partie, th = theme(p), num = PARTIES.indexOf(p) + 1, v = T.voyage;
     var intro = (T.sections_intro || {})[ecran.section.id] || {};
@@ -735,28 +745,120 @@
   }
 
   /* ---------- pages d'entrée ---------- */
+  /* ---------- page d'accueil « motion » ---------- */
+  function motsAnimes(texte, classe) {
+    return h('span', { class: classe }, texte.split(' ').map(function (m, k) {
+      return h('span', { class: 'mot', style: '--k:' + k }, [h('span', { class: 'mot-in', text: m })]);
+    }).reduce(function (acc, x) { acc.push(x, ' '); return acc; }, []));
+  }
+  function telephoneHero() {
+    var a = T.accueil;
+    var posts = [];
+    for (var k = 0; k < 8; k++) {
+      posts.push(h('div', { class: 'post' }, [
+        h('span', { class: 'post-av', style: '--h:' + (k * 47 % 360) }),
+        h('span', { class: 'post-l' }), h('span', { class: 'post-img', text: ['🏖️', '🍕', '⚽', '🎧', '😂', '🐱', '🌆', '🎮'][k] }),
+        h('span', { class: 'post-actions', text: '❤️ 💬 ↗' })
+      ]));
+    }
+    return h('div', { class: 'tel3d', 'aria-hidden': 'true' }, [
+      h('div', { class: 'tel3d-corps' }, [
+        h('div', { class: 'tel3d-encoche' }),
+        h('div', { class: 'tel3d-ecran' }, [
+          h('div', { class: 'tel3d-barre' }, [h('span', { text: a.tel_temps }), h('strong', { id: 'temps-ecran', dir: 'ltr', text: '7h 42m' })]),
+          h('div', { class: 'feed' }, [h('div', { class: 'feed-piste' }, posts.concat(posts.map(function (x) { return x.cloneNode(true); })))]),
+          h('div', { class: 'notifs' }, (a.tel_notifs || []).map(function (t, k) { return h('div', { class: 'notif', style: '--k:' + k, text: t }); }))
+        ])
+      ])
+    ]);
+  }
+  function sticker(pose, genre, classe, texte) {
+    return h('div', { class: 'etu-sticker ' + classe, 'aria-hidden': 'true', html: window.Etudiant ? Etudiant.svg({ pose: pose, genre: genre, texte: texte }) : '' });
+  }
+  function bandeauDefilant(liste, inverse) {
+    var items = liste.concat(liste).map(function (t) { return h('span', { class: 'mq-item', text: t }); });
+    return h('div', { class: 'marquee' + (inverse ? ' inverse' : ''), 'aria-hidden': 'true' }, [h('div', { class: 'mq-piste' }, items)]);
+  }
   function pageAccueil() {
     var enCours = etat.etape === 'questionnaire' || etat.etape === 'prenom' || etat.etape === 'envoi';
     var a = T.accueil;
+    var actions = h('div', { class: 'hero-actions' }, enCours ? [
+      bouton(a.bouton_reprendre, 'btn-principal btn-grand magnetique', reprendre),
+      bouton(a.bouton_recommencer, 'btn-fantome', function () { etat = nouvelEtat(); sauver(); majSalutation(); pageConsentement(); })
+    ] : [bouton(a.bouton, 'btn-principal btn-grand magnetique', pageConsentement)]);
     afficher([
-      h('section', { class: 'hero' }, [
-        sceneAccueil(),
-        h('p', { class: 'hero-etiquette', text: a.etiquette }),
-        h('h1', { class: 'hero-titre', text: a.titre }),
-        h('p', { class: 'hero-sous-titre', text: a.sous_titre }),
+      h('section', { class: 'hero2' }, [
+        h('p', { class: 'hero-etiquette apparait', style: '--k:0', text: a.etiquette }),
+        h('h1', { class: 'hero2-titre' }, [motsAnimes(a.titre, 'titre-mots')]),
+        h('p', { class: 'hero-sous-titre apparait', style: '--k:6', text: a.sous_titre }),
         enCours ? h('p', { class: 'message', text: a.reprise }) : null,
-        h('div', { class: 'hero-actions' }, enCours ? [
-          bouton(a.bouton_reprendre, 'btn-principal btn-grand', reprendre),
-          bouton(a.bouton_recommencer, 'btn-fantome', function () { etat = nouvelEtat(); sauver(); majSalutation(); pageConsentement(); })
-        ] : [bouton(a.bouton, 'btn-principal btn-grand', pageConsentement)]),
+        actions,
+        h('div', { class: 'scene2' }, [
+          h('div', { class: 'halo-scene' }),
+          h('div', { class: 'anneau-orbite o1' }), h('div', { class: 'anneau-orbite o2' }),
+          telephoneHero(),
+          sticker('megaphone', 'h', 's-gauche-haut'),
+          sticker('telephone', 'f', 's-droite-haut'),
+          sticker('manette', 'h', 's-gauche-bas'),
+          sticker('idee', 'f', 's-droite-bas'),
+          h('span', { class: 'flottant f1', 'aria-hidden': 'true', text: '❤️' }), h('span', { class: 'flottant f2', 'aria-hidden': 'true', text: '🔔' }),
+          h('span', { class: 'flottant f3', 'aria-hidden': 'true', text: '💬' }), h('span', { class: 'flottant f4', 'aria-hidden': 'true', text: '🎲' })
+        ])
+      ]),
+      bandeauDefilant(a.marquee || [], false),
+      bandeauDefilant((a.marquee || []).slice().reverse(), true),
+      h('section', { class: 'comment' }, [
+        h('h2', { class: 'section-titre revele' }, [motsAnimes(a.comment_titre, 'titre-mots')]),
+        h('div', { class: 'etapes' }, (a.etapes || []).map(function (e, k) {
+          return h('article', { class: 'etape-carte revele', style: '--k:' + k }, [
+            h('span', { class: 'etape-num', dir: 'ltr', text: '0' + (k + 1) }),
+            h('span', { class: 'etape-icone', 'aria-hidden': 'true', text: e.icone }),
+            h('h3', { text: e.titre }), h('p', { text: e.texte })
+          ]);
+        })),
+        h('div', { class: 'stats' }, (a.stats || []).map(function (st, k) {
+          return h('div', { class: 'stat revele', style: '--k:' + k }, [h('strong', { class: 'compte', dir: 'ltr', 'data-n': String(st.n), 'data-s': st.s, text: '0' + st.s }), h('span', { text: st.t })]);
+        }))
+      ]),
+      h('section', { class: 'cta revele' }, [
+        sticker('pancarte', 'f', 's-cta', '🚀'),
+        h('h2', { class: 'section-titre' }, [motsAnimes(a.cta_titre, 'titre-mots')]),
         h('ul', { class: 'badges' }, a.badges.map(function (b, i) {
           return h('li', null, [h('span', { 'aria-hidden': 'true', text: (a.badges_icones || [])[i] || '✨' }), h('span', { text: b })]);
         })),
-        h('ul', { class: 'atouts' }, (a.atouts || []).map(function (x) {
-          return h('li', null, [h('span', { class: 'atout-icone', 'aria-hidden': 'true', text: x.icone }), h('strong', { text: x.titre }), h('span', { text: x.texte })]);
-        }))
+        bouton(enCours ? a.bouton_reprendre : a.bouton, 'btn-principal btn-grand magnetique', enCours ? reprendre : pageConsentement)
       ])
     ], 'page-accueil');
+    animerAccueil();
+  }
+  /* révélations au défilement, compteurs, horloge du téléphone */
+  function animerAccueil() {
+    var els = app.querySelectorAll('.revele');
+    var compter = function (el) {
+      var cible = Number(el.getAttribute('data-n')), suf = el.getAttribute('data-s') || '', t0 = performance.now();
+      (function pas(t) {
+        var x = Math.min(1, (t - t0) / 1400), e = x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+        el.textContent = Math.round(cible * e) + suf;
+        if (x < 1) requestAnimationFrame(pas);
+      })(t0);
+    };
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entrees) {
+        entrees.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          en.target.classList.add('vu');
+          en.target.querySelectorAll('.compte').forEach(compter);
+          io.unobserve(en.target);
+        });
+      }, { threshold: .2 });
+      els.forEach(function (el) { io.observe(el); });
+    } else els.forEach(function (el) { el.classList.add('vu'); });
+    var horloge = document.getElementById('temps-ecran'), m = 42 + 7 * 60;
+    clearInterval(animerAccueil.t);
+    animerAccueil.t = setInterval(function () {
+      if (!document.body.contains(horloge)) { clearInterval(animerAccueil.t); return; }
+      m++; horloge.textContent = Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
+    }, 1200);
   }
   function reprendre() {
     if (etat.etape === 'envoi') envoyer();
