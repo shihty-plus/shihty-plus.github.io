@@ -185,7 +185,24 @@
     }, { passive: true });
   }
 
+  /* ---------- 7. une porte s'ouvre pour entrer dans la station ---------- */
+  function porte(couleur, emoji, titre, fini) {
+    if (CALME) { fini(); return; }
+    var s = document.createElement('div');
+    s.className = 'porte-scene';
+    s.style.setProperty('--pc', couleur || '#0D9488');
+    s.innerHTML = '<div class="porte-lumiere"></div><div class="porte-cadre"><div class="porte-enseigne"><span class="pe-emoji"></span><span class="pe-titre"></span></div>' +
+      '<div class="porte-ouverture"><div class="battant b-g"><i></i><i></i><b></b></div><div class="battant b-d"><i></i><i></i><b></b></div></div></div>';
+    s.querySelector('.pe-emoji').textContent = emoji || '✨';
+    s.querySelector('.pe-titre').textContent = titre || '';
+    document.body.appendChild(s);
+    requestAnimationFrame(function () { s.classList.add('entre'); });
+    setTimeout(function () { s.classList.add('ouvre'); var r = s.querySelector('.porte-ouverture').getBoundingClientRect(); eclat(r.left + r.width / 2, r.top + r.height / 2, 20); }, 700);
+    setTimeout(function () { fini(); s.classList.add('traverse'); }, 1350);
+    setTimeout(function () { s.remove(); }, 2000);
+  }
+
   function init() { creerFormes(); creerHalo(); suivrePointeur(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  window.FX = { eclat: eclat, debloquer: debloquer, envol: envol, calme: CALME };
+  window.FX = { eclat: eclat, debloquer: debloquer, envol: envol, porte: porte, calme: CALME };
 })();

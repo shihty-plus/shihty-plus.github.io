@@ -677,12 +677,119 @@
     etat.i = suivant;
     var gagnes = SAISIE ? [] : nouveauxAutocollants();
     sauver();
-    rendreQuestionnaire(false);
     var e2 = ECRANS[suivant];
-    annoncerAutocollants(gagnes);
-    if (e2.type === 'resultat' && e2.cle !== 'SOUTIEN') { confettis(); return; }
-    var msg = e2.type === 'q' && e2.debutPartie && e2.partie !== avant.partie && (T.encouragements_parties || {})[e2.partie.id];
-    if (msg && !SAISIE && !gagnes.length) toast(msg);
+    function montrer() {
+      rendreQuestionnaire(false);
+      annoncerAutocollants(gagnes);
+      if (e2.type === 'resultat' && e2.cle !== 'SOUTIEN') { confettis(); return; }
+      var msg = e2.type === 'q' && e2.debutPartie && e2.partie !== avant.partie && (T.encouragements_parties || {})[e2.partie.id];
+      if (msg && !SAISIE && !gagnes.length) toast(msg);
+    }
+    if (SAISIE) { montrer(); return; }
+    // entrer dans une station : une porte s'ouvre
+    if (avant.type === 'station' && e2.type === 'q' && window.FX) { window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer); return; }
+    // nouvelle station : l'étudiant marche sur la carte de la station précédente à la suivante
+    if (e2.type === 'station') { voyageCarte(PARTIES.indexOf(e2.partie) - 1, PARTIES.indexOf(e2.partie), montrer); return; }
+    montrer();
+  }
+
+  /* ---------- carte de la route : chemin sinueux à travers les 3 mondes ---------- */
+  var CARTE = { L: 360, pas: 88, haut: 80 };
+  function pointsCarte() {
+    var pts = [{ x: 180, y: CARTE.haut }];   // index 0 = départ, puis 1..20 = stations
+    PARTIES.forEach(function (p, k) { pts.push({ x: 180 + 112 * Math.sin((k + 1) * 1.05), y: CARTE.haut + (k + 1) * CARTE.pas }); });
+    return pts;
+  }
+  function cheminLisse(pts) {
+    var d = 'M' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      d += ' C' + (p1.x + (p2.x - p0.x) / 6).toFixed(1) + ' ' + (p1.y + (p2.y - p0.y) / 6).toFixed(1) + ' ' +
+        (p2.x - (p3.x - p1.x) / 6).toFixed(1) + ' ' + (p2.y - (p3.y - p1.y) / 6).toFixed(1) + ' ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
+    }
+    return d;
+  }
+  /* de, a : index de station (0..19) ; -1 = départ. */
+  function construireCarte(de, a) {
+    var pts = pointsCarte(), H = pts[pts.length - 1].y + 80, d = cheminLisse(pts), mondes = '', v = T.voyage;
+    var couleursMonde = { S1: '#0D9488', S2: '#E0543F', S3: '#C8964A' };
+    Q.sections.forEach(function (sec) {
+      var idx = PARTIES.filter(function (p) { return sec.parties.indexOf(p) >= 0; }).map(function (p) { return PARTIES.indexOf(p) + 1; });
+      var y0 = pts[idx[0]].y - CARTE.pas / 2, y1 = pts[idx[idx.length - 1]].y + CARTE.pas / 2;
+      mondes += '<rect x="0" y="' + y0 + '" width="' + CARTE.L + '" height="' + (y1 - y0) + '" fill="' + couleursMonde[sec.id] + '" opacity=".1"/>' +
+        '<text x="' + (CARTE.L / 2) + '" y="' + (y0 + 24) + '" text-anchor="middle" class="carte-monde" fill="' + couleursMonde[sec.id] + '">' + ((v.mondes || {})[sec.id] || '') + '</text>';
+    });
+    var deco = ['🌴', '☁️', '🌵', '⛰️', '🌲', '🏕️', '🌸', '🪨'];
+    var decos = '';
+    for (var k = 1; k < pts.length; k += 2) decos += '<text x="' + (pts[k].x > 180 ? 40 : 320) + '" y="' + (pts[k].y + 10) + '" font-size="26" opacity=".75" text-anchor="middle">' + deco[k % deco.length] + '</text>';
+    var noeuds = '<g class="carte-noeud depart"><circle cx="' + pts[0].x + '" cy="' + pts[0].y + '" r="22" fill="#FFFCF7"/><text x="' + pts[0].x + '" y="' + (pts[0].y + 9) + '" font-size="24" text-anchor="middle">🚩</text>' +
+      '<text x="' + pts[0].x + '" y="' + (pts[0].y - 30) + '" class="carte-lib" text-anchor="middle">' + v.depart + '</text></g>';
+    PARTIES.forEach(function (p, k) {
+      var pt = pts[k + 1], st = k < a ? 'fait' : (k === a ? 'ici' : 'apres'), c = theme(p).couleur;
+      noeuds += '<g class="carte-noeud ' + st + '" style="--c:' + c + '">' +
+        '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y + '" r="25" class="cn-fond"/>' +
+        '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y + 9) + '" font-size="24" text-anchor="middle">' + (st === 'apres' ? '🔒' : icone(p.id)) + '</text>' +
+        (st === 'fait' ? '<circle cx="' + (pt.x + 18).toFixed(1) + '" cy="' + (pt.y - 18) + '" r="9" fill="#2DD4BF" stroke="#fff" stroke-width="2"/><text x="' + (pt.x + 18).toFixed(1) + '" y="' + (pt.y - 14) + '" font-size="11" font-weight="800" text-anchor="middle" fill="#042F2E">✓</text>' : '') +
+        '<text x="' + (pt.x + (pt.x > 180 ? -36 : 36)).toFixed(1) + '" y="' + (pt.y + 5) + '" class="carte-lib" text-anchor="' + (pt.x > 180 ? 'end' : 'start') + '">' + (k + 1) + '</text></g>';
+    });
+    var svg = '<svg viewBox="0 0 ' + CARTE.L + ' ' + H + '" class="carte-svg" aria-hidden="true">' + mondes + decos +
+      '<path d="' + d + '" class="carte-chemin-ombre"/><path d="' + d + '" class="carte-chemin"/><path d="' + d + '" class="carte-chemin-fait"/>' + noeuds + '</svg>';
+    var avatar = h('div', { class: 'carte-avatar', html: window.Etudiant ? Etudiant.svg({ pose: 'salut', genre: (de + a) % 2 ? 'h' : 'f' }) : '🎒' });
+    return { el: h('div', { class: 'carte-monde-boite' }, [h('div', { class: 'carte-plan', html: svg }), avatar]), pts: pts };
+  }
+  function voyageCarte(de, a, fini, statique) {
+    var v = T.voyage, c = construireCarte(de, a);
+    var fermer = h('button', { type: 'button', class: 'btn btn-principal carte-btn', text: statique ? v.fermer : v.continuer });
+    var fond = h('div', { class: 'carte-jeu' + (statique ? ' statique' : ''), role: 'dialog', 'aria-label': v.carte_titre }, [
+      h('div', { class: 'carte-tete' }, [h('strong', { text: v.carte_titre }), h('span', { class: 'carte-compte', dir: 'ltr', text: (a + 1) + ' / ' + PARTIES.length })]),
+      h('div', { class: 'carte-defile' }, [c.el]),
+      fermer
+    ]);
+    document.body.appendChild(fond);
+    var defile = fond.querySelector('.carte-defile'), chemin = fond.querySelector('.carte-chemin'), fait = fond.querySelector('.carte-chemin-fait'), av = fond.querySelector('.carte-avatar');
+    var total = chemin.getTotalLength(), echant = [];
+    for (var l = 0; l <= total; l += 3) { var q = chemin.getPointAtLength(l); echant.push([l, q.x, q.y]); }
+    function longueurA(idx) {
+      var pt = c.pts[idx + 1], best = 0, bd = 1e9;
+      echant.forEach(function (e) { var dd = (e[1] - pt.x) * (e[1] - pt.x) + (e[2] - pt.y) * (e[2] - pt.y); if (dd < bd) { bd = dd; best = e[0]; } });
+      return best;
+    }
+    var L0 = longueurA(de), L1 = longueurA(a), termine = false;
+    fait.style.strokeDasharray = total; 
+    function placer(l) {
+      var q = chemin.getPointAtLength(l), sc = c.el.clientWidth / CARTE.L;
+      av.style.transform = 'translate(' + (q.x * sc).toFixed(1) + 'px,' + (q.y * sc).toFixed(1) + 'px)';
+      fait.style.strokeDashoffset = (total - l).toFixed(1);
+      defile.scrollTop = q.y * sc - defile.clientHeight / 2;
+    }
+    function finir() {
+      if (termine) return; termine = true;
+      fond.classList.add('sortie');
+      setTimeout(function () { fond.remove(); }, 380);
+      if (fini) fini();
+    }
+    fermer.addEventListener('click', finir);
+    fond.addEventListener('keydown', function (e) { if (e.key === 'Escape') finir(); });
+    requestAnimationFrame(function () {
+      placer(statique || (window.FX && window.FX.calme) ? L1 : L0);
+      fermer.focus();
+      if (statique || (window.FX && window.FX.calme)) return;
+      var t0 = performance.now() + 450, duree = 1700;
+      (function pas(t) {
+        if (termine) return;
+        var x = Math.max(0, Math.min(1, (t - t0) / duree)), e = x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+        placer(L0 + (L1 - L0) * e);
+        av.classList.toggle('marche', x > 0 && x < 1);
+        if (x < 1) requestAnimationFrame(pas);
+        else { av.classList.add('arrive'); if (window.FX) { var r = av.getBoundingClientRect(); window.FX.eclat(r.left + r.width / 2, r.top + r.height / 2, 16); } }
+      })(performance.now());
+    });
+  }
+  function ouvrirCarte() {
+    var a = 0;
+    PARTIES.forEach(function (p, k) { if ((etat.album || []).indexOf(p.id) >= 0) a = Math.min(PARTIES.length - 1, k + 1); });
+    var e = ECRANS[etat.i]; if (e && e.partie) a = PARTIES.indexOf(e.partie);
+    voyageCarte(a, a, null, true);
   }
 
   /* ---------- album d'autocollants : un par partie terminée ---------- */
@@ -713,6 +820,7 @@
     var b = document.getElementById('album');
     if (!b || !T) return;
     b.hidden = !visible;
+    var bc = document.getElementById('btn-carte'); if (bc) bc.hidden = !visible;
     majCompteAlbum();
   }
   function grilleAlbum(ids) {
@@ -900,7 +1008,7 @@
     function suite(garder) {
       etat.prenom = garder ? input.value.trim().slice(0, 24) : '';
       etat.etape = 'questionnaire'; etat.i = 0; etat.dernier = Date.now(); sauver(); majSalutation();
-      rendreQuestionnaire(false);
+      voyageCarte(-1, 0, function () { rendreQuestionnaire(false); });
     }
     afficher([h('section', { class: 'carte carte-centre' }, [
       autocollant('😊', ['👋', '✨'], 'moyen'),
@@ -1168,6 +1276,8 @@
     nom.replaceChildren(T.marque.replace(/\+$/, ''), h('b', { class: 'plus', 'aria-hidden': 'true', text: '+' }));
     document.getElementById('album-bouton-texte').textContent = T.album.bouton;
     document.getElementById('album').addEventListener('click', ouvrirAlbum);
+    document.getElementById('carte-bouton-texte').textContent = T.voyage.bouton_carte;
+    document.getElementById('btn-carte').addEventListener('click', ouvrirCarte);
     var lien = document.getElementById('lien-aide');
     lien.textContent = T.aide.lien; lien.addEventListener('click', ouvrirAide);
     var bandeau = document.getElementById('bandeau');

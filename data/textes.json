@@ -529,7 +529,13 @@
       "S2": "🌐 أرخبيل الإنترنت",
       "S3": "🌿 واحة الصحة"
     },
-    "route": "رحلتك"
+    "route": "رحلتك",
+    "carte_titre": "🗺️ خريطة الرحلة",
+    "depart": "الانطلاق",
+    "bouton_carte": "خريطتي",
+    "continuer": "هيا ➜",
+    "fermer": "إغلاق",
+    "ouverture": "جاري فتح المحطة..."
   },
   "etudiants": {
     "_aide": "Illustrations d'étudiants affichées sur les îles des stations. Mettez les fichiers PNG (fond transparent) dans assets/etudiants/ puis listez-les ici, par ex. \"assets/etudiants/etudiant-1.png\". Tant que la liste est vide, des personnages emoji sont utilisés.",
