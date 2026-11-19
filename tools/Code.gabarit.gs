@@ -13,6 +13,7 @@
 var FEUILLE_REPONSES = 'Réponses';
 var FEUILLE_LIBELLES = 'Réponses_libellés';
 var FEUILLE_DICTIONNAIRE = 'Dictionnaire';
+var FEUILLE_FORMS = 'Réponses (format Google Forms)';
 var TAILLE_MAX = 60000;       // taille maximale d'un envoi (caractères)
 var TEXTE_MAX = 200;          // longueur maximale d'une réponse en texte libre
 
@@ -20,12 +21,15 @@ var COLONNES = /*__COLONNES__*/[];
 var NUMERIQUES = /*__NUMERIQUES__*/[];
 var LIBELLES = /*__LIBELLES__*/{};
 var DICTIONNAIRE = /*__DICTIONNAIRE__*/[];
+var FORMS = /*__FORMS__*/[];   // colonnes de la feuille au format Google Forms
+var ENTETES_FORMS = FORMS.map(function (f) { return f.t; });
 
 /** À exécuter une fois : crée (ou met à jour) les feuilles, les en-têtes et le dictionnaire. */
 function installer() {
   var classeur = SpreadsheetApp.getActiveSpreadsheet();
-  preparerFeuille_(classeur, FEUILLE_REPONSES);
-  preparerFeuille_(classeur, FEUILLE_LIBELLES);
+  feuillePrete_(classeur, FEUILLE_FORMS, ENTETES_FORMS);
+  feuillePrete_(classeur, FEUILLE_REPONSES, COLONNES);
+  feuillePrete_(classeur, FEUILLE_LIBELLES, COLONNES);
   var dico = classeur.getSheetByName(FEUILLE_DICTIONNAIRE) || classeur.insertSheet(FEUILLE_DICTIONNAIRE);
   dico.clear();
   var entetes = [['Variable', 'Texte de la question / description', 'Type', 'Valeurs et libellés', 'Partie', 'Condition d\'affichage', 'Remarque']];
@@ -35,17 +39,24 @@ function installer() {
   dico.setRightToLeft(false);
 }
 
-function preparerFeuille_(classeur, nom) {
-  var f = classeur.getSheetByName(nom) || classeur.insertSheet(nom);
-  var existant = f.getLastColumn() ? f.getRange(1, 1, 1, f.getLastColumn()).getValues()[0] : [];
-  if (f.getLastRow() > 1 && existant.join('|') !== COLONNES.join('|')) {
-    throw new Error('La feuille « ' + nom + ' » contient déjà des réponses avec d\'autres colonnes. ' +
-      'Renommez-la (ex. « ' + nom + '_ancien ») puis relancez installer().');
+/** Prépare une feuille avec ses en-têtes. Si elle contient déjà des réponses avec d'autres colonnes
+    (ancienne version du questionnaire), elle est renommée « … (ancien AAAA-MM-JJ) » et une feuille neuve est créée :
+    aucune donnée n'est jamais effacée ni décalée. */
+function feuillePrete_(classeur, nom, entetes) {
+  var f = classeur.getSheetByName(nom);
+  if (f) {
+    var largeur = f.getLastColumn();
+    var actuel = largeur ? f.getRange(1, 1, 1, largeur).getValues()[0] : [];
+    if (actuel.join('|') === entetes.join('|')) return f;
+    if (f.getLastRow() > 1) {
+      f.setName(nom.slice(0, 60) + ' (ancien ' + Utilities.formatDate(new Date(), 'GMT', 'yyyy-MM-dd HH-mm') + ')');
+      f = null;
+    }
   }
-  if (f.getMaxColumns() < COLONNES.length) f.insertColumnsAfter(f.getMaxColumns(), COLONNES.length - f.getMaxColumns());
-  f.getRange(1, 1, 1, COLONNES.length).setValues([COLONNES]).setFontWeight('bold');
+  if (!f) f = classeur.insertSheet(nom);
+  if (f.getMaxColumns() < entetes.length) f.insertColumnsAfter(f.getMaxColumns(), entetes.length - f.getMaxColumns());
+  f.getRange(1, 1, 1, entetes.length).setValues([entetes]).setFontWeight('bold');
   f.setFrozenRows(1);
-  f.setFrozenColumns(1);
   return f;
 }
 
@@ -69,27 +80,33 @@ function doPost(e) {
     var estNumerique = {};
     NUMERIQUES.forEach(function (c) { estNumerique[c] = true; });
     var maintenant = new Date();
-    var codes = [], textes = [];
+    var codes = [], textes = [], valeurs = {};
     COLONNES.forEach(function (c) {
       var v = c === 'horodatage' ? maintenant : nettoyer_(ligne[c], estNumerique[c]);
+      valeurs[c] = v;
       codes.push(v);
-      textes.push(LIBELLES[c] && v !== '' && LIBELLES[c][v] !== undefined ? LIBELLES[c][v] : v);
+      textes.push(libelle_(c, v));
+    });
+    // format Google Forms : réponse en texte, cases à cocher regroupées « A, B, C »
+    var forms = FORMS.map(function (f) {
+      if (f.m) return f.m.filter(function (p) { return Number(valeurs[p[0]]) === 1; }).map(function (p) { return p[1]; }).join(', ');
+      return libelle_(f.k, valeurs[f.k] === undefined ? '' : valeurs[f.k]);
     });
 
     var verrou = LockService.getScriptLock();
     verrou.waitLock(30000);                       // envois simultanés : un à la fois
     try {
       var classeur = SpreadsheetApp.getActiveSpreadsheet();
-      var feuille = classeur.getSheetByName(FEUILLE_REPONSES) || preparerFeuille_(classeur, FEUILLE_REPONSES);
+      var feuille = feuillePrete_(classeur, FEUILLE_REPONSES, COLONNES);
       // Double envoi (bouton cliqué deux fois, réseau instable) : le même identifiant n'est enregistré qu'une fois.
       var dernier = feuille.getLastRow();
       if (dernier > 1) {
         var deja = feuille.getRange(2, 1, dernier - 1, 1).createTextFinder(id).matchEntireCell(true).findNext();
         if (deja) return json_({ ok: true, doublon: true });
       }
+      feuillePrete_(classeur, FEUILLE_FORMS, ENTETES_FORMS).appendRow(forms);
       feuille.appendRow(codes);
-      var feuilleTexte = classeur.getSheetByName(FEUILLE_LIBELLES);
-      if (feuilleTexte) feuilleTexte.appendRow(textes);
+      feuillePrete_(classeur, FEUILLE_LIBELLES, COLONNES).appendRow(textes);
     } finally {
       verrou.releaseLock();
     }
@@ -108,6 +125,10 @@ function nettoyer_(v, numerique) {
   }
   var s = String(v).replace(/[\u0000-\u001f]/g, ' ').slice(0, TEXTE_MAX);
   return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+
+function libelle_(c, v) {
+  return LIBELLES[c] && v !== '' && LIBELLES[c][v] !== undefined ? LIBELLES[c][v] : v;
 }
 
 function json_(objet) {

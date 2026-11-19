@@ -869,8 +869,8 @@ html, body { overflow-x: clip; }
 .battant i { flex: 1; border-radius: 10px; box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .22), inset 0 6px 12px rgba(0, 0, 0, .15); }
 .battant b { position: absolute; top: 52%; width: 12px; height: 12px; border-radius: 50%; background: #E2B970; box-shadow: 0 2px 4px rgba(0, 0, 0, .4); }
 .b-g b { right: 10px; } .b-d b { left: 10px; }
-.porte-scene.ouvre .b-g { transform: rotateY(-112deg); }
-.porte-scene.ouvre .b-d { transform: rotateY(112deg); }
+.porte-scene.ouvre .b-g { transform: rotateY(112deg); }
+.porte-scene.ouvre .b-d { transform: rotateY(-112deg); }
 
 .carte-jeu { position: fixed; inset: 0; z-index: 75; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: calc(env(safe-area-inset-top, 0px) + 14px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 18px) max(16px, env(safe-area-inset-left, 0px));
   background: radial-gradient(120% 70% at 50% 0%, rgba(255, 127, 107, .25), transparent 60%), linear-gradient(170deg, #04201F, #0B3B3A 60%, #115E59); animation: carte-entre .45s cubic-bezier(.2, .8, .2, 1) both; }

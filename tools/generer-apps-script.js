@@ -37,11 +37,30 @@ const libelles = {};
 vars.forEach(v => { if (v.valeurs.length) { libelles[v.code] = {}; v.valeurs.forEach(o => { libelles[v.code][o.c] = o.t; }); } });
 const numeriques = vars.filter(v => v.type !== 'texte').map(v => v.code).concat(Scoring.COLONNES, ['duree_minutes', 'consentement']);
 
+// Feuille « format Google Forms » : texte de la question en en-tête, réponse en texte, cases à cocher regroupées
+const forms = [{ t: 'Horodateur', k: 'horodatage' }];
+Schema.elements(Q).forEach(x => {
+  const el = x.el;
+  switch (el.type) {
+    case 'choix': case 'liste': case 'nombre': case 'texte': forms.push({ t: el.texte, k: el.var }); break;
+    case 'multiple': forms.push({ t: el.texte || '', m: el.choix.map(c => [c.var, c.t]) }); break;
+    case 'echelle': el.items.forEach(it => forms.push({ t: (el.consigne ? el.consigne + ' ' : '') + '[' + it.texte + ']', k: it.var })); break;
+    case 'reseaux':
+      forms.push({ t: el.colonne_utilise, m: el.reseaux.map(r => [r.var, r.t]) });
+      forms.push({ t: el.colonne_plus, k: el.var_plus });
+      forms.push({ t: el.colonne_moins, k: el.var_moins });
+      break;
+  }
+});
+forms.push({ t: 'رقم الاستمارة – خاص بالباحث', k: 'num_formulaire' }, { t: 'id_participation', k: 'id_participation' });
+if (process.env.SPEC_OUT) fs.writeFileSync(process.env.SPEC_OUT, JSON.stringify({ colonnes, numeriques, libelles, forms, dictionnaire }));
+
 const gabarit = fs.readFileSync(path.join(__dirname, 'Code.gabarit.gs'), 'utf8');
 const sortie = gabarit
   .replace('/*__COLONNES__*/[]', JSON.stringify(colonnes))
   .replace('/*__NUMERIQUES__*/[]', JSON.stringify(numeriques))
   .replace('/*__LIBELLES__*/{}', JSON.stringify(libelles))
-  .replace('/*__DICTIONNAIRE__*/[]', JSON.stringify(dictionnaire));
+  .replace('/*__DICTIONNAIRE__*/[]', JSON.stringify(dictionnaire))
+  .replace('/*__FORMS__*/[]', JSON.stringify(forms));
 fs.writeFileSync(path.join(racine, 'apps-script/Code.gs'), sortie);
-console.log('apps-script/Code.gs généré : ' + colonnes.length + ' colonnes (' + vars.length + ' variables du questionnaire, ' + Scoring.COLONNES.length + ' colonnes de scores).');
+console.log('apps-script/Code.gs généré : ' + colonnes.length + ' colonnes (' + vars.length + ' variables du questionnaire, ' + Scoring.COLONNES.length + ' colonnes de scores) ; format Google Forms : ' + forms.length + ' colonnes.');
