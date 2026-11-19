@@ -59,6 +59,7 @@
   function afficher(noeuds, classe) {
     app.className = 'page ' + (classe || '');
     document.body.classList.add('clair');
+    if (window.Monde) window.Monde.cacher();
     app.style.removeProperty('--accent');
     majAlbum(false);
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
@@ -517,32 +518,18 @@
     var p = ecran.partie, th = theme(p), num = PARTIES.indexOf(p) + 1, v = T.voyage;
     var intro = (T.sections_intro || {})[ecran.section.id] || {};
     var monde = ecran.debutSection ? (v.mondes || {})[ecran.section.id] : null;
-    var route = h('div', { class: 'route', 'aria-label': v.route, 'data-de': String(Math.max(0, num - 2)), 'data-a': String(num - 1) }, [
-      h('div', { class: 'route-ligne' }),
-      h('div', { class: 'route-noeuds' }, PARTIES.map(function (q, k) {
-        var st = k < num - 1 ? 'fait' : (k === num - 1 ? 'ici' : 'apres');
-        return h('span', { class: 'route-noeud ' + st + (k > 0 && q.id.charAt(0) !== PARTIES[k - 1].id.charAt(0) ? ' nouveau-monde' : ''), title: q.titre, text: st === 'fait' ? '✓' : (st === 'ici' ? icone(q.id) : '') });
-      })),
-      h('span', { class: 'route-avatar', 'aria-hidden': 'true', text: '🎒' })
-    ]);
+    var perso = (T.etudiants3d || ['🧑‍🎓'])[(num - 1) % (T.etudiants3d || ['🧑‍🎓']).length];
     return [
       barreProgression(),
-      h('section', { class: 'station', style: '--accent:' + th.couleur }, [
-        h('div', { class: 'ciel ciel3d', 'aria-hidden': 'true' }, [
-          window.Sphere ? Sphere.creer([th.heros, icone(p.id)].concat(th.particules || []), { n: 30, rayon: 150, classe: 'sph-station' }) : null,
-          h('div', { class: 'sph-perso' }, [h('span', { text: (T.etudiants3d || ['🧑‍🎓'])[(num - 1) % (T.etudiants3d || ['🧑‍🎓']).length] })]),
-          h('div', { class: 'bulle-parole', text: v.bulle }),
-          h('span', { class: 'brume' })
-        ]),
-        h('div', { class: 'station-info' }, [
-          monde ? h('p', { class: 'monde', text: monde }) : null,
-          ecran.debutSection && intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
-          h('p', { class: 'station-num', text: v.station.replace('{n}', num).replace('{total}', PARTIES.length) }),
-          h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
-          route,
-          window.Jeux && T.jeux ? bouton(T.jeux.bouton, 'btn-pause', function () { window.Jeux.ouvrir(T.jeux, function () {}); }) : null,
-          h('div', { class: 'nav' }, [precedent, bouton(v.entrer, 'btn-principal', avancer, { id: 'btn-suivant' })])
-        ])
+      h('div', { class: 'station-vide', 'aria-hidden': 'true' }),
+      h('section', { class: 'station-panneau', style: '--accent:' + th.couleur }, [
+        h('div', { class: 'station-guide' }, [h('span', { class: 'sph-perso', 'aria-hidden': 'true', text: perso }), h('p', { class: 'station-bulle', text: v.bulle })]),
+        monde ? h('p', { class: 'monde' }, [h('span', { class: 'monde-em', text: monde })]) : null,
+        ecran.debutSection && intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
+        h('p', { class: 'station-num', text: v.station.replace('{n}', num).replace('{total}', PARTIES.length) }),
+        h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
+        window.Jeux && T.jeux ? bouton(T.jeux.bouton, 'btn-pause', function () { window.Jeux.ouvrir(T.jeux, function () {}); }) : null,
+        h('div', { class: 'nav' }, [precedent, bouton(v.entrer, 'btn-principal', avancer, { id: 'btn-suivant' })])
       ])
     ];
   }
@@ -637,7 +624,13 @@
     app.className = 'page ' + classe;
     document.body.classList.add('clair');
     appliquerTheme(ecran.type === 'intro' ? null : ecran.partie);
-    if (ecran.type === 'station') setTimeout(lancerRoute, 0);
+    if (window.Monde && !SAISIE) {
+      if (ecran.type === 'station') {
+        var kSt = PARTIES.indexOf(ecran.partie);
+        var faites = PARTIES.map(function (q, k) { return (etat.album || []).indexOf(q.id) >= 0 ? k : -1; }).filter(function (k) { return k >= 0; });
+        window.Monde.station(kSt, faites, kSt > 0 && SENS === 'avant');
+      } else window.Monde.fond();
+    }
     majAlbum(!SAISIE);
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (conserverDefilement) {
@@ -684,11 +677,11 @@
     if (SAISIE) { montrer(); return; }
     // entrer dans une station : une porte s'ouvre
     if (avant.type === 'station' && e2.type === 'q' && window.FX) {
-      window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer);
+      var porte = function () { window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer); };
+      if (window.Monde) window.Monde.plonger(porte); else porte();
       return;
     }
     // nouvelle station : l'étudiant marche sur la carte de la station précédente à la suivante
-    if (e2.type === 'station') { voyageCarte(PARTIES.indexOf(e2.partie) - 1, PARTIES.indexOf(e2.partie), montrer); return; }
     montrer();
   }
 
@@ -865,7 +858,7 @@
     var b = document.getElementById('album');
     if (!b || !T) return;
     b.hidden = !visible;
-    var bc = document.getElementById('btn-carte'); if (bc) bc.hidden = !visible;
+    var bc = document.getElementById('btn-carte'); if (bc) bc.hidden = true;   // la sphère remplace la carte
     majCompteAlbum();
   }
   function grilleAlbum(ids) {
@@ -913,7 +906,12 @@
   /* Un(e) étudiant(e) perdu(e) dans son téléphone, au centre d'une sphère de réseaux sociaux qui tourne. */
   function scenePerdu(A) {
     return h('section', { class: 'ac-perdu', 'aria-hidden': 'true' }, [
-      window.Sphere ? Sphere.creer(A.sphere || ['📱'], { n: 46, rayon: 230, classe: 'sph-accueil' }) : null,
+      h('div', { class: 'orbites' }, [0, 1].map(function (o) {
+        var liste = (A.sphere || ['📱']).filter(function (_, k) { return k % 2 === o; }).slice(0, o ? 7 : 9);
+        return h('div', { class: 'orbite o' + o, style: '--n:' + liste.length }, liste.map(function (e, k) {
+          return h('span', { class: 'orbite-icone', style: '--k:' + k }, [h('span', { class: 'sph-em', text: e })]);
+        }));
+      })),
       h('div', { class: 'perdu-perso' }, [
         h('span', { class: 'sph-perso', text: A.perdu || '🤳' }),
         h('span', { class: 'perdu-bulle' }, [h('span', { class: 'sph-bulle-em', text: A.perdu_bulle || '😵‍💫' })]),
@@ -1019,7 +1017,7 @@
       lignes.forEach(function (l) { l.style.transform = 'translateX(' + (Number(l.getAttribute('data-sens')) * (p - .5) * 40).toFixed(2) + '%)'; });
     }
     if (sec && !CALME) { window.addEventListener('scroll', glisse, { passive: true }); glisse(); }
-    var perdu = app.querySelector('.ac-perdu'), sph = perdu && perdu.querySelector('.sph');
+    var perdu = app.querySelector('.ac-perdu'), sph = perdu && perdu.querySelector('.orbites');
     function grandit() {
       if (!document.body.contains(perdu)) { window.removeEventListener('scroll', grandit); return; }
       var r = perdu.getBoundingClientRect(), p = Math.max(0, Math.min(1, (window.innerHeight - r.top) / (window.innerHeight + r.height)));
@@ -1048,7 +1046,7 @@
           bouton(c.bouton_accepter, 'btn-principal', function () {
             if (!cb.checked) { err.hidden = false; return; }
             etat.etape = 'questionnaire'; etat.i = 0; etat.prenom = ''; etat.dernier = Date.now(); sauver(); majSalutation();
-            voyageCarte(-1, 0, function () { rendreQuestionnaire(false); });
+            rendreQuestionnaire(false);
           })
         ])
       ])
@@ -1331,6 +1329,8 @@
   Promise.all(['questions', 'textes', 'feedback', 'ressources'].map(charger)).then(function (d) {
     Q = d[0]; T = d[1]; F = d[2]; R = d[3];
     construireEcrans();
+    if (window.Monde && !SAISIE) window.Monde.init(PARTIES, function (p) { return icone(p.id); }, function (p) { return theme(p).couleur; },
+      function (p) { var th = theme(p); return [th.heros].concat(th.particules || []); });
     var nom = document.getElementById('marque-nom');
     nom.replaceChildren(T.marque.replace(/\+$/, ''), h('b', { class: 'plus', 'aria-hidden': 'true', text: '+' }));
     document.getElementById('album-bouton-texte').textContent = T.album.bouton;
