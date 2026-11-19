@@ -58,6 +58,7 @@
   }
   function afficher(noeuds, classe) {
     app.className = 'page ' + (classe || '');
+    document.body.classList.toggle('clair', classe === 'page-accueil');
     app.style.removeProperty('--accent');
     majAlbum(false);
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
@@ -546,6 +547,7 @@
           h('p', { class: 'station-num', text: v.station.replace('{n}', num).replace('{total}', PARTIES.length) }),
           h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
           route,
+          window.Jeux && T.jeux ? bouton(T.jeux.bouton, 'btn-pause', function () { window.Jeux.ouvrir(T.jeux, function () {}); }) : null,
           h('div', { class: 'nav' }, [precedent, bouton(v.entrer, 'btn-principal', avancer, { id: 'btn-suivant' })])
         ])
       ])
@@ -640,6 +642,7 @@
       ];
     }
     app.className = 'page ' + classe;
+    document.body.classList.remove('clair');
     appliquerTheme(ecran.type === 'intro' ? null : ecran.partie);
     if (ecran.type === 'station') setTimeout(lancerRoute, 0);
     majAlbum(!SAISIE);
@@ -688,7 +691,7 @@
     if (SAISIE) { montrer(); return; }
     // entrer dans une station : une porte s'ouvre
     if (avant.type === 'station' && e2.type === 'q' && window.FX) {
-      miniJeu(avant, function () { window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer); });
+      window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer);
       return;
     }
     // nouvelle station : l'étudiant marche sur la carte de la station précédente à la suivante
@@ -902,78 +905,61 @@
   }
 
   /* ---------- pages d'entrée ---------- */
-  /* ---------- page d'accueil « motion » ---------- */
+  /* ---------- page d'accueil : partie claire, puis tunnel 3D au défilement ---------- */
   function motsAnimes(texte, classe) {
     return h('span', { class: classe }, texte.split(' ').map(function (m, k) {
       return h('span', { class: 'mot', style: '--k:' + k }, [h('span', { class: 'mot-in', text: m })]);
     }).reduce(function (acc, x) { acc.push(x, ' '); return acc; }, []));
   }
-  function telephoneHero() {
-    var a = T.accueil;
-    var posts = [];
-    for (var k = 0; k < 8; k++) {
-      posts.push(h('div', { class: 'post' }, [
-        h('span', { class: 'post-av', style: '--h:' + (k * 47 % 360) }),
-        h('span', { class: 'post-l' }), h('span', { class: 'post-img', text: ['🏖️', '🍕', '⚽', '🎧', '😂', '🐱', '🌆', '🎮'][k] }),
-        h('span', { class: 'post-actions', text: '❤️ 💬 ↗' })
-      ]));
-    }
-    return h('div', { class: 'tel3d', 'aria-hidden': 'true' }, [
-      h('div', { class: 'tel3d-corps' }, [
-        h('div', { class: 'tel3d-encoche' }),
-        h('div', { class: 'tel3d-ecran' }, [
-          h('div', { class: 'tel3d-barre' }, [h('span', { text: a.tel_temps }), h('strong', { id: 'temps-ecran', dir: 'ltr', text: '7h 42m' })]),
-          h('div', { class: 'feed' }, [h('div', { class: 'feed-piste' }, posts.concat(posts.map(function (x) { return x.cloneNode(true); })))]),
-          h('div', { class: 'notifs' }, (a.tel_notifs || []).map(function (t, k) { return h('div', { class: 'notif', style: '--k:' + k, text: t }); }))
-        ])
-      ])
-    ]);
-  }
-  /* Scène néon « vidéo en boucle » : un étudiant en pixel art hypnotisé par son téléphone, entouré d'applis. */
-  function sceneNeon() {
-    var apps = [['❤️', 'a1'], ['▶️', 'a2'], ['💬', 'a3'], ['📸', 'a4'], ['🎵', 'a5'], ['🎮', 'a6'], ['🔔', 'a7'], ['🎲', 'a8'], ['🤖', 'a9']];
-    var garcon = window.Pixel ? Pixel.canvas('garcon') : h('span');
-    var fille = window.Pixel ? Pixel.canvas('fille') : h('span');
-    var deco = [];
-    if (window.Pixel) {
-      [['coeur', '#F7C6D9', 'd1'], ['etoile', '#FDE68A', 'd2'], ['coeur', '#C9A7F5', 'd3'], ['etoile', '#C7DCF6', 'd4'], ['coeur', '#FF7F6B', 'd5']].forEach(function (m) {
-        var c = Pixel.canvas(m[0], m[1]); c.className = 'pixel-deco ' + m[2]; deco.push(c);
-      });
-    }
-    return h('div', { class: 'scene-neon', 'aria-hidden': 'true' }, [
-      h('div', { class: 'neon-lumiere l-bleu' }), h('div', { class: 'neon-lumiere l-rose' }),
-      h('div', { class: 'neon-apps' }, apps.map(function (a) { return h('span', { class: 'neon-app ' + a[1], text: a[0] }); })),
-      h('div', { class: 'neon-garcon' }, [h('div', { class: 'neon-lueur' }), garcon]),
-      h('div', { class: 'neon-compteurs' }, (T.accueil.neon_compteurs || []).map(function (t, k) { return h('span', { class: 'neon-compteur', style: '--k:' + k, text: t }); })),
-      h('div', { class: 'neon-fille' }, [fille, h('span', { class: 'neon-bulle', text: 'هيا نرتاحو شوية! 💚' })]),
-      h('div', { class: 'neon-lignes' })
-    ].concat(deco));
-  }
-  function sticker(pose, genre, classe, texte) {
-    return h('div', { class: 'etu-sticker ' + classe, 'aria-hidden': 'true', html: window.Etudiant ? Etudiant.svg({ pose: pose, genre: genre, texte: texte }) : '' });
-  }
-  function bandeauDefilant(liste, inverse) {
-    var items = liste.concat(liste).map(function (t) { return h('span', { class: 'mq-item', text: t }); });
-    return h('div', { class: 'marquee' + (inverse ? ' inverse' : ''), 'aria-hidden': 'true' }, [h('div', { class: 'mq-piste' }, items)]);
+  function titreAccueil(mots) {
+    return h('h1', { class: 'ac-titre' }, mots.map(function (m, k) {
+      if (m[1] === 'chip') return h('span', { class: 'mot ac-chip', style: '--k:' + k, 'aria-hidden': 'true' }, [h('span', { class: 'mot-in' }, [h('span', { class: 'ac-chip-tel' }, [h('span', { text: m[0] })])])]);
+      return h('span', { class: 'mot ' + (m[1] === 'b' ? 'fort' : 'leger'), style: '--k:' + k }, [h('span', { class: 'mot-in', text: m[0] })]);
+    }).reduce(function (acc, x) { acc.push(x, ' '); return acc; }, []));
   }
   function pageAccueil() {
     var enCours = etat.etape === 'questionnaire' || etat.etape === 'prenom' || etat.etape === 'envoi';
-    var a = T.accueil;
-    var actions = h('div', { class: 'hero-actions' }, enCours ? [
-      bouton(a.bouton_reprendre, 'btn-principal btn-grand magnetique', reprendre),
-      bouton(a.bouton_recommencer, 'btn-fantome', function () { etat = nouvelEtat(); sauver(); majSalutation(); pageConsentement(); })
-    ] : [bouton(a.bouton, 'btn-principal btn-grand magnetique', pageConsentement)]);
+    var a = T.accueil, A = T.accueil2;
+    var commencer = enCours ? reprendre : pageConsentement;
+    var cta = function (classe) { return bouton((enCours ? a.bouton_reprendre : A.cta) + ' ←', 'btn ac-cta ' + (classe || ''), commencer); };
+    var eventail = h('div', { class: 'ac-eventail', 'aria-hidden': 'true' }, A.cartes.map(function (c, k) {
+      return h('div', { class: 'ac-carte', style: '--k:' + k + ';--n:' + A.cartes.length + ';--c:' + c[2] }, [
+        h('span', { class: 'ac-carte-em', text: c[0] }), h('span', { class: 'ac-carte-nom', text: c[1] })
+      ]);
+    }));
+    var tunnel = h('section', { class: 'tunnel' }, [
+      h('div', { class: 'tunnel-scene' }, [
+        h('canvas', { class: 'tunnel-canvas', 'aria-hidden': 'true' }),
+        h('div', { class: 'tunnel-textes' }, A.beats.map(function (b, k) {
+          return h('div', { class: 'beat' + (k === A.beats.length - 1 ? ' beat-fin' : ''), 'data-a': String(b.a), 'data-b': String(b.b) }, [
+            h('p', { class: 'beat-t', text: b.t }), h('p', { class: 'beat-s', text: b.s }),
+            k === A.beats.length - 1 ? cta('ac-cta-clair') : null
+          ]);
+        })),
+        h('div', { class: 'tunnel-indice', 'aria-hidden': 'true' }, [h('span')])
+      ])
+    ]);
+    var cinetique = h('section', { class: 'cinetique', 'aria-hidden': 'true' }, A.cinetique.map(function (ligne, k) {
+      return h('div', { class: 'cin-ligne', 'data-sens': k % 2 ? '1' : '-1' }, ligne.concat(ligne).map(function (m) {
+        return m[1] === 'tag' ? h('span', { class: 'cin-tag', text: m[0] }) : h('span', { class: 'cin-mot', text: m[0] });
+      }));
+    }));
     afficher([
-      h('section', { class: 'hero2' }, [
-        h('p', { class: 'hero-etiquette apparait', style: '--k:0', text: a.etiquette }),
-        h('h1', { class: 'hero2-titre' }, [motsAnimes(a.titre, 'titre-mots')]),
-        h('p', { class: 'hero-sous-titre apparait', style: '--k:6', text: a.sous_titre }),
-        enCours ? h('p', { class: 'message', text: a.reprise }) : null,
-        actions,
-        sceneNeon()
+      h('section', { class: 'ac-hero' }, [
+        h('p', { class: 'ac-etiquette apparait', style: '--k:0', text: a.etiquette }),
+        titreAccueil(A.mots),
+        h('p', { class: 'ac-sous apparait', style: '--k:7', text: a.sous_titre }),
+        enCours ? h('p', { class: 'ac-reprise', text: a.reprise }) : null,
+        h('div', { class: 'ac-actions apparait', style: '--k:9' }, [
+          cta(),
+          enCours ? bouton(a.bouton_recommencer, 'btn ac-lien', function () { etat = nouvelEtat(); sauver(); pageConsentement(); })
+            : h('a', { class: 'btn ac-lien', href: '#decouvrir', text: A.decouvrir })
+        ]),
+        eventail
       ]),
-      bandeauDefilant(a.marquee || [], false),
-      bandeauDefilant((a.marquee || []).slice().reverse(), true),
+      h('span', { id: 'decouvrir' }),
+      tunnel,
+      cinetique,
       h('section', { class: 'comment' }, [
         h('h2', { class: 'section-titre revele' }, [motsAnimes(a.comment_titre, 'titre-mots')]),
         h('div', { class: 'etapes' }, (a.etapes || []).map(function (e, k) {
@@ -988,17 +974,17 @@
         }))
       ]),
       h('section', { class: 'cta revele' }, [
-        sticker('pancarte', 'f', 's-cta', '🚀'),
         h('h2', { class: 'section-titre' }, [motsAnimes(a.cta_titre, 'titre-mots')]),
         h('ul', { class: 'badges' }, a.badges.map(function (b, i) {
           return h('li', null, [h('span', { 'aria-hidden': 'true', text: (a.badges_icones || [])[i] || '✨' }), h('span', { text: b })]);
         })),
-        bouton(enCours ? a.bouton_reprendre : a.bouton, 'btn-principal btn-grand magnetique', enCours ? reprendre : pageConsentement)
+        cta()
       ])
     ], 'page-accueil');
     animerAccueil();
+    if (window.Accueil3D) window.Accueil3D.monter(tunnel);
   }
-  /* révélations au défilement, compteurs, horloge du téléphone */
+  /* révélations au défilement, compteurs, texte qui glisse avec le défilement */
   function animerAccueil() {
     var els = app.querySelectorAll('.revele');
     var compter = function (el) {
@@ -1020,16 +1006,16 @@
       }, { threshold: .2 });
       els.forEach(function (el) { io.observe(el); });
     } else els.forEach(function (el) { el.classList.add('vu'); });
-    var horloge = document.getElementById('temps-ecran'), m = 42 + 7 * 60;
-    clearInterval(animerAccueil.t);
-    animerAccueil.t = setInterval(function () {
-      if (!document.body.contains(horloge)) { clearInterval(animerAccueil.t); return; }
-      m++; horloge.textContent = Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
-    }, 1200);
+    var lignes = app.querySelectorAll('.cin-ligne'), sec = app.querySelector('.cinetique');
+    function glisse() {
+      if (!document.body.contains(sec)) { window.removeEventListener('scroll', glisse); return; }
+      var r = sec.getBoundingClientRect(), p = (window.innerHeight - r.top) / (window.innerHeight + r.height);
+      lignes.forEach(function (l) { l.style.transform = 'translateX(' + (Number(l.getAttribute('data-sens')) * (p - .5) * 40).toFixed(2) + '%)'; });
+    }
+    if (sec && !CALME) { window.addEventListener('scroll', glisse, { passive: true }); glisse(); }
   }
   function reprendre() {
     if (etat.etape === 'envoi') envoyer();
-    else if (etat.etape === 'prenom') pagePrenom();
     else rendreQuestionnaire(false);
   }
   function pageConsentement() {
@@ -1048,7 +1034,8 @@
           bouton(c.bouton_refuser, 'btn-gris', function () { effacer(localStorage, CLE); etat = nouvelEtat(); pageRefus(); }),
           bouton(c.bouton_accepter, 'btn-principal', function () {
             if (!cb.checked) { err.hidden = false; return; }
-            etat.etape = 'prenom'; etat.dernier = Date.now(); sauver(); pagePrenom();
+            etat.etape = 'questionnaire'; etat.i = 0; etat.prenom = ''; etat.dernier = Date.now(); sauver(); majSalutation();
+            voyageCarte(-1, 0, function () { rendreQuestionnaire(false); });
           })
         ])
       ])
