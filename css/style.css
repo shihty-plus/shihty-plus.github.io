@@ -1355,3 +1355,32 @@ body.clair .entete, .page, .pied { position: relative; z-index: 1; }
 .av-credit { position: absolute; left: 12px; bottom: 10px; z-index: 7; font-size: 10px; color: rgba(255, 255, 255, .8); text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
 .av-photo::after { z-index: 6; background: radial-gradient(130% 100% at 50% 50%, transparent 60%, rgba(0, 0, 0, .3)); }
 @media (prefers-reduced-motion: reduce) { .av-img { animation: none; } }
+
+/* =====================================================================
+   v9 — portrait vivant : étudiant qui scrolle
+   ===================================================================== */
+.viv-cadre { position: relative; aspect-ratio: 400 / 480; touch-action: pan-y; }
+.viv-halo { position: absolute; left: 50%; top: 44%; width: 92%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #CCFBF1, #99F6E4 35%, #FFD3C9 70%, transparent 72%); filter: blur(2px); animation: respire 7s ease-in-out infinite; }
+.viv { position: absolute; inset: 0; }
+.viv-svg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; cursor: grab; user-select: none; -webkit-user-select: none; filter: drop-shadow(0 24px 30px rgba(23, 48, 47, .18)); }
+.viv-svg:active { cursor: grabbing; }
+.viv-fil { animation: fil-defile 5s linear infinite; animation-play-state: paused; }
+.scrolle .viv-fil { animation-play-state: running; }
+@keyframes fil-defile { to { transform: translateY(-208px); } }
+.viv-pouce { transition: transform .3s; }
+.scrolle .viv-pouce { animation: pouce 1.1s ease-in-out infinite; }
+@keyframes pouce { 0%, 100% { transform: translateY(14px); } 45% { transform: translateY(-26px); } 55% { transform: translateY(-26px); } }
+.viv-lueur { animation: lueur-ecran 2.6s steps(1) infinite; }
+.viv-effets { position: absolute; inset: 0; pointer-events: none; }
+.viv-fx { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; display: grid; place-items: center; font-size: 30px; }
+.viv-fx .em3d { width: 40px; height: 40px; }
+.viv-fx.monte { border-radius: 14px; background: rgba(255, 255, 255, .92); box-shadow: 0 8px 18px rgba(23, 48, 47, .18); animation: viv-monte 2.4s cubic-bezier(.25, .6, .4, 1) forwards; }
+.viv-fx.monte .em3d { width: 30px; height: 30px; }
+@keyframes viv-monte { 0% { opacity: 0; transform: translate(0, 0) scale(.3); } 12% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), -260px) scale(1.05) rotate(var(--r)); } }
+.viv-fx.zzz { animation: viv-zzz 2.2s ease-out forwards; }
+@keyframes viv-zzz { 0% { opacity: 0; transform: translate(0, 0) scale(.5); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(40px, -90px) scale(1.2); } }
+.viv-fx.souffle { animation: viv-zzz .9s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) { .viv-fil, .viv-pouce, .viv-lueur, .viv-halo { animation: none !important; } }
+.viv-halo { translate: none; left: 4%; top: 6%; width: 92%; animation: halo-respire 7s ease-in-out infinite; }
+@keyframes halo-respire { 50% { transform: scale(1.06); opacity: .85; } }

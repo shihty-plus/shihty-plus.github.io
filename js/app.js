@@ -922,23 +922,12 @@
   }
   /* Illustration animée : une personne de nuit, le visage éclairé par son téléphone ;
      les réseaux sociaux s'échappent de l'écran et montent sans fin. */
-  function visuelAddiction(V) {
-    var flux = (V.flux || ['❤️']).map(function (e, k) {
-      return h('span', { class: 'av-ico', style: '--k:' + k + ';--dx:' + (((k * 37) % 120) - 60) + 'px;--r:' + (((k * 53) % 50) - 25) + 'deg' }, [h('span', { class: 'sph-em', text: e })]);
-    });
-    return h('div', { class: 'ac-visuel apparait', style: '--k:4', 'aria-hidden': 'true' }, [
-      h('div', { class: 'av-cadre av-photo' }, [
-        h('img', { class: 'av-img', src: 'assets/photos/nomophobie.webp', alt: '', decoding: 'async' }),
-        h('div', { class: 'av-voile' }),
-        h('div', { class: 'av-flux' }, flux),
-        h('div', { class: 'av-flux f2' }, flux.map(function (x) { return x.cloneNode(true); })),
-        h('span', { class: 'av-credit', dir: 'ltr', text: 'Photo: Rawpixel, CC0 (Wikimedia Commons)' }),
-        h('span', { class: 'av-bulle' }, [h('span', { class: 'sph-bulle-em', text: V.bulle || '😵‍💫' })]),
-        h('div', { class: 'av-puces' }, (V.puces || []).map(function (p, k) {
-          return h('span', { class: 'av-puce', style: '--k:' + k }, [h('span', { class: 'sph-em', text: p[0] }), h('b', { dir: 'ltr', text: p[1] })]);
-        }))
-      ])
-    ]);
+  /* Portrait vivant : un étudiant qui scrolle (js/vivant.js). */
+  function visuelAddiction() {
+    var boite = h('div', { class: 'viv' });
+    var cadre = h('div', { class: 'ac-visuel apparait', style: '--k:4' }, [h('div', { class: 'viv-cadre' }, [h('span', { class: 'viv-halo', 'aria-hidden': 'true' }), boite])]);
+    setTimeout(function () { if (window.Vivant) window.Vivant.monter(boite); }, 0);
+    return cadre;
   }
   function pageAccueil() {
     var enCours = etat.etape === 'questionnaire' || etat.etape === 'prenom' || etat.etape === 'envoi';
