@@ -927,15 +927,12 @@
       return h('span', { class: 'av-ico', style: '--k:' + k + ';--dx:' + (((k * 37) % 120) - 60) + 'px;--r:' + (((k * 53) % 50) - 25) + 'deg' }, [h('span', { class: 'sph-em', text: e })]);
     });
     return h('div', { class: 'ac-visuel apparait', style: '--k:4', 'aria-hidden': 'true' }, [
-      h('div', { class: 'av-cadre' }, [
-        h('span', { class: 'av-lune sph-em', text: V.lune || '🌙' }),
-        h('span', { class: 'av-heure', dir: 'ltr', text: V.heure || '02:47' }),
-        h('div', { class: 'av-lueur' }),
+      h('div', { class: 'av-cadre av-photo' }, [
+        h('img', { class: 'av-img', src: 'assets/photos/nomophobie.webp', alt: '', decoding: 'async' }),
+        h('div', { class: 'av-voile' }),
         h('div', { class: 'av-flux' }, flux),
-        h('div', { class: 'av-personne' }, [
-          h('span', { class: 'av-tete sph-perso', text: V.tete || '🧑' }),
-          h('span', { class: 'av-main sph-perso', text: V.main || '🤳' })
-        ]),
+        h('div', { class: 'av-flux f2' }, flux.map(function (x) { return x.cloneNode(true); })),
+        h('span', { class: 'av-credit', dir: 'ltr', text: 'Photo: Rawpixel, CC0 (Wikimedia Commons)' }),
         h('span', { class: 'av-bulle' }, [h('span', { class: 'sph-bulle-em', text: V.bulle || '😵‍💫' })]),
         h('div', { class: 'av-puces' }, (V.puces || []).map(function (p, k) {
           return h('span', { class: 'av-puce', style: '--k:' + k }, [h('span', { class: 'sph-em', text: p[0] }), h('b', { dir: 'ltr', text: p[1] })]);
