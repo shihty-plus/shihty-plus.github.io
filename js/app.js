@@ -59,7 +59,6 @@
   function afficher(noeuds, classe) {
     app.className = 'page ' + (classe || '');
     document.body.classList.add('clair');
-    if (window.Monde) window.Monde.cacher();
     app.style.removeProperty('--accent');
     majAlbum(false);
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
@@ -514,24 +513,35 @@
     '3A': ['salut', 'f'], '3B': ['livre', 'h'], '3C': ['pancarte', 'f', '💤'], '3D': ['laptop', 'h'], '3E': ['idee', 'f'], '3F': ['megaphone', 'h'],
     '3G': ['pancarte', 'f', '💚'], '3H': ['salut', 'h']
   };
+  /* Station : le monde 3D où l'étudiant marche jusqu'à la station, puis le panneau d'arrivée. */
   function rendreStation(ecran, precedent) {
     var p = ecran.partie, th = theme(p), num = PARTIES.indexOf(p) + 1, v = T.voyage;
     var intro = (T.sections_intro || {})[ecran.section.id] || {};
     var monde = ecran.debutSection ? (v.mondes || {})[ecran.section.id] : null;
-    var perso = (T.etudiants3d || ['🧑‍🎓'])[(num - 1) % (T.etudiants3d || ['🧑‍🎓']).length];
     return [
       barreProgression(),
-      h('div', { class: 'station-vide', 'aria-hidden': 'true' }),
-      h('section', { class: 'station-panneau', style: '--accent:' + th.couleur }, [
-        h('div', { class: 'station-guide' }, [h('span', { class: 'sph-perso', 'aria-hidden': 'true', text: perso }), h('p', { class: 'station-bulle', text: v.bulle })]),
-        monde ? h('p', { class: 'monde' }, [h('span', { class: 'monde-em', text: monde })]) : null,
-        ecran.debutSection && intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
-        h('p', { class: 'station-num', text: v.station.replace('{n}', num).replace('{total}', PARTIES.length) }),
-        h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
-        window.Jeux && T.jeux ? bouton(T.jeux.bouton, 'btn-pause', function () { window.Jeux.ouvrir(T.jeux, function () {}); }) : null,
-        h('div', { class: 'nav' }, [precedent, bouton(v.entrer, 'btn-principal', avancer, { id: 'btn-suivant' })])
+      h('section', { class: 'v3d', style: '--accent:' + th.couleur }, [
+        h('div', { class: 'v3d-scene' }),
+        h('div', { class: 'v3d-carte', 'aria-hidden': 'true' }),
+        h('p', { class: 'v3d-route' }, [h('span', { class: 'v3d-route-t', text: v.en_route.replace('{n}', num) }), h('span', { class: 'v3d-passer', text: v.passer })]),
+        h('div', { class: 'v3d-panneau' }, [
+          monde ? h('p', { class: 'monde' }, [h('span', { class: 'monde-em', text: monde })]) : null,
+          ecran.debutSection && intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
+          h('p', { class: 'station-num', text: v.station.replace('{n}', num).replace('{total}', PARTIES.length) }),
+          h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
+          h('div', { class: 'nav' }, [precedent, bouton(v.entrer, 'btn-principal', avancer, { id: 'btn-suivant' })])
+        ])
       ])
     ];
+  }
+  var DERNIERE_STATION = null;
+  function lancerVoyage3D(ecran) {
+    var sec = app.querySelector('.v3d'); if (!sec) return;
+    var k = PARTIES.indexOf(ecran.partie);
+    var de = SENS === 'avant' && DERNIERE_STATION !== k ? k - 1 : k;
+    DERNIERE_STATION = k;
+    var arrive = function () { sec.classList.add('arrive'); };
+    if (!window.Voyage3D || !window.Voyage3D.monter(sec.querySelector('.v3d-scene'), de, k, arrive)) { sec.classList.add('sans3d'); arrive(); }
   }
   /* L'avatar 🎒 saute de la station précédente à la nouvelle. */
   function lancerRoute() {
@@ -624,15 +634,10 @@
     app.className = 'page ' + classe;
     document.body.classList.add('clair');
     appliquerTheme(ecran.type === 'intro' ? null : ecran.partie);
-    if (window.Monde && !SAISIE) {
-      if (ecran.type === 'station') {
-        var kSt = PARTIES.indexOf(ecran.partie);
-        var faites = PARTIES.map(function (q, k) { return (etat.album || []).indexOf(q.id) >= 0 ? k : -1; }).filter(function (k) { return k >= 0; });
-        window.Monde.station(kSt, faites, kSt > 0 && SENS === 'avant');
-      } else window.Monde.fond();
-    }
+
     majAlbum(!SAISIE);
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
+    if (ecran.type === 'station' && !SAISIE) lancerVoyage3D(ecran);
     if (conserverDefilement) {
       window.scrollTo(0, y);
       if (focusId) { var f = document.getElementById(focusId); if (f) try { f.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
@@ -678,7 +683,7 @@
     // entrer dans une station : une porte s'ouvre
     if (avant.type === 'station' && e2.type === 'q' && window.FX) {
       var porte = function () { window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer); };
-      if (window.Monde) window.Monde.plonger(porte); else porte();
+      porte();
       return;
     }
     // nouvelle station : l'étudiant marche sur la carte de la station précédente à la suivante
@@ -858,7 +863,7 @@
     var b = document.getElementById('album');
     if (!b || !T) return;
     b.hidden = !visible;
-    var bc = document.getElementById('btn-carte'); if (bc) bc.hidden = true;   // la sphère remplace la carte
+    var bc = document.getElementById('btn-carte'); if (bc) bc.hidden = !visible;
     majCompteAlbum();
   }
   function grilleAlbum(ids) {
@@ -1342,8 +1347,8 @@
   Promise.all(['questions', 'textes', 'feedback', 'ressources'].map(charger)).then(function (d) {
     Q = d[0]; T = d[1]; F = d[2]; R = d[3];
     construireEcrans();
-    if (window.Monde && !SAISIE) window.Monde.init(PARTIES, function (p) { return icone(p.id); }, function (p) { return theme(p).couleur; },
-      function (p) { var th = theme(p); return [th.heros].concat(th.particules || []); });
+    if (window.Voyage3D && !SAISIE) window.Voyage3D.init({ parties: PARTIES, couleur: function (p) { return theme(p).couleur; }, icone: function (p) { return icone(p.id); },
+      monde: function (p) { var s = null; Q.sections.forEach(function (x) { if (x.parties.indexOf(p) >= 0) s = x.id; }); return s; } });
     var nom = document.getElementById('marque-nom');
     nom.replaceChildren(T.marque.replace(/\+$/, ''), h('b', { class: 'plus', 'aria-hidden': 'true', text: '+' }));
     document.getElementById('album-bouton-texte').textContent = T.album.bouton;
