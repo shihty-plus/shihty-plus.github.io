@@ -161,7 +161,7 @@
           }
           if (!ech) { ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, debutPartie: premier }); premier = false; return; }
           var n = ech.items.length;
-          var nb = 1;   // toute l'échelle sur une seule page
+          var nb = ech.par_ecran && !SAISIE ? Math.ceil(n / ech.par_ecran) : 1;   // longues échelles découpées (BFI : 3 pages de 10)
           var taille = Math.ceil(n / nb);
           for (var k = 0; k < nb; k++) {
             ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, echelle: ech,
@@ -529,6 +529,10 @@
           ecran.debutSection && intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
           h('p', { class: 'station-num', text: v.station.replace('{n}', num).replace('{total}', PARTIES.length) }),
           h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
+          window.Jeux && T.jeux ? h('div', { class: 'pause-invit' }, [
+            h('span', { class: 'pause-invit-t', text: T.jeux.invitation }),
+            bouton(T.jeux.bouton, 'btn-pause', function () { window.Jeux.ouvrir(T.jeux, function () {}); })
+          ]) : null,
           h('div', { class: 'nav' }, [precedent, bouton(v.entrer, 'btn-principal', avancer, { id: 'btn-suivant' })])
         ])
       ])
@@ -864,6 +868,7 @@
     if (!b || !T) return;
     b.hidden = !visible;
     var bc = document.getElementById('btn-carte'); if (bc) bc.hidden = !visible;
+    var bj = document.getElementById('btn-jeux'); if (bj) bj.hidden = !visible || !window.Jeux;
     majCompteAlbum();
   }
   function grilleAlbum(ids) {
@@ -1355,6 +1360,8 @@
     document.getElementById('album').addEventListener('click', ouvrirAlbum);
     document.getElementById('carte-bouton-texte').textContent = T.voyage.bouton_carte;
     document.getElementById('btn-carte').addEventListener('click', ouvrirCarte);
+    document.getElementById('jeux-bouton-texte').textContent = T.jeux.entete;
+    document.getElementById('btn-jeux').addEventListener('click', function () { if (window.Jeux) window.Jeux.ouvrir(T.jeux, function () {}); });
     var lien = document.getElementById('lien-aide');
     lien.textContent = T.aide.lien; lien.addEventListener('click', ouvrirAide);
     var bandeau = document.getElementById('bandeau');
