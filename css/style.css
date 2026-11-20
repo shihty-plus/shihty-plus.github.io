@@ -1413,3 +1413,44 @@ body.clair .entete, .page, .pied { position: relative; z-index: 1; }
 .pause-invit { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 4px; padding: 10px 12px; border-radius: 18px; background: #FDF8EF; border: 1px dashed #E2B970; width: 100%; }
 .pause-invit-t { font-size: 14px; color: #5F6F6D; font-weight: 500; }
 .pause-invit .btn-pause { min-height: 40px; padding: 6px 16px; font-size: 14px; }
+
+/* =====================================================================
+   v11 — identité propre : logo khatam, motif zellige, formes plus nettes,
+   plus d'étincelles, de dégradés de titres, de pointillés ni de boutons « 3D »
+   ===================================================================== */
+:root { --zellige: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cg fill='%230D9488'%3E%3Crect x='8' y='2' width='8' height='8'/%3E%3Crect x='8' y='2' width='8' height='8' transform='rotate(45 12 6)'/%3E%3C/g%3E%3Crect x='10' y='4' width='4' height='4' fill='%23FF7F6B' transform='rotate(45 12 6)'/%3E%3C/svg%3E"); }
+.marque-icone { background: none !important; box-shadow: none !important; transform: none !important; width: auto; height: auto; }
+.marque-icone svg { display: block; transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.marque:hover .marque-icone svg { transform: rotate(45deg); }
+.marque-nom .plus { animation: none; text-shadow: none; }
+/* titres : encre pleine, soulignement zellige */
+.titre-degrade, .titre-mots .mot:nth-child(4n+3) .mot-in { background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: #17302F !important; }
+.titre-mots .mot:nth-child(4n+3) .mot-in { color: #E0543F !important; }
+.titre-partie { border-bottom: 0; padding-bottom: 14px; background: var(--zellige) left bottom / 24px 12px repeat-x; }
+.section-titre::after { content: ""; display: block; width: 96px; height: 12px; margin: 14px auto 0; background: var(--zellige) center / 24px 12px repeat-x; }
+/* plus d'étincelles ni de petits éclats en texte */
+.option.riche:has(input:checked)::after { content: none !important; }
+.eclat-p { width: 9px; height: 9px; font-size: 0 !important; background: currentColor; border-radius: 1px; }
+.eclat-p.eclat-1 { border-radius: 50%; width: 7px; height: 7px; }
+.eclat-p.eclat-2 { width: 4px; height: 12px; }
+/* formes plus nettes */
+.carte, .station, .v3d, .v3d-panneau, .station-panneau, .jx-carte, .etape-carte, .cta, .soutien, .carte-resultat, .item, .consigne, .dialogue, .album-final { border-radius: 14px !important; }
+.option, .option.riche, .champ, .opt-emoji, .pastille-opt, .mission-icone, .titre-partie-icone, .resultat-icone, .etape-icone { border-radius: 8px !important; }
+.btn, .ac-cta, .ac-lien, .album-btn, .lien-aide, .btn-pause, .badge, .monde, .revelation-sur, .ac-etiquette, .badges li, .jeu-compte, .carte-compte, .compteur { border-radius: 6px !important; }
+.btn-principal, .btn-gris, .btn-principal:active, .btn-gris:active { box-shadow: none !important; transform: none; }
+.btn-principal { background: #E0543F; text-shadow: none; transition: background .2s, transform .2s; }
+.btn-principal:hover { background: #C94430; transform: translateY(-1px); }
+.btn-grand::after { content: none; }
+.option { border-bottom-width: 1.5px; border-width: 1.5px; }
+.option:active { transform: none; border-bottom-width: 1.5px; margin-bottom: 0; }
+/* pointillés → traits pleins ou zellige */
+.btn-pause, .pause-invit, .jeu-arene, .route-ligne { border-style: solid !important; }
+.pause-invit { border-width: 0; border-top: 0; background: #FDF8EF var(--zellige) left top / 24px 12px repeat-x; padding-top: 20px; }
+.ac-chip-tel { border-radius: 4px; transform: rotate(0); }
+.q-badge { border-radius: 10px; }
+@media (max-width: 600px) {
+  .pause-invit { flex-direction: row; justify-content: center; padding: 16px 8px 8px; gap: 8px; }
+  .pause-invit-t { display: none; }
+  .v3d-panneau { gap: 4px; padding: 12px 14px 14px; }
+  .v3d-panneau .station-titre { font-size: 20px; }
+}

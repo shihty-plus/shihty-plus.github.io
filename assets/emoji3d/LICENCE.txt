@@ -1,2 +1,0 @@
-Emojis 3D : Fluent Emoji (Microsoft), paquet @lobehub/fluent-emoji-3d, licence MIT.
-https://github.com/microsoft/fluentui-emoji

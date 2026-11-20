@@ -65,7 +65,7 @@
       var angle = (i / n) * Math.PI * 2 + hasard(-.25, .25);
       var dist = hasard(38, 86) * (force > 12 ? 1.25 : 1);
       p.className = 'eclat-p';
-      p.textContent = choix(GLYPHES);
+      p.className = 'eclat-p eclat-' + (i % 3);
       p.style.color = choix(PALETTE);
       p.style.fontSize = hasard(11, 20).toFixed(0) + 'px';
       p.style.setProperty('--dx', (Math.cos(angle) * dist).toFixed(1) + 'px');
