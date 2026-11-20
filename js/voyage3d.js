@@ -51,36 +51,40 @@
     return tex;
   }
 
-  /* ---------- l'étudiant en 3D (même style que le portrait vivant) ---------- */
+  /* ---------- l'étudiant(e) : l'avatar 3D vu de dos (assets/avatars/), en panneau toujours face à la caméra ---------- */
+  var chargeur = null, genreCharge = null;
   function etudiant() {
-    var g = new T3.Group(), M = function (c, r) { return new T3.MeshStandardMaterial({ color: c, roughness: r === undefined ? .6 : r }); };
-    var peau = M(0xEDB48C, .7), sweat = M(0x14B8A6, .8), jean = M(0x2A3550, .8), cheveux = M(0x3A2216, .9);
-    var corps = new T3.Mesh(new T3.CapsuleGeometry(.42, .7, 6, 16), sweat); corps.position.y = 1.35; g.add(corps);
-    var tete = new T3.Group(); tete.position.y = 2.35; g.add(tete);
-    tete.add(new T3.Mesh(new T3.SphereGeometry(.48, 24, 18), peau));
-    [[0, .32, .05, .3], [.22, .26, 0, .24], [-.22, .26, 0, .24], [.12, .36, -.15, .26], [-.14, .34, -.16, .26], [0, .2, -.3, .3], [.3, .1, -.12, .2], [-.3, .1, -.12, .2]]
-      .forEach(function (c) { var m = new T3.Mesh(new T3.SphereGeometry(c[3], 14, 10), cheveux); m.position.set(c[0], c[1], c[2]); tete.add(m); });
-    [-.17, .17].forEach(function (x) {
-      var o = new T3.Mesh(new T3.SphereGeometry(.1, 12, 10), M(0xffffff, .3)); o.position.set(x, .02, .42); tete.add(o);
-      var p = new T3.Mesh(new T3.SphereGeometry(.055, 10, 8), M(0x2A160D, .3)); p.position.set(x, .01, .51); tete.add(p);
-    });
-    var cou = new T3.Mesh(new T3.CylinderGeometry(.14, .16, .2, 12), peau); cou.position.y = 1.95; g.add(cou);
-    function membre(mat, r, l, x, y) { var piv = new T3.Group(); piv.position.set(x, y, 0); var m = new T3.Mesh(new T3.CapsuleGeometry(r, l, 4, 10), mat); m.position.y = -l / 2 - r * .6; piv.add(m); g.add(piv); return piv; }
-    var jambeG = membre(jean, .17, .55, -.2, .88), jambeD = membre(jean, .17, .55, .2, .88);
-    var brasG = membre(sweat, .13, .55, -.55, 1.8), brasD = membre(sweat, .13, .55, .55, 1.8);
-    var tel = new T3.Mesh(new T3.BoxGeometry(.2, .36, .04), M(0x17202E, .3)); tel.position.set(0, -.85, .12); brasD.add(tel);
-    var ecran = new T3.Mesh(new T3.PlaneGeometry(.16, .3), new T3.MeshBasicMaterial({ color: 0x5EEAD4 })); ecran.position.set(0, -.85, .145); brasD.add(ecran);
-    g.userData = { jambeG: jambeG, jambeD: jambeD, brasG: brasG, brasD: brasD, tete: tete, corps: corps };
-    g.scale.setScalar(.9);
+    var g = new T3.Group();
+    var mat = new T3.SpriteMaterial({ transparent: true, depthWrite: false });
+    var sp = new T3.Sprite(mat); sp.center.set(.5, 0); sp.scale.set(1.1, 2.9, 1); g.add(sp);
+    g.userData = { sprite: sp, tex: {}, vue: null };
     return g;
   }
+  function chargerAvatar() {
+    var gg = window.Avatar ? window.Avatar.genre() : 'f';
+    if (gg === genreCharge) return; genreCharge = gg;
+    chargeur = chargeur || new T3.TextureLoader();
+    var u = etu.userData; u.tex = {}; u.vue = null;
+    ['dos', 'dos2'].forEach(function (n) {
+      var src = window.Avatar ? window.Avatar.src(n, gg) : 'assets/avatars/fille-' + n + '.webp';
+      chargeur.load(src, function (t) {
+        if (gg !== genreCharge) return;
+        t.anisotropy = 4;
+        u.tex[n] = t; u.vue = null;
+      });
+    });
+  }
+  function vue(n) {
+    var u = etu.userData, t = u.tex[n] || u.tex.dos || u.tex.dos2;
+    if (!t || u.vue === t) return;
+    u.vue = t; u.sprite.material.map = t; u.sprite.material.needsUpdate = true;
+    var h = 2.9; u.sprite.scale.set(h * t.image.width / t.image.height, h, 1);
+  }
   function marcher(t, vitesse) {
-    var u = etu.userData, a = Math.sin(t * 9) * .7 * vitesse;
-    u.jambeG.rotation.x = a; u.jambeD.rotation.x = -a;
-    u.brasG.rotation.x = -a * .8; u.brasD.rotation.x = vitesse > .1 ? a * .5 : -.9 + Math.sin(t * 2) * .04;   // à l'arrêt : il regarde son téléphone
-    u.tete.rotation.x = vitesse > .1 ? 0 : .35;
-    u.corps.position.y = 1.35 + Math.abs(Math.sin(t * 9)) * .08 * vitesse;
-    u.tete.position.y = 2.35 + Math.abs(Math.sin(t * 9)) * .08 * vitesse;
+    var u = etu.userData;
+    vue(vitesse > .05 ? 'dos' : 'dos2');
+    u.sprite.position.y = Math.abs(Math.sin(t * 9)) * .12 * vitesse;
+    u.sprite.material.rotation = Math.sin(t * 9) * .035 * vitesse;
   }
 
   /* ---------- construction du monde ---------- */
@@ -257,6 +261,7 @@
   function monter(boite, de, a, arrivee) {
     if (!T3) { if (arrivee) arrivee(); return false; }
     boite.appendChild(canvas);
+    chargerAvatar();
     var mini = boite.parentNode.querySelector('.v3d-carte');
     if (mini) { mini.replaceChildren(miniCarte(de, a)); }
     panneaux.forEach(function (s, i) { s.material.opacity = i < a ? .75 : 1; });

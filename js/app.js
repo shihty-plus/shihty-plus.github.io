@@ -507,12 +507,18 @@
     }
     return h('span', { class: 'etudiant-emoji', text: emoji });
   }
+  /* Le personnage qui attend sur le bord du panneau de chaque station (assets/avatars/). */
   var POSES_STATION = {
-    '1A': ['salut', 'f'], '1B': ['pancarte', 'h', '🏠'], '1C': ['livre', 'f'], '1D': ['salut', 'h'], '1E': ['idee', 'f'], '1F': ['megaphone', 'h'],
-    '2A': ['telephone', 'f'], '2B': ['telephone', 'h'], '2C': ['manette', 'f'], '2D': ['des', 'h'], '2E': ['pancarte', 'f', '🔒'], '2F': ['laptop', 'h'],
-    '3A': ['salut', 'f'], '3B': ['livre', 'h'], '3C': ['pancarte', 'f', '💤'], '3D': ['laptop', 'h'], '3E': ['idee', 'f'], '3F': ['megaphone', 'h'],
-    '3G': ['pancarte', 'f', '💚'], '3H': ['salut', 'h']
+    '1A': ['fille-salut'], '1B': ['fille-pancarte', '🏠'], '1C': ['fille-livre'], '1D': ['garcon-face'], '1E': ['fille-montre'], '1F': ['garcon-tel'],
+    '2A': ['fille-telephone'], '2B': ['garcon-tel'], '2C': ['fille-manette'], '2D': ['fille-pouce'], '2E': ['fille-pancarte', '🔒'], '2F': ['fille-laptop'],
+    '3A': ['fille-salut'], '3B': ['fille-livre'], '3C': ['fille-pancarte', '💤'], '3D': ['fille-laptop'], '3E': ['fille-montre'], '3F': ['garcon-face'],
+    '3G': ['fille-pancarte', '💚'], '3H': ['fille-saute']
   };
+  function poseStation(p) {
+    if (!window.Avatar) return null;
+    var po = POSES_STATION[p.id] || ['fille-salut'];
+    var el = window.Avatar.pose(po[0], po[1]); el.classList.add('avt-bord'); return el;
+  }
   /* Station : le monde 3D où l'étudiant marche jusqu'à la station, puis le panneau d'arrivée. */
   function rendreStation(ecran, precedent) {
     var p = ecran.partie, th = theme(p), num = PARTIES.indexOf(p) + 1, v = T.voyage;
@@ -525,11 +531,13 @@
         h('div', { class: 'v3d-carte', 'aria-hidden': 'true' }),
         h('p', { class: 'v3d-route' }, [h('span', { class: 'v3d-route-t', text: v.en_route.replace('{n}', num) }), h('span', { class: 'v3d-passer', text: v.passer })]),
         h('div', { class: 'v3d-panneau' }, [
+          poseStation(p),
           monde ? h('p', { class: 'monde' }, [h('span', { class: 'monde-em', text: monde })]) : null,
           ecran.debutSection && intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
           h('p', { class: 'station-num', text: v.station.replace('{n}', num).replace('{total}', PARTIES.length) }),
           h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
           window.Jeux && T.jeux ? h('div', { class: 'pause-invit' }, [
+            window.Avatar ? window.Avatar.pose('fille-the') : null,
             h('span', { class: 'pause-invit-t', text: T.jeux.invitation }),
             bouton(T.jeux.bouton, 'btn-pause', function () { window.Jeux.ouvrir(T.jeux, function () {}); })
           ]) : null,
@@ -781,7 +789,8 @@
     });
     var svg = '<svg viewBox="0 0 ' + CARTE.L + ' ' + H + '" class="carte-svg" aria-hidden="true">' + mondes + decos +
       '<path d="' + d + '" class="carte-chemin-ombre"/><path d="' + d + '" class="carte-chemin"/><path d="' + d + '" class="carte-chemin-fait"/>' + noeuds + '</svg>';
-    var avatar = h('div', { class: 'carte-avatar', html: window.Etudiant ? Etudiant.svg({ pose: 'salut', genre: (de + a) % 2 ? 'h' : 'f' }) : '🎒' });
+    var avatar = h('div', { class: 'carte-avatar', html: window.Avatar ? '' : window.Etudiant ? Etudiant.svg({ pose: 'salut', genre: (de + a) % 2 ? 'h' : 'f' }) : '🎒' });
+    if (window.Avatar) avatar.appendChild(window.Avatar.pose('tel'));
     return { el: h('div', { class: 'carte-monde-boite' }, [h('div', { class: 'carte-plan', html: svg }), avatar]), pts: pts };
   }
   function voyageCarte(de, a, fini, statique) {
@@ -936,7 +945,7 @@
   function visuelAddiction() {
     var boite = h('div', { class: 'viv' });
     var cadre = h('div', { class: 'ac-visuel apparait', style: '--k:4' }, [h('div', { class: 'viv-cadre' }, [h('span', { class: 'viv-halo', 'aria-hidden': 'true' }), boite])]);
-    setTimeout(function () { if (window.Vivant) window.Vivant.monter(boite); }, 0);
+    setTimeout(function () { if (window.Avatar) window.Avatar.portrait(boite); else if (window.Vivant) window.Vivant.monter(boite); }, 0);
     return cadre;
   }
   function pageAccueil() {
