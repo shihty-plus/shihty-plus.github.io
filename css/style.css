@@ -1455,53 +1455,26 @@ body.clair .entete, .page, .pied { position: relative; z-index: 1; }
   .v3d-panneau .station-titre { font-size: 20px; }
 }
 
-/* ===== v12 — avatars 3D (assets/avatars/, js/avatar.js) ===== */
-.avt-portrait { position: absolute; inset: 0; perspective: 900px; }
-.avt-incline { position: absolute; inset: 0; transform-style: preserve-3d; cursor: pointer; will-change: transform; -webkit-tap-highlight-color: transparent; }
-.avt-pile { position: absolute; inset: 0; transform-origin: 50% 100%; animation: av-respire 4.2s ease-in-out infinite; }
-.avt-pile.pop { animation: av-pop .5s cubic-bezier(.3, 1.6, .5, 1), av-respire 4.2s ease-in-out .5s infinite; }
-.avt-expr { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; opacity: 0; transition: opacity .22s ease;
-  user-select: none; -webkit-user-select: none; pointer-events: none; filter: drop-shadow(0 26px 30px rgba(23, 48, 47, .22)); }
-.avt-expr.on { opacity: 1; }
-.avt-lueur { position: absolute; left: 50%; top: 74%; width: 70%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(closest-side, rgba(94, 234, 212, .55), rgba(94, 234, 212, 0)); animation: av-lueur 2.8s ease-in-out infinite; }
-@keyframes av-respire { 0%, 100% { scale: 1 1; } 50% { scale: 1.006 1.014; } }
-@keyframes av-pop { 0% { transform: scale(.96, 1.04); } 55% { transform: scale(1.025, .98); } 100% { transform: none; } }
-@keyframes av-lueur { 0%, 100% { opacity: .55; scale: .9; } 50% { opacity: 1; scale: 1.05; } }
-.avt-choix { position: absolute; left: 50%; bottom: -8px; translate: -50% 0; z-index: 3; display: flex; gap: 0; background: #fff; border: 2px solid #17302F; box-shadow: 3px 3px 0 #17302F; }
-.avt-choix button { font: inherit; font-size: 14px; font-weight: 700; padding: 6px 16px; border: 0; background: transparent; color: #17302F; cursor: pointer; }
-.avt-choix button[aria-pressed="true"] { background: #0D9488; color: #fff; }
-.avt-portrait .viv-effets { z-index: 2; }
-
-/* poses */
+/* ===== v12 — images de la mascotte (Avatar.pose) ===== */
 .avt-pose { position: relative; display: inline-block; pointer-events: none; }
-.avt-pose img { display: block; width: 100%; height: auto; filter: drop-shadow(0 12px 14px rgba(23, 48, 47, .22)); }
-.avt-signe { position: absolute; left: 0; right: 0; top: 0; height: 39.5%; display: grid; place-items: center; }
-.avt-signe .em3d { width: 46%; height: auto; max-height: 82%; }
-
-/* le personnage surgit de derrière le bord du panneau de station */
-.v3d-panneau { overflow: visible; }
-.avt-in { position: relative; display: block; }
-.avt-bord { position: absolute; bottom: 100%; inset-inline-start: 14px; width: 92px; overflow: hidden; padding: 0 6px; }
-.avt-bord .avt-in { translate: 0 105%; transition: translate .6s cubic-bezier(.3, 1.4, .5, 1) .3s; transform-origin: 50% 100%; }
-.v3d.arrive .avt-bord .avt-in { translate: 0 0; animation: av-balance 3.6s ease-in-out 1s infinite alternate; }
-.avt-bord.avt-pancarte { width: 108px; }
-.avt-bord.avt-laptop, .avt-bord.avt-saute { width: 120px; }
-@keyframes av-balance { from { rotate: -1.5deg; } to { rotate: 1.5deg; } }
-
-.pause-invit { position: relative; }
-.pause-invit .avt-the { position: absolute; inset-inline-end: 4px; bottom: 0; width: 54px; }
-@media (max-width: 600px) {
-  .avt-bord { width: 70px; inset-inline-start: 4px; }
-  .avt-bord.avt-pancarte { width: 82px; }
-  .avt-bord.avt-laptop, .avt-bord.avt-saute { width: 90px; }
-  .pause-invit .avt-the { width: 42px; }
-}
-
+.avt-pose img { display: block; width: 100%; height: auto; }
 .carte-avatar .avt-pose { width: 100%; }
 .carte-avatar.marche .avt-pose { animation: pas-marche .32s ease-in-out infinite alternate; }
 .carte-avatar.arrive .avt-pose { animation: arrive-saut .6s cubic-bezier(.2, .9, .3, 1.6); }
-@media (prefers-reduced-motion: reduce) { .avt-pile, .avt-lueur, .avt-bord .avt-in, .carte-avatar .avt-pose { animation: none !important; } }
-.pause-invit:has(.avt-the) { padding-inline: 56px; }
-@media (max-width: 600px) { .pause-invit:has(.avt-the) { padding-inline: 44px; } }
-.avt-bord img { filter: none; }
+@media (prefers-reduced-motion: reduce) { .carte-avatar .avt-pose { animation: none !important; } }
+
+/* ===== v13 — Bitto, la mascotte (assets/bitto/, js/avatar.js) ===== */
+.btt { position: absolute; inset: 0; }
+.btt-corps { position: absolute; left: 50%; bottom: 5%; height: 90%; aspect-ratio: 682 / 720; translate: -50% 0; transform-origin: 50% 100%; cursor: pointer;
+  will-change: transform; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+.btt-in { position: absolute; inset: 0; transform-origin: 50% 100%; }
+.btt-in.pop { animation: btt-pop .45s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes btt-pop { 0% { transform: scale(.94, 1.07); } 55% { transform: scale(1.04, .97); } 100% { transform: none; } }
+.btt-pile, .btt-img, .btt-yeux { position: absolute; inset: 0; width: 100%; height: 100%; }
+.btt-img { opacity: 0; transition: opacity .16s ease; pointer-events: none; filter: drop-shadow(0 22px 26px rgba(23, 48, 47, .22)); }
+.btt-img.on { opacity: 1; }
+.btt-yeux { pointer-events: none; transition: opacity .12s; overflow: visible; }
+.btt-ombre { position: absolute; left: 50%; bottom: 3%; width: 46%; height: 5%; margin-left: -23%; border-radius: 50%; background: radial-gradient(closest-side, rgba(23, 48, 47, .28), rgba(23, 48, 47, 0)); }
+.btt .viv-effets { z-index: 2; pointer-events: none; }
+.carte-avatar .avt-pose img { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .2)); }
+@media (prefers-reduced-motion: reduce) { .btt-in.pop { animation: none; } }

@@ -493,32 +493,7 @@
       '<path d="M120 196 q-4 10 2 14 M196 182 q4 12 -2 16 M150 204 q2 6 -1 8" stroke="#0F766E" stroke-width="2.500" fill="none" stroke-linecap="round"/>' +
       '</svg>';
   }
-  function etudiant(num) {
-    var imgs = (T.etudiants && T.etudiants.images) || [];
-    var emoji = PERSOS_DEFAUT[num % PERSOS_DEFAUT.length];
-    if (imgs.length) {
-      var img = h('img', { class: 'etudiant-img', src: imgs[num % imgs.length], alt: '' });
-      img.addEventListener('error', function () { img.replaceWith(h('span', { class: 'etudiant-emoji', text: emoji })); });
-      return img;
-    }
-    if (window.Etudiant) {
-      var pose = POSES_STATION[(PARTIES[num - 1] || {}).id] || ['salut', 'f'];
-      return h('div', { class: 'etudiant-svg', html: Etudiant.svg({ pose: pose[0], genre: pose[1], texte: pose[2] }) });
-    }
-    return h('span', { class: 'etudiant-emoji', text: emoji });
-  }
-  /* Le personnage qui attend sur le bord du panneau de chaque station (assets/avatars/). */
-  var POSES_STATION = {
-    '1A': ['fille-salut'], '1B': ['fille-pancarte', '🏠'], '1C': ['fille-livre'], '1D': ['garcon-face'], '1E': ['fille-montre'], '1F': ['garcon-tel'],
-    '2A': ['fille-telephone'], '2B': ['garcon-tel'], '2C': ['fille-manette'], '2D': ['fille-pouce'], '2E': ['fille-pancarte', '🔒'], '2F': ['fille-laptop'],
-    '3A': ['fille-salut'], '3B': ['fille-livre'], '3C': ['fille-pancarte', '💤'], '3D': ['fille-laptop'], '3E': ['fille-montre'], '3F': ['garcon-face'],
-    '3G': ['fille-pancarte', '💚'], '3H': ['fille-saute']
-  };
-  function poseStation(p) {
-    if (!window.Avatar) return null;
-    var po = POSES_STATION[p.id] || ['fille-salut'];
-    var el = window.Avatar.pose(po[0], po[1]); el.classList.add('avt-bord'); return el;
-  }
+
   /* Station : le monde 3D où l'étudiant marche jusqu'à la station, puis le panneau d'arrivée. */
   function rendreStation(ecran, precedent) {
     var p = ecran.partie, th = theme(p), num = PARTIES.indexOf(p) + 1, v = T.voyage;
@@ -788,7 +763,7 @@
     var svg = '<svg viewBox="0 0 ' + CARTE.L + ' ' + H + '" class="carte-svg" aria-hidden="true">' + mondes + decos +
       '<path d="' + d + '" class="carte-chemin-ombre"/><path d="' + d + '" class="carte-chemin"/><path d="' + d + '" class="carte-chemin-fait"/>' + noeuds + '</svg>';
     var avatar = h('div', { class: 'carte-avatar', html: window.Avatar ? '' : window.Etudiant ? Etudiant.svg({ pose: 'salut', genre: (de + a) % 2 ? 'h' : 'f' }) : '🎒' });
-    if (window.Avatar) avatar.appendChild(window.Avatar.pose('face'));
+    if (window.Avatar) avatar.appendChild(window.Avatar.pose('salut'));
     return { el: h('div', { class: 'carte-monde-boite' }, [h('div', { class: 'carte-plan', html: svg }), avatar]), pts: pts };
   }
   function voyageCarte(de, a, fini, statique) {
