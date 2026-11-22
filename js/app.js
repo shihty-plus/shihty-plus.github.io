@@ -531,13 +531,11 @@
         h('div', { class: 'v3d-carte', 'aria-hidden': 'true' }),
         h('p', { class: 'v3d-route' }, [h('span', { class: 'v3d-route-t', text: v.en_route.replace('{n}', num) }), h('span', { class: 'v3d-passer', text: v.passer })]),
         h('div', { class: 'v3d-panneau' }, [
-          poseStation(p),
           monde ? h('p', { class: 'monde' }, [h('span', { class: 'monde-em', text: monde })]) : null,
           ecran.debutSection && intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
           h('p', { class: 'station-num', text: v.station.replace('{n}', num).replace('{total}', PARTIES.length) }),
           h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
           window.Jeux && T.jeux ? h('div', { class: 'pause-invit' }, [
-            window.Avatar ? window.Avatar.pose('fille-the') : null,
             h('span', { class: 'pause-invit-t', text: T.jeux.invitation }),
             bouton(T.jeux.bouton, 'btn-pause', function () { window.Jeux.ouvrir(T.jeux, function () {}); })
           ]) : null,
@@ -790,7 +788,7 @@
     var svg = '<svg viewBox="0 0 ' + CARTE.L + ' ' + H + '" class="carte-svg" aria-hidden="true">' + mondes + decos +
       '<path d="' + d + '" class="carte-chemin-ombre"/><path d="' + d + '" class="carte-chemin"/><path d="' + d + '" class="carte-chemin-fait"/>' + noeuds + '</svg>';
     var avatar = h('div', { class: 'carte-avatar', html: window.Avatar ? '' : window.Etudiant ? Etudiant.svg({ pose: 'salut', genre: (de + a) % 2 ? 'h' : 'f' }) : '🎒' });
-    if (window.Avatar) avatar.appendChild(window.Avatar.pose('tel'));
+    if (window.Avatar) avatar.appendChild(window.Avatar.pose('face'));
     return { el: h('div', { class: 'carte-monde-boite' }, [h('div', { class: 'carte-plan', html: svg }), avatar]), pts: pts };
   }
   function voyageCarte(de, a, fini, statique) {
