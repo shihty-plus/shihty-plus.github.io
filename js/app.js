@@ -307,7 +307,7 @@
   }
   function rendreChoix(el) {
     var opts = Schema.options(Q, el.options);
-    var classe = el.affichage === 'emojis' ? 'opts-emoji' : (el.affichage === 'numerique' ? 'opts-num' : (opts.length <= 2 ? 'opts-duo' : 'opts-v'));
+    var classe = el.affichage === 'emojis' ? 'opts-emoji' : (el.affichage === 'numerique' ? 'opts-num' : (opts.length <= 2 && !opts.some(function (o) { return (o.t || '').length > 34; }) ? 'opts-duo' : 'opts-v'));
     return h('fieldset', { class: 'question', 'data-var': el.var }, [
       h('legend', null, [badge(el), el.texte]),
       el.aide ? h('p', { class: 'aide', text: el.aide }) : null,
@@ -890,7 +890,7 @@
     }).reduce(function (acc, x) { acc.push(x, ' '); return acc; }, []));
   }
   function titreAccueil(mots) {
-    return h('h1', { class: 'ac-titre' }, mots.map(function (m, k) {
+    return h('h1', { class: 'ac-titre' }, mots.filter(function (m) { return m[1] !== 'chip'; }).map(function (m, k) {
       if (m[1] === 'chip') return h('span', { class: 'mot ac-chip', style: '--k:' + k, 'aria-hidden': 'true' }, [h('span', { class: 'mot-in' }, [h('span', { class: 'ac-chip-tel' }, [h('span', { text: m[0] })])])]);
       return h('span', { class: 'mot ' + (m[1] === 'b' ? 'fort' : 'leger'), style: '--k:' + k }, [h('span', { class: 'mot-in', text: m[0] })]);
     }).reduce(function (acc, x) { acc.push(x, ' '); return acc; }, []));

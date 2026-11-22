@@ -1478,3 +1478,23 @@ body.clair .entete, .page, .pied { position: relative; z-index: 1; }
 .btt .viv-effets { z-index: 2; pointer-events: none; }
 .carte-avatar .avt-pose img { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .2)); }
 @media (prefers-reduced-motion: reduce) { .btt-in.pop { animation: none; } }
+
+/* v14 — les textes d'option longs vont toujours à la ligne */
+.option-texte { min-width: 0; overflow-wrap: anywhere; white-space: normal; }
+.opts-duo .option.riche .option-texte { flex: 0 1 auto; text-align: center; }
+/* barre de réactions au-dessus de Bitto */
+.btt-reac { position: absolute; left: 50%; top: -2%; translate: -50% 0; z-index: 4; display: flex; gap: 2px; padding: 5px 8px; direction: ltr;
+  background: #fff; border-radius: 999px; box-shadow: 0 10px 28px rgba(23, 48, 47, .16), 0 0 0 1px rgba(23, 48, 47, .06); animation: btt-reac-in .5s cubic-bezier(.3, 1.5, .5, 1) .6s both; }
+@keyframes btt-reac-in { from { opacity: 0; transform: translateY(12px) scale(.8); } to { opacity: 1; transform: none; } }
+.btt-r { position: relative; display: grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%;
+  transition: transform .18s cubic-bezier(.3, 1.6, .5, 1); transform-origin: 50% 100%; -webkit-tap-highlight-color: transparent; }
+.btt-r-em { display: grid; place-items: center; font-size: 28px; line-height: 1; }
+.btt-r-em .em3d { width: 32px; height: 32px; }
+.btt-r:hover, .btt-r:focus-visible { transform: translateY(-8px) scale(1.4); z-index: 1; outline: none; }
+.btt-r-nom { position: absolute; bottom: 100%; left: 50%; translate: -50% 0; margin-bottom: 4px; padding: 2px 8px; border-radius: 999px; background: rgba(23, 48, 47, .86); color: #fff;
+  font-size: 10px; font-weight: 700; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; direction: rtl; }
+.btt-r:hover .btt-r-nom, .btt-r:focus-visible .btt-r-nom { opacity: 1; }
+.btt-r.choisi { animation: btt-r-choisi .5s ease; }
+@keyframes btt-r-choisi { 40% { transform: translateY(-14px) scale(1.6); } }
+@media (max-width: 600px) { .btt-r { width: 36px; height: 36px; } .btt-r-em .em3d { width: 27px; height: 27px; } .btt-reac { padding: 4px 6px; top: -4%; } }
+@media (prefers-reduced-motion: reduce) { .btt-reac, .btt-r.choisi { animation: none; } }

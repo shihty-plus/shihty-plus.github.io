@@ -16,7 +16,9 @@
     { cx: .4322, cy: .3673, r: .0711 },
     { cx: .6648, cy: .3351, r: .0704 }
   ];
-  var RATIO = 682 / 720;   // largeur / hauteur des images d'expression
+  var RATIO = 682 / 720;
+  /* barre de réactions (comme sur les réseaux sociaux) : emoji, expression de Bitto, nom affiché */
+  var REACTIONS = [['😂', 'rit', 'هههه'], ['😍', 'coeurs', 'كنبغيك'], ['😮', 'surpris', 'واو'], ['🎉', 'saute', 'برافو'], ['🥱', 'fatigue', 'عييت'], ['😴', 'dort', 'نعسان'], ['😠', 'agace', 'معصب']];   // largeur / hauteur des images d'expression
 
   function src(nom) { return DOSSIER + nom + '.webp'; }
   function emoji(e) { var s = window.Icones && window.Icones.src(e); return s ? '<img class="em3d" src="' + s + '" alt="">' : e; }
@@ -53,13 +55,16 @@
 
   function portrait(boite) {
     boite.classList.add('btt');
-    boite.innerHTML = '<div class="btt-ombre"></div><div class="btt-corps"><div class="btt-in"><div class="btt-pile"></div>' + yeuxSvg() + '</div></div><div class="viv-effets"></div>';
+    boite.innerHTML = '<div class="btt-ombre"></div><div class="btt-corps"><div class="btt-in"><div class="btt-pile"></div>' + yeuxSvg() + '</div></div><div class="viv-effets"></div>' +
+      '<div class="btt-reac" role="group" aria-label="تفاعل مع Bitto">' + REACTIONS.map(function (r, i) {
+        return '<button type="button" class="btt-r" data-i="' + i + '" style="--i:' + i + '" aria-label="' + r[2] + '"><span class="btt-r-em">' + r[0] + '</span><span class="btt-r-nom">' + r[2] + '</span></button>';
+      }).join('') + '</div>';
     var corps = boite.querySelector('.btt-corps'), dedans = boite.querySelector('.btt-in'), pile = boite.querySelector('.btt-pile'), fx = boite.querySelector('.viv-effets');
     var svgYeux = boite.querySelector('.btt-yeux');
     var pupilles = [].slice.call(boite.querySelectorAll('.btt-pupille')), paupieres = [].slice.call(boite.querySelectorAll('.btt-paupiere'));
-    var imgs = {}, actuelle = null, minuteur = null, verrou = 0, clics = [], suite = 0;
+    var saut = 0, imgs = {}, actuelle = null, minuteur = null, verrou = 0, clics = [], suite = 0;
     var dernierGeste = performance.now(), endormi = false, prochainCligne = performance.now() + 2500, cligne = 0;
-    var vise = { x: 0, y: .25 }, regard = { x: 0, y: .25 }, incl = { x: 0, y: 0 };
+    var vise = { x: 0, y: .25 }, regard = { x: 0, y: .25 }, incl = { x: 0, y: 0 }, inclS = { x: 0, y: 0 }, avant = performance.now();
 
     EXPR.forEach(function (e) {
       var im = document.createElement('img'); im.src = src(e); im.alt = ''; im.draggable = false; im.className = 'btt-img';
@@ -106,7 +111,16 @@
       var s = [['surpris', 900, null], ['rit', 1300, null], ['coeurs', 1500, ['❤️', '😍', '💕']]][suite++ % 3];
       montrer(s[0], s[1]); salve(5, s[2]); verrou = t + s[1];
     });
-    corps.addEventListener('pointerenter', function (ev) { if (ev.pointerType === 'mouse') { geste(); if (performance.now() > verrou) montrer('rit', 1300); } });
+    boite.querySelectorAll('.btt-r').forEach(function (b) {
+      b.addEventListener('click', function (ev) {
+        ev.stopPropagation(); geste();
+        var r = REACTIONS[+b.getAttribute('data-i')];
+        montrer(r[1], 2200); verrou = performance.now() + 2200; endormi = false;
+        if (r[1] === 'saute') saut = performance.now();
+        for (var k = 0; k < 6; k++) setTimeout(function () { bulle(r[0], 'monte', 35 + Math.random() * 30, 20); }, k * 110);
+        b.classList.remove('choisi'); void b.offsetWidth; b.classList.add('choisi');
+      });
+    });
     setTimeout(function () {
       document.querySelectorAll('.ac-cta').forEach(function (b) {
         b.addEventListener('pointerenter', function () { geste(); montrer('coeurs', 1600); salve(4, ['❤️', '💕']); verrou = performance.now() + 1600; });
@@ -119,17 +133,19 @@
     window.addEventListener('touchstart', touche, { passive: true });
     window.addEventListener('scroll', geste, { passive: true });
 
-    var prochaineNotif = performance.now() + 3000, saut = 0;
+    var prochaineNotif = performance.now() + 3000;
     function boucle(t) {
       if (!document.body.contains(boite)) {
         window.removeEventListener('pointermove', bouge); window.removeEventListener('pointerdown', bouge);
         window.removeEventListener('touchstart', touche); window.removeEventListener('scroll', geste); return;
       }
       requestAnimationFrame(boucle);
+      var dt = Math.min(.05, (t - avant) / 1000); avant = t;
       var calme = t - dernierGeste;
       // sans souris depuis un moment : il regarde son « écran » vers le bas, puis ailleurs
       if (calme > 3000 && actuelle === 'yeux') { vise.x = Math.sin(t / 1700) * .5; vise.y = .3 + Math.sin(t / 2300) * .2; }
-      var k = CALME ? 1 : .14;
+      var k = CALME ? 1 : 1 - Math.exp(-dt * 9), k2 = CALME ? 1 : 1 - Math.exp(-dt * 3.2);
+      inclS.x += (incl.x - inclS.x) * k2; inclS.y += (incl.y - inclS.y) * k2;
       regard.x += (vise.x - regard.x) * k; regard.y += (vise.y - regard.y) * k;
       pupilles.forEach(function (p, i) {
         var r = YEUX[i].r * RATIO * 1000 * .4;
@@ -141,10 +157,10 @@
       paupieres.forEach(function (p) { p.style.opacity = Math.min(1, f * 2.5).toFixed(2); });
       // il se penche vers le curseur, respire, et fait un petit saut de temps en temps
       if (!CALME) {
-        if (actuelle === 'yeux' && Math.random() < .0015) saut = t;
-        var s = saut ? (t - saut) / 520 : 1, h = s < 1 ? Math.sin(s * Math.PI) : 0;
+        if (actuelle === 'yeux' && Math.random() < .0008) saut = t;
+        var s = saut ? (t - saut) / 560 : 1, h = s < 1 ? Math.sin(s * Math.PI) : 0;
         var ecr = s < 1 ? (s < .15 ? s / .15 : s > .85 ? (1 - s) / .15 : 0) * .06 : 0;
-        corps.style.transform = 'perspective(900px) rotateY(' + (incl.x * 10).toFixed(2) + 'deg) rotateX(' + (-incl.y * 6).toFixed(2) + 'deg) translateY(' + (-h * 7).toFixed(2) + '%) scale(' + (1 + ecr) + ',' + (1 - ecr + Math.sin(t / 700) * .008) + ')';
+        corps.style.transform = 'translate(' + (inclS.x * 2.5).toFixed(3) + '%, ' + (-h * 9 + inclS.y * 1.2).toFixed(3) + '%) rotate(' + (inclS.x * 4 + Math.sin(t / 1300) * .6).toFixed(3) + 'deg) scale(' + (1 + ecr).toFixed(4) + ',' + (1 - ecr + Math.sin(t / 700) * .008).toFixed(4) + ')';
         boite.querySelector('.btt-ombre').style.transform = 'scale(' + (1 - h * .35).toFixed(3) + ')';
       }
       if (t > prochaineNotif && !endormi && actuelle !== 'fatigue') { prochaineNotif = t + 2600 + Math.random() * 2600; bulle(NOTIFS[Math.floor(Math.random() * NOTIFS.length)], 'monte', 40 + Math.random() * 30, 22); }

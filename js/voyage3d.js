@@ -54,7 +54,7 @@
   /* ---------- Bitto, la mascotte : il sautille de dos d'une station à l'autre ----------
      Pendant le trajet : image de dos, petits sauts (étirement en l'air, écrasement à l'atterrissage).
      À l'arrivée : il se retourne vers la caméra et salue. */
-  var CW = 360, CH = 400, HAUT = 2.8, charge = false;
+  var CW = 360, CH = 400, HAUT = 3.2, charge = false;
   function etudiant() {
     var g = new T3.Group();
     var cv = document.createElement('canvas'); cv.width = CW; cv.height = CH;
@@ -77,25 +77,31 @@
     u.cible = anim && anim.fin !== null ? 'dos' : 'salut';
     if (u.cible !== u.vue && u.tour >= 1) u.tour = 0;
     if (u.tour < 1) { u.tour = Math.min(1, u.tour + dt / .4); if (u.tour >= .5) u.vue = u.cible; }
-    // sauts : pendant le trajet, et de temps en temps à l'arrêt
+    // sauts de lapin : accroupi → bond (étiré, penché en avant) → atterrissage (écrasé), puis on recommence
     var enSaut = vitesse > .05;
-    if (enSaut) u.phase += dt * 2.4 * Math.PI * Math.max(.6, vitesse);
-    else if (u.sautRepos) { u.phase += dt * 2.6 * Math.PI; if (u.phase >= Math.PI) { u.phase = 0; u.sautRepos = 0; } }
-    else { u.phase = 0; if (!CALME && Math.random() < .004) u.sautRepos = 1; }
-    var s = Math.abs(Math.sin(u.phase)), haut = (enSaut || u.sautRepos) ? s : 0;
-    u.sprite.position.y = haut * (enSaut ? .75 : .35);
-    var etire = haut > .25 ? (haut - .25) * .12 : 0, ecrase = (enSaut || u.sautRepos) && haut < .25 ? (.25 - haut) * .5 : 0;
+    if (enSaut || u.sautRepos) {
+      u.phase += dt * (enSaut ? 1.75 : 1.4);
+      if (u.phase >= 1) { u.phase -= 1; if (!enSaut) { u.sautRepos = 0; u.phase = 0; } }
+    } else { u.phase = 0; if (!CALME && Math.random() < .004) u.sautRepos = 1; }
+    var c = u.phase, actif = enSaut || u.sautRepos, haut = 0, sy = 1, penche = 0;
+    if (actif) {
+      if (c < .14) { sy = 1 - Math.sin(c / .14 * Math.PI / 2) * .16; }                       // il s'accroupit
+      else if (c < .78) { var v = (c - .14) / .64; haut = 4 * v * (1 - v);                   // en l'air (parabole)
+        sy = 1 + (v < .35 ? (.35 - v) / .35 * .16 : 0) - (v > .8 ? (v - .8) / .2 * .05 : 0); penche = (v - .5) * .16; }
+      else { var w = (c - .78) / .22; sy = 1 - Math.sin(w * Math.PI) * .2; }                 // atterrissage
+    }
+    u.sprite.position.y = haut * (enSaut ? 1.25 : .55);
     var im = u.img[u.vue] || u.img.dos || u.img.salut;
     x.clearRect(0, 0, CW, CH);
     if (im) {
-      var ih = CH * .96, iw = ih * im.width / im.height, sx = u.tour < 1 ? Math.max(.02, Math.abs(1 - 2 * u.tour)) : 1;
+      var ih = CH * .84, iw = ih * im.width / im.height, sx = u.tour < 1 ? Math.max(.02, Math.abs(1 - 2 * u.tour)) : 1;
       x.save(); x.translate(CW / 2, CH);
-      x.scale(sx * (1 - etire * .5 + ecrase), 1 + etire - ecrase + (u.vue === 'salut' ? Math.sin(temps * 2.4) * .01 : 0));
-      x.rotate(enSaut ? Math.sin(u.phase * 2) * .04 : 0);
+      x.scale(sx * (2 - sy) , sy + (u.vue === 'salut' && !actif ? Math.sin(temps * 2.4) * .01 : 0));
+      x.rotate(penche);
       x.drawImage(im, -iw / 2, -ih, iw, ih); x.restore();
     }
     u.tex.needsUpdate = true;
-    if (ombre) ombre.scale.setScalar(1 - haut * .35);
+    if (ombre) ombre.scale.setScalar(1 - haut * .45);
   }
 
   /* ---------- construction du monde ---------- */
