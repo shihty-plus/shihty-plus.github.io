@@ -8,7 +8,7 @@
   var T3, opts, parties = [], N = 0;
   var rendu, scene, cam, courbe, pts = [], etu, ombre, panneaux = [], arches = [], anneau, flotteurs = [];
   var canvas, actif = false, enBoucle = false, anim = null, dernier = 0, carteSvg = null, carteMarq = null;
-  var camPos, camVise, MONDES = { S1: 0, S2: 1, S3: 2 };
+  var camPos, camVise, MONDES = { S1: 0, S2: 1, S3: 2 }, dtCourant = .016;
 
   function webglOk() { try { var c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; } }
   function aleatoire(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
@@ -51,40 +51,90 @@
     return tex;
   }
 
-  /* ---------- l'étudiant(e) : l'avatar 3D vu de dos (assets/avatars/), en panneau toujours face à la caméra ---------- */
-  var chargeur = null, genreCharge = null;
+  /* ---------- l'étudiant(e) : l'avatar 3D (assets/avatars/), animé en morceaux sur un canvas ----------
+     De dos pendant la marche : les jambes (ou la jupe et les pieds) bougent vraiment, le corps se balance.
+     À l'arrivée, il/elle se retourne vers la caméra (image de face) et respire. */
+  var CW = 300, CH = 930;
+  /* repères mesurés sur les images (fractions de l'image) */
+  var GEO = {
+    h: { hanche: .54, milieu: .485, jambeG: .18, jambeD: .9, main: .17, mainBas: .64 },
+    f: { taille: .555, ourlet: .915, milieu: .5, main: .17, mainBas: .62 }
+  };
+  var genreCharge = null;
   function etudiant() {
     var g = new T3.Group();
-    var mat = new T3.SpriteMaterial({ transparent: true, depthWrite: false });
-    var sp = new T3.Sprite(mat); sp.center.set(.5, 0); sp.scale.set(1.1, 2.9, 1); g.add(sp);
-    g.userData = { sprite: sp, tex: {}, vue: null };
+    var cv = document.createElement('canvas'); cv.width = CW; cv.height = CH;
+    var tex = new T3.CanvasTexture(cv); tex.anisotropy = 4;
+    var sp = new T3.Sprite(new T3.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+    sp.center.set(.5, 0); sp.scale.set(3.3 * CW / CH, 3.3, 1); g.add(sp);
+    g.userData = { sprite: sp, cv: cv, x: cv.getContext('2d'), tex: tex, img: {}, phase: 0, vue: 'dos', tour: 1, cible: 'dos' };
     return g;
   }
   function chargerAvatar() {
     var gg = window.Avatar ? window.Avatar.genre() : 'f';
     if (gg === genreCharge) return; genreCharge = gg;
-    chargeur = chargeur || new T3.TextureLoader();
-    var u = etu.userData; u.tex = {}; u.vue = null;
-    ['dos', 'dos2'].forEach(function (n) {
-      var src = window.Avatar ? window.Avatar.src(n, gg) : 'assets/avatars/fille-' + n + '.webp';
-      chargeur.load(src, function (t) {
-        if (gg !== genreCharge) return;
-        t.anisotropy = 4;
-        u.tex[n] = t; u.vue = null;
-      });
+    var u = etu.userData; u.img = {}; u.genre = gg;
+    ['dos', 'face'].forEach(function (n) {
+      var im = new Image();
+      im.onload = function () { if (gg === genreCharge) u.img[n] = im; };
+      im.src = window.Avatar ? window.Avatar.src(n, gg) : 'assets/avatars/fille-' + n + '.webp';
     });
   }
-  function vue(n) {
-    var u = etu.userData, t = u.tex[n] || u.tex.dos || u.tex.dos2;
-    if (!t || u.vue === t) return;
-    u.vue = t; u.sprite.material.map = t; u.sprite.material.needsUpdate = true;
-    var h = 2.9; u.sprite.scale.set(h * t.image.width / t.image.height, h, 1);
+  function boite(im) {   // l'image posée en bas, centrée, à la hauteur du canvas
+    var ih = CH * .97, iw = ih * im.width / im.height;
+    return { x: (CW - iw) / 2, y: CH - ih, w: iw, h: ih };
   }
-  function marcher(t, vitesse) {
-    var u = etu.userData;
-    vue(vitesse > .05 ? 'dos' : 'dos2');
-    u.sprite.position.y = Math.abs(Math.sin(t * 9)) * .12 * vitesse;
-    u.sprite.material.rotation = Math.sin(t * 9) * .035 * vitesse;
+  function morceau(x, im, b, clip, transfo) {
+    x.save(); x.beginPath();
+    clip.forEach(function (r) { x.rect(b.x + r[0] * b.w, b.y + r[1] * b.h, (r[2] - r[0]) * b.w, (r[3] - r[1]) * b.h); });
+    x.clip(); if (transfo) transfo(x);
+    x.drawImage(im, b.x, b.y, b.w, b.h); x.restore();
+  }
+  function dessinerDos(x, im, b, ph, v) {
+    var s = Math.sin(ph), levG = Math.max(0, s) * v, levD = Math.max(0, -s) * v;
+    var balance = s * .022 * v;
+    if (etu.userData.genre === 'h') {
+      var G = GEO.h, yh = b.y + G.hanche * b.h;
+      [[G.jambeG, G.milieu, levG, 1], [G.milieu, G.jambeD, levD, -1]].forEach(function (j) {
+        morceau(x, im, b, [[j[0], G.hanche - .01, j[1], 1.01]], function (c) {
+          var cx = b.x + (j[0] + j[1]) / 2 * b.w;
+          c.translate(cx + j[3] * j[2] * .02 * b.w, yh); c.scale(1, 1 - .15 * j[2]); c.translate(-cx, -yh);
+        });
+      });
+      morceau(x, im, b, [[-.1, -.1, 1.1, G.hanche + .012], [-.1, G.hanche, G.main, G.mainBas]], function (c) {
+        var cx = b.x + G.milieu * b.w; c.translate(cx, yh); c.rotate(balance); c.translate(-cx, -yh);
+      });
+    } else {
+      var F = GEO.f, yt = b.y + F.taille * b.h;
+      [[0, F.milieu, levG], [F.milieu, 1, levD]].forEach(function (j) {   // pieds sous la jupe
+        morceau(x, im, b, [[j[0], F.ourlet - .03, j[1], 1.01]], function (c) { c.translate(0, -j[2] * .035 * b.h); });
+      });
+      morceau(x, im, b, [[F.main, F.taille - .005, 1.1, F.ourlet + .004], [-.1, F.mainBas, F.main, F.ourlet + .004]], function (c) {
+        var k = s * .06 * v, cx = b.x + F.milieu * b.w;
+        c.translate(cx, yt); c.transform(1, 0, k, 1, 0, 0); c.scale(1 + Math.abs(s) * .015 * v, 1); c.translate(-cx, -yt);
+      });
+      morceau(x, im, b, [[-.1, -.1, 1.1, F.taille + .004], [-.1, F.taille, F.main, F.mainBas]], function (c) {
+        var cx = b.x + F.milieu * b.w; c.translate(cx, yt); c.rotate(balance); c.translate(-cx, -yt);
+      });
+    }
+  }
+  function marcher(temps, vitesse, dt) {
+    var u = etu.userData, x = u.x;
+    u.cible = anim && anim.fin !== null ? 'dos' : 'face';
+    if (u.cible !== u.vue && u.tour >= 1) u.tour = 0;
+    if (u.tour < 1) { u.tour = Math.min(1, u.tour + (dt || .016) / .45); if (u.tour >= .5) u.vue = u.cible; }
+    u.phase += (dt || .016) * 11 * vitesse;
+    var im = u.img[u.vue] || u.img.dos || u.img.face;
+    x.clearRect(0, 0, CW, CH);
+    if (!im) { u.tex.needsUpdate = true; return; }
+    var b = boite(im), sx = u.tour < 1 ? Math.max(.02, Math.abs(1 - 2 * u.tour)) : 1;
+    var bob = -(1 - Math.abs(Math.sin(u.phase))) * .014 * CH * vitesse;
+    x.save();
+    x.translate(CW / 2, CH); x.scale(sx, u.vue === 'face' ? 1 + Math.sin(temps * 2.2) * .006 : 1); x.translate(-CW / 2, -CH + bob);
+    if (u.vue === 'dos') dessinerDos(x, im, b, u.phase, Math.min(1, vitesse * 1.3));
+    else x.drawImage(im, b.x, b.y, b.w, b.h);
+    x.restore();
+    u.tex.needsUpdate = true;
   }
 
   /* ---------- construction du monde ---------- */
@@ -214,14 +264,14 @@
     t = Math.max(0, Math.min(1, t || 0));
     var p = courbe.getPoint(t), tg = courbe.getTangent(t);
     etu.position.set(p.x, 0, p.z); etu.rotation.y = Math.atan2(tg.x, tg.z); ombre.position.set(p.x, .04, p.z);
-    marcher(temps, vitesse);
+    marcher(temps, vitesse, dtCourant);
     if (carteMarq) { var q = carteSvg.P(p); carteMarq.setAttribute('cx', q[0].toFixed(2)); carteMarq.setAttribute('cy', q[1].toFixed(2)); }
     return { p: p, tg: tg };
   }
   function boucle(now) {
     if (!actif || !document.body.contains(canvas)) { enBoucle = false; actif = false; return; }
     requestAnimationFrame(boucle);
-    var dt = Math.min(.05, (now - dernier) / 1000); dernier = now;
+    var dt = Math.min(.05, (now - dernier) / 1000); dernier = now; dtCourant = dt;
     var temps = now / 1000, t, vitesse = 0;
     if (anim.fin === null) t = anim.t1;
     else {
@@ -277,5 +327,5 @@
     boite.onclick = function () { if (anim && anim.fin !== null) anim.debut = performance.now() - anim.duree; };   // toucher = arriver tout de suite
     return true;
   }
-  window.Voyage3D = { init: init, monter: monter };
+  window.Voyage3D = { init: init, monter: monter, avatarCanvas: function () { return etu ? etu.userData.cv : null; } };
 })();
