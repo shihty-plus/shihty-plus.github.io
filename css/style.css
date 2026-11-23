@@ -1546,3 +1546,14 @@ body.clair .ac-reprise { background: rgba(255, 252, 247, .1); border: 1px solid 
 .bandeau-theme { height: 96px; }
 .carte-theme:not(:has(.bandeau-theme)) { padding-top: 22px; }
 .opts-rangee .option.riche { padding-inline: 4px; gap: 0; }
+/* v17 — même style « barre colorée » pour toutes les réponses (dégradé corail → sarcelle selon la position) */
+.avec-barre .option.riche, .opts-rangee.avec-barre .option.riche, .opts-likert.avec-barre .option.riche {
+  --barre: color-mix(in oklab, #14B8A6 calc(var(--t, 0) * 100%), #FF7F6B);
+  border: 1.5px solid #E8E2D6; border-top: 6px solid var(--barre); border-radius: 12px; background: #fff; }
+.avec-barre .option.riche:has(input:checked), .opts-rangee.avec-barre .option.riche:has(input:checked), .opts-likert.avec-barre .option.riche:has(input:checked) {
+  border-color: var(--barre); background: color-mix(in oklab, var(--barre) 14%, #fff); box-shadow: 0 6px 16px color-mix(in oklab, var(--barre) 30%, transparent); }
+.avec-barre .option.riche:has(input:checked) .option-texte { font-weight: 800; color: #17302F; }
+.avec-barre .option.riche .pastille-opt:not(.p-case) { display: none; }
+.opts-v.avec-barre .option.riche, .opts-duo.avec-barre .option.riche { min-height: 0; padding: 12px 14px; justify-content: flex-start; }
+.opts-duo.avec-barre .option.riche { justify-content: center; }
+.avec-barre .option.riche input { position: absolute; opacity: 0; pointer-events: none; }

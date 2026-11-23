@@ -268,6 +268,7 @@
   function groupeRadios(v, opts, classe, auChoix, genre) {
     var n = opts.length;
     var riche = !/opts-(num|emoji)/.test(classe);
+    if (riche && !/avec-barre/.test(classe)) classe += ' avec-barre';   // barre colorée sur toutes les réponses
     return h('div', { class: 'options ' + classe, style: '--n:' + n }, opts.map(function (o, i) {
       var id = v + '__' + o.c;
       var input = h('input', { type: 'radio', name: v, id: id, value: String(o.c), checked: Number(etat.reponses[v]) === o.c && !vide(etat.reponses[v]) });
@@ -343,10 +344,10 @@
   function rendreMultiple(el) {
     return h('fieldset', { class: 'question', 'data-multiple': '1' }, [
       el.texte ? h('legend', null, [badge(el), el.texte]) : badge(el),
-      h('div', { class: 'options opts-v' }, el.choix.map(function (c) {
+      h('div', { class: 'options opts-v avec-barre' }, el.choix.map(function (c, i) {
         var input = h('input', { type: 'checkbox', id: 'c_' + c.var, checked: Number(etat.reponses[c.var]) === 1 });
         input.addEventListener('change', function () { definir(c.var, input.checked ? 1 : 0); apresChangement(c.var, input); });
-        return h('label', { class: 'option riche', for: 'c_' + c.var }, [input,
+        return h('label', { class: 'option riche', for: 'c_' + c.var, style: '--t:' + (el.choix.length > 1 ? i / (el.choix.length - 1) : 0) }, [input,
           h('span', { class: 'pastille-opt p-simple p-case', 'aria-hidden': 'true' }), h('span', { class: 'option-texte', text: c.t })]);
       }))
     ]);
