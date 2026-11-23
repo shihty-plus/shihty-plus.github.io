@@ -1558,3 +1558,21 @@ body.clair .ac-reprise { background: rgba(255, 252, 247, .1); border: 1px solid 
 .opts-duo.avec-barre .option.riche { justify-content: center; }
 .avec-barre .option.riche input { position: absolute; opacity: 0; pointer-events: none; }
 .consigne { white-space: pre-line; }
+/* v18 — la question répondue se replie en une fine ligne ; la suivante remonte */
+.question.repliable > .options, .question.repliable > .aide, .question.repliable > .note { max-height: 900px; transition: max-height .45s cubic-bezier(.4, 0, .2, 1), opacity .25s, margin .35s; }
+.question.repliable > legend { transition: font-size .3s, color .3s, margin .3s; }
+.question.repliable { transition: padding .35s, background .3s; }
+.rep-resume { display: none; }
+.question.repondu > .options, .question.repondu > .aide, .question.repondu > .note { max-height: 0; opacity: 0; margin: 0 !important; overflow: hidden; pointer-events: none; }
+.question.repondu { padding-top: 10px !important; padding-bottom: 10px !important; background: #F4FBFA !important; }
+.question.repondu > legend { font-size: 14px !important; color: #5F6F6D !important; margin-bottom: 6px !important; }
+.question.repondu > legend .q-mini { display: none; }
+.question.repondu .rep-resume { --barre: color-mix(in oklab, #14B8A6 calc(var(--t, 0) * 100%), #FF7F6B);
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 10px; border: 1.5px solid var(--barre); border-radius: 10px; background: #fff;
+  font: inherit; font-size: 14.5px; font-weight: 800; color: #17302F; cursor: pointer; text-align: start; animation: rep-entre .35s ease both; }
+.rep-coche { display: grid; place-items: center; width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--barre); color: #fff; font-size: 13px; }
+.rep-texte { flex: 1; }
+.rep-modif { opacity: .45; font-size: 14px; }
+.rep-resume:hover .rep-modif, .rep-resume:focus-visible .rep-modif { opacity: 1; }
+@keyframes rep-entre { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .question.repliable > .options, .question.repliable { transition: none; } .rep-resume { animation: none; } }

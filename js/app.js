@@ -402,12 +402,45 @@
     ].concat(blocs, [ech.message_apres && ecran.dernierBloc ? h('p', { class: 'message message-doux', text: ech.message_apres }) : null]));
   }
   /* Après un choix sur un item d'échelle : faire défiler jusqu'au prochain item sans réponse. */
+  /* Une question répondue se replie en une fine ligne (question + réponse choisie) et la suivante remonte.
+     Toucher la ligne la rouvre pour changer la réponse. Uniquement pour les questions à choix unique. */
+  var REPLI = false;
+  function replierReponses() {
+    REPLI = true;
+    app.querySelectorAll('fieldset.question').forEach(function (q) {
+      if (q.querySelector('input[type=checkbox], input[type=number], select') || q.dataset.reseaux) return;
+      var radios = q.querySelectorAll('input[type=radio]'); if (!radios.length) return;
+      q.classList.add('repliable');
+      var resume = h('button', { type: 'button', class: 'rep-resume', 'aria-label': T.navigation.modifier || 'تعديل' }, [h('span', { class: 'rep-coche', 'aria-hidden': 'true', text: '✓' }), h('span', { class: 'rep-texte' }), h('span', { class: 'rep-modif', 'aria-hidden': 'true', text: '✎' })]);
+      q.appendChild(resume);
+      function maj() {
+        var c = q.querySelector('input[type=radio]:checked'); if (!c) return false;
+        var lab = c.closest('label');
+        resume.querySelector('.rep-texte').textContent = lab ? (lab.querySelector('.option-texte') || lab).textContent : '';
+        resume.style.setProperty('--t', lab ? (lab.style.getPropertyValue('--t') || 0) : 0);
+        return true;
+      }
+      if (maj()) q.classList.add('repondu');
+      var minut = null;
+      q.addEventListener('change', function (ev) {
+        if (ev.target.type !== 'radio' || !maj()) return;
+        clearTimeout(minut);
+        minut = setTimeout(function () { q.classList.add('repondu'); }, 380);   // on laisse voir le choix, puis la carte se replie
+      });
+      resume.addEventListener('click', function () { clearTimeout(minut); q.classList.remove('repondu'); });
+    });
+  }
   function allerAuSuivant(input) {
     var item = input.closest('.item'); if (!item) return;
     var suivants = Array.prototype.slice.call(app.querySelectorAll('.item'));
     var cible = suivants.slice(suivants.indexOf(item) + 1).find(function (n) { return vide(etat.reponses[n.getAttribute('data-var')]); });
     var dest = cible || app.querySelector('.nav');
-    if (dest) setTimeout(function () { dest.scrollIntoView({ behavior: CALME ? 'auto' : 'smooth', block: cible ? 'center' : 'end' }); }, 180);
+    if (!dest) return;
+    if (REPLI) {   // la carte se replie : on ne fait défiler que si la question suivante sort de l'écran
+      setTimeout(function () { var r = dest.getBoundingClientRect(); if (r.top < 70 || r.bottom > innerHeight - 20) dest.scrollIntoView({ behavior: CALME ? 'auto' : 'smooth', block: cible ? 'center' : 'end' }); }, 820);
+      return;
+    }
+    setTimeout(function () { dest.scrollIntoView({ behavior: CALME ? 'auto' : 'smooth', block: cible ? 'center' : 'end' }); }, 180);
   }
 
   function rendreElement(el) {
@@ -551,6 +584,7 @@
     return h('span', { class: 'compteur', dir: 'ltr', text: pos + ' / ' + n });
   }
   function rendreQuestionnaire(conserverDefilement) {
+    REPLI = false;
     var y = window.scrollY;
     var focusId = document.activeElement && document.activeElement.id;
     var ecran = ECRANS[etat.i];
@@ -623,6 +657,7 @@
     majAlbum(!SAISIE);
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (ecran.type === 'station' && !SAISIE) lancerVoyage3D(ecran);
+    if (ecran.type === 'q' && !SAISIE && !ecran.unique) replierReponses();
     if (conserverDefilement) {
       window.scrollTo(0, y);
       if (focusId) { var f = document.getElementById(focusId); if (f) try { f.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
