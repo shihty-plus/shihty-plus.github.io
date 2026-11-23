@@ -915,9 +915,25 @@
   /* Illustration animée : une personne de nuit, le visage éclairé par son téléphone ;
      les réseaux sociaux s'échappent de l'écran et montent sans fin. */
   /* Portrait vivant : un étudiant qui scrolle (js/vivant.js). */
+  /* Arc marocain en fer à cheval : bande de zellige, fines moulures sarcelle et corail, fond sable. */
+  function arcMarocain() {
+    var ext = 'M28 480 V250 A178 178 0 1 1 372 250 V480', int_ = 'M58 480 V252 A150 150 0 1 1 342 252 V480';
+    return '<svg class="viv-arc" viewBox="0 0 400 480" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><defs>' +
+      '<pattern id="arcZel" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#F4ECDD"/>' +
+      '<g fill="#0D9488"><rect x="7" y="7" width="10" height="10"/><rect x="7" y="7" width="10" height="10" transform="rotate(45 12 12)"/></g>' +
+      '<circle cx="12" cy="12" r="1.6" fill="#FF7F6B"/><g fill="#FF7F6B"><path d="M0 -3 3 0 0 3 -3 0z"/><path d="M24 -3 27 0 24 3 21 0z"/><path d="M0 21 3 24 0 27 -3 24z"/><path d="M24 21 27 24 24 27 21 24z"/></g></pattern>' +
+      '<linearGradient id="arcFond" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E7F7F4"/><stop offset="1" stop-color="#FBF8F3" stop-opacity="0"/></linearGradient>' +
+      '<mask id="arcMasque"><rect width="400" height="480" fill="#fff"/><path d="' + int_ + 'Z" fill="#000"/></mask></defs>' +
+      '<path class="arc-int" d="' + int_ + 'Z"/>' +
+      '<path d="' + ext + 'Z" fill="url(#arcZel)" mask="url(#arcMasque)"/>' +
+      '<path d="' + ext + '" fill="none" stroke="#0D9488" stroke-width="5"/>' +
+      '<path d="' + int_ + '" fill="none" stroke="#0D9488" stroke-width="4"/>' +
+      '<path d="M66 480 V253 A142 142 0 1 1 334 253 V480" fill="none" stroke="#FF7F6B" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/>' +
+      '</svg>';
+  }
   function visuelAddiction() {
     var boite = h('div', { class: 'viv' });
-    var cadre = h('div', { class: 'ac-visuel apparait', style: '--k:4' }, [h('div', { class: 'viv-cadre' }, [h('span', { class: 'viv-halo', 'aria-hidden': 'true' }), boite])]);
+    var cadre = h('div', { class: 'ac-visuel apparait', style: '--k:4' }, [h('div', { class: 'viv-cadre' }, [h('span', { html: arcMarocain() }).firstChild, h('span', { class: 'viv-halo', 'aria-hidden': 'true' }), boite])]);
     setTimeout(function () { if (window.Avatar) window.Avatar.portrait(boite); else if (window.Vivant) window.Vivant.monter(boite); }, 0);
     return cadre;
   }

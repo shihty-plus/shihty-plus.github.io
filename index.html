@@ -10,9 +10,10 @@
   <link rel="icon" href="assets/logo-shihty-32.png?v=2" type="image/png" sizes="32x32">
   <link rel="apple-touch-icon" href="assets/logo-shihty-180.png?v=2">
   <link rel="preload" href="assets/fonts/tajawal-arabic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=15">
+  <link rel="stylesheet" href="css/style.css?v=18">
 </head>
 <body>
+  <div class="bord-zellige g" aria-hidden="true"></div><div class="bord-zellige d" aria-hidden="true"></div>
   <div class="decor" aria-hidden="true"><span class="d1"></span><span class="d2"></span><span class="d3"></span><span class="d4"></span></div>
   <div id="bandeau" class="bandeau" hidden></div>
 
@@ -43,20 +44,21 @@
   <dialog id="dialogue-aide" class="dialogue" aria-labelledby="aide-titre"></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=15"></script>
-  <script src="js/icones.js?v=15"></script>
-  <script src="js/emoji3d.js?v=15"></script>
-  <script src="js/sphere.js?v=15"></script>
-  <script src="js/vivant.js?v=15"></script>
-  <script src="js/avatar.js?v=15"></script>
-  <script src="js/fx.js?v=15"></script>
-  <script src="js/etudiants.js?v=15"></script>
-  <script src="js/jeux.js?v=15"></script>
-  <script src="js/vendor/three.min.js?v=15"></script>
-  <script src="js/accueil3d.js?v=15"></script>
-  <script src="js/voyage3d.js?v=15"></script>
-  <script src="js/schema.js?v=15"></script>
-  <script src="js/scoring.js?v=15"></script>
-  <script src="js/app.js?v=15"></script>
+  <script src="js/config.js?v=18"></script>
+  <script src="js/icones.js?v=18"></script>
+  <script src="js/emoji3d.js?v=18"></script>
+  <script src="js/sphere.js?v=18"></script>
+  <script src="js/vivant.js?v=18"></script>
+  <script src="js/avatar.js?v=18"></script>
+  <script src="js/fx.js?v=18"></script>
+  <script src="js/etudiants.js?v=18"></script>
+  <script src="js/jeux.js?v=18"></script>
+  <script src="js/vendor/three.min.js?v=18"></script>
+  <script src="js/accueil3d.js?v=18"></script>
+  <script src="js/voyage3d.js?v=18"></script>
+  <script src="js/schema.js?v=18"></script>
+  <script src="js/scoring.js?v=18"></script>
+  <script src="js/app.js?v=18"></script>
+  <script>(function(){var b=document.querySelectorAll(".bord-zellige"),f=0;addEventListener("scroll",function(){if(f)return;f=requestAnimationFrame(function(){f=0;var y=(-scrollY*.25)+"px";b.forEach(function(e){e.style.setProperty("--zy",y)});});},{passive:true});})();</script>
 </body>
 </html>
