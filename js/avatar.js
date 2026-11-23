@@ -1,7 +1,7 @@
-/* avatar.js — Bitto, la mascotte de SHIHTY+ (images dans assets/bitto/, fond retiré).
+/* avatar.js — Dittou (ديتو), la mascotte de SHIHTY+ (images dans assets/bitto/, fond retiré).
    Avatar.src(nom)          chemin d'une image : 'salut', 'yeux', 'rit', 'surpris', 'coeurs', 'fatigue', 'dort', 'agace', 'bas', 'saute', 'dos'
-   Avatar.pose(nom)         <span><img></span> d'une image de Bitto
-   Avatar.portrait(boite)   accueil : Bitto vivant. Ses pupilles (dessinées par code sur l'image « yeux ») suivent
+   Avatar.pose(nom)         <span><img></span> d'une image de Dittou
+   Avatar.portrait(boite)   accueil : Dittou vivant. Ses pupilles (dessinées par code sur l'image « yeux ») suivent
                             la souris ou le doigt ; il cligne des yeux, se penche vers le curseur, et réagit :
                             survol → rit, clic → surpris / rit / cœurs, trop de clics → agacé,
                             bouton « ابدأ » → cœurs, laissé seul → fatigué puis endormi. */
@@ -17,7 +17,7 @@
     { cx: .6648, cy: .3351, r: .0704 }
   ];
   var RATIO = 682 / 720;
-  /* barre de réactions (comme sur les réseaux sociaux) : emoji, expression de Bitto, nom affiché */
+  /* barre de réactions (comme sur les réseaux sociaux) : emoji, expression de Dittou, nom affiché */
   var REACTIONS = [['😂', 'rit', 'هههه'], ['😍', 'coeurs', 'كنبغيك'], ['😮', 'surpris', 'واو'], ['🎉', 'saute', 'برافو'], ['🥱', 'fatigue', 'عييت'], ['😴', 'dort', 'نعسان'], ['😠', 'agace', 'معصب']];   // largeur / hauteur des images d'expression
 
   function src(nom) { return DOSSIER + nom + '.webp'; }
@@ -53,12 +53,19 @@
     return s;
   }
 
-  function portrait(boite) {
+  function portrait(boite, TX) {
+    TX = TX || {};
     boite.classList.add('btt');
-    boite.innerHTML = '<div class="btt-ombre"></div><div class="btt-corps"><div class="btt-in"><div class="btt-pile"></div>' + yeuxSvg() + '</div></div><div class="viv-effets"></div>' +
-      '<div class="btt-reac" role="group" aria-label="تفاعل مع Bitto">' + REACTIONS.map(function (r, i) {
+    boite.innerHTML = '<div class="btt-ombre"></div><div class="btt-corps"><div class="btt-in"><div class="btt-pile"></div>' + yeuxSvg() + '</div></div><div class="viv-effets"></div><p class="btt-bulle" aria-live="polite"></p>' +
+      '<div class="btt-reac" role="group" aria-label="تفاعل مع ديتو">' + REACTIONS.map(function (r, i) {
         return '<button type="button" class="btt-r" data-i="' + i + '" style="--i:' + i + '" aria-label="' + r[2] + '"><span class="btt-r-em">' + r[0] + '</span><span class="btt-r-nom">' + r[2] + '</span></button>';
       }).join('') + '</div>';
+    var bulleEl = boite.querySelector('.btt-bulle'), bulleMin = null;
+    function parler(txt, ms) {
+      if (!txt) return;
+      bulleEl.textContent = txt; bulleEl.classList.remove('on'); void bulleEl.offsetWidth; bulleEl.classList.add('on');
+      clearTimeout(bulleMin); bulleMin = setTimeout(function () { bulleEl.classList.remove('on'); }, ms || 2800);
+    }
     var corps = boite.querySelector('.btt-corps'), dedans = boite.querySelector('.btt-in'), pile = boite.querySelector('.btt-pile'), fx = boite.querySelector('.viv-effets');
     var svgYeux = boite.querySelector('.btt-yeux');
     var pupilles = [].slice.call(boite.querySelectorAll('.btt-pupille')), paupieres = [].slice.call(boite.querySelectorAll('.btt-paupiere'));
@@ -94,7 +101,7 @@
     }
     function geste() {
       dernierGeste = performance.now();
-      if (endormi || actuelle === 'fatigue') { endormi = false; montrer('surpris', 900); salve(4, ['🔔', '📩', '💬']); verrou = performance.now() + 900; }
+      if (endormi || actuelle === 'fatigue') { endormi = false; montrer('surpris', 900); salve(4, ['🔔', '📩', '💬']); verrou = performance.now() + 900; parler(TX.reveil, 1800); }
     }
     function viser(cx, cy) {   // le point regardé, en coordonnées de l'écran
       var r = svgYeux.getBoundingClientRect();
@@ -107,7 +114,7 @@
     corps.addEventListener('click', function () {
       geste(); var t = performance.now();
       clics = clics.filter(function (c) { return t - c < 2500; }); clics.push(t);
-      if (clics.length >= 6) { clics = []; montrer('agace', 1800); verrou = t + 1800; return; }
+      if (clics.length >= 6) { clics = []; montrer('agace', 1800); verrou = t + 1800; parler((TX.reactions || {}).agace, 2000); return; }
       var s = [['surpris', 900, null], ['rit', 1300, null], ['coeurs', 1500, ['❤️', '😍', '💕']]][suite++ % 3];
       montrer(s[0], s[1]); salve(5, s[2]); verrou = t + s[1];
     });
@@ -116,6 +123,7 @@
         ev.stopPropagation(); geste();
         var r = REACTIONS[+b.getAttribute('data-i')];
         montrer(r[1], 2200); verrou = performance.now() + 2200; endormi = false;
+        parler((TX.reactions || {})[r[1]], 2400);
         if (r[1] === 'saute') saut = performance.now();
         for (var k = 0; k < 6; k++) setTimeout(function () { bulle(r[0], 'monte', 35 + Math.random() * 30, 20); }, k * 110);
         b.classList.remove('choisi'); void b.offsetWidth; b.classList.add('choisi');
@@ -165,10 +173,11 @@
       }
       if (t > prochaineNotif && !endormi && actuelle !== 'fatigue') { prochaineNotif = t + 2600 + Math.random() * 2600; bulle(NOTIFS[Math.floor(Math.random() * NOTIFS.length)], 'monte', 40 + Math.random() * 30, 22); }
       // laissé seul : fatigué (batterie rouge), puis il s'endort
-      if (actuelle === 'yeux' && calme > 9000) { montrer('fatigue'); setTimeout(function () { if (actuelle === 'fatigue' && performance.now() - dernierGeste > 9000) { endormi = true; montrer('dort'); } }, 2600); }
+      if (actuelle === 'yeux' && calme > 9000) { montrer('fatigue'); parler((TX.reactions || {}).fatigue, 2400); setTimeout(function () { if (actuelle === 'fatigue' && performance.now() - dernierGeste > 9000) { endormi = true; montrer('dort'); } }, 2600); }
       if (endormi && Math.random() < .01) bulle('💤', 'zzz', 66, 14, 2200);
     }
     montrer('salut', 1800);   // il dit bonjour en arrivant
+    (TX.accueil || []).forEach(function (m, i) { setTimeout(function () { if (document.body.contains(boite) && performance.now() > verrou) parler(m, 2900); }, 700 + i * 3300); });
     requestAnimationFrame(boucle);
   }
 

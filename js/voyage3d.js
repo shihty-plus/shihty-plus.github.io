@@ -55,6 +55,28 @@
      Pendant le trajet : image de dos, petits sauts (étirement en l'air, écrasement à l'atterrissage).
      À l'arrivée : il se retourne vers la caméra et salue. */
   var CW = 360, CH = 400, HAUT = 3.2, charge = false;
+  var BOND = { periode: .56, decol: .16, atterr: .74 };   // un bond = 0,56 s : 16 % accroupi, 58 % en l'air, 26 % atterrissage
+  var nuages = [];
+  function poussiere(p) {   // petit nuage de poussière à chaque atterrissage
+    if (!scene || CALME) return;
+    if (!nuages.tex) {
+      var cv = document.createElement('canvas'); cv.width = cv.height = 64; var x = cv.getContext('2d');
+      var g = x.createRadialGradient(32, 32, 2, 32, 32, 30); g.addColorStop(0, 'rgba(236,222,196,.95)'); g.addColorStop(1, 'rgba(236,222,196,0)');
+      x.fillStyle = g; x.fillRect(0, 0, 64, 64); nuages.tex = new T3.CanvasTexture(cv);
+    }
+    for (var i = 0; i < 3; i++) {
+      var sp = new T3.Sprite(new T3.SpriteMaterial({ map: nuages.tex, transparent: true, depthWrite: false }));
+      sp.position.set(p.x + (i - 1) * .35, .15, p.z + (Math.random() - .5) * .3); sp.scale.setScalar(.4);
+      sp.userData = { nait: performance.now(), dx: (i - 1) * .9 }; scene.add(sp); nuages.push(sp);
+    }
+  }
+  function animerNuages(now) {
+    for (var i = nuages.length - 1; i >= 0; i--) {
+      var sp = nuages[i], v = (now - sp.userData.nait) / 600;
+      if (v >= 1) { scene.remove(sp); sp.material.dispose(); nuages.splice(i, 1); continue; }
+      sp.scale.setScalar(.4 + v * 1.1); sp.material.opacity = (1 - v) * .8; sp.position.x += sp.userData.dx * .012; sp.position.y = .15 + v * .35;
+    }
+  }
   function etudiant() {
     var g = new T3.Group();
     var cv = document.createElement('canvas'); cv.width = CW; cv.height = CH;
@@ -78,17 +100,17 @@
     if (u.cible !== u.vue && u.tour >= 1) u.tour = 0;
     if (u.tour < 1) { u.tour = Math.min(1, u.tour + dt / .4); if (u.tour >= .5) u.vue = u.cible; }
     // sauts de lapin : accroupi → bond (étiré, penché en avant) → atterrissage (écrasé), puis on recommence
-    var enSaut = vitesse > .05;
-    if (enSaut || u.sautRepos) {
-      u.phase += dt * (enSaut ? 1.75 : 1.4);
-      if (u.phase >= 1) { u.phase -= 1; if (!enSaut) { u.sautRepos = 0; u.phase = 0; } }
-    } else { u.phase = 0; if (!CALME && Math.random() < .004) u.sautRepos = 1; }
+    var enSaut = vitesse > .05 && anim && anim.fin !== null;
+    if (enSaut) u.phase = anim.c || 0;
+    else if (u.sautRepos) { u.phase += dt * 1.5; if (u.phase >= 1) { u.sautRepos = 0; u.phase = 0; } }
+    else { u.phase = 0; if (!CALME && Math.random() < .003) u.sautRepos = 1; }
     var c = u.phase, actif = enSaut || u.sautRepos, haut = 0, sy = 1, penche = 0;
     if (actif) {
-      if (c < .14) { sy = 1 - Math.sin(c / .14 * Math.PI / 2) * .16; }                       // il s'accroupit
-      else if (c < .78) { var v = (c - .14) / .64; haut = 4 * v * (1 - v);                   // en l'air (parabole)
-        sy = 1 + (v < .35 ? (.35 - v) / .35 * .16 : 0) - (v > .8 ? (v - .8) / .2 * .05 : 0); penche = (v - .5) * .16; }
-      else { var w = (c - .78) / .22; sy = 1 - Math.sin(w * Math.PI) * .2; }                 // atterrissage
+      var D = BOND.decol, A = BOND.atterr;
+      if (c < D) { sy = 1 - Math.sin(c / D * Math.PI / 2) * .14; }                            // il s'accroupit
+      else if (c < A) { var v = (c - D) / (A - D); haut = 4 * v * (1 - v);                    // en l'air (parabole)
+        sy = 1 + Math.sin(Math.min(1, v * 2.2) * Math.PI) * .1 - (v > .8 ? (v - .8) / .2 * .04 : 0); penche = (v - .5) * .14; }
+      else { var w = (c - A) / (1 - A); sy = 1 - Math.sin(w * Math.PI) * .17 * (1 - w * .3); }  // atterrissage amorti
     }
     u.sprite.position.y = haut * (enSaut ? 1.25 : .55);
     var im = u.img[u.vue] || u.img.dos || u.img.salut;
@@ -242,11 +264,17 @@
     var temps = now / 1000, t, vitesse = 0;
     if (anim.fin === null) t = anim.t1;
     else {
-      var x = Math.max(0, Math.min(1, (now - anim.debut) / anim.duree)), e = x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-      t = anim.t0 + (anim.t1 - anim.t0) * e; vitesse = x < 1 ? Math.min(1, Math.sin(x * Math.PI) * 2.2) : 0;
+      var x = Math.max(0, Math.min(1, (now - anim.debut) / anim.duree));
+      var H = anim.bonds, k = Math.min(H - 1, Math.floor(x * H)), c = x >= 1 ? 1 : x * H - k;
+      // un bond : accroupi (immobile) → en l'air (il avance) → atterrissage (immobile)
+      var av = c < BOND.decol ? 0 : c > BOND.atterr ? 1 : (function (v) { return v * v * (3 - 2 * v); })((c - BOND.decol) / (BOND.atterr - BOND.decol));
+      t = anim.t0 + (anim.t1 - anim.t0) * (k + av) / H; vitesse = x < 1 ? 1 : 0;
+      if (anim.kPrec !== k && anim.kPrec !== undefined) poussiere(courbe.getPoint(Math.max(0, Math.min(1, t))));
+      anim.kPrec = k; anim.c = c;
       if (x >= 1) { anim.fin = null; if (anim.arrivee) { var f = anim.arrivee; anim.arrivee = null; f(); } }
     }
     var o = poserEtudiant(t, vitesse, temps);
+    animerNuages(now);
     // caméra : derrière l'étudiant en marche, de trois-quarts à l'arrivée
     var cote = new T3.Vector3().crossVectors(o.tg, new T3.Vector3(0, 1, 0)).normalize();
     var arret = vitesse < .05 && anim.fin === null;
@@ -283,7 +311,8 @@
     if (mini) { mini.replaceChildren(miniCarte(de, a)); }
     panneaux.forEach(function (s, i) { s.material.opacity = i < a ? .75 : 1; });
     var marche = de !== a && !CALME;
-    anim = { t0: tDe(de, de >= 0), t1: tDe(a, true), debut: performance.now() + 350, duree: marche ? 2600 + Math.abs(a - de) * 500 : 0, fin: marche ? 1 : null, a: a, arrivee: arrivee, saut: true };
+    var bonds = Math.max(4, Math.round((2600 + Math.abs(a - de) * 500) / (BOND.periode * 1000)));
+    anim = { t0: tDe(de, de >= 0), t1: tDe(a, true), debut: performance.now() + 350, duree: marche ? bonds * BOND.periode * 1000 : 0, bonds: bonds, fin: marche ? 1 : null, a: a, arrivee: arrivee, saut: true };
     if (!marche) { anim.fin = null; setTimeout(function () { if (anim.arrivee) { var f = anim.arrivee; anim.arrivee = null; f(); } }, 30); }
     taille();
     // on met la caméra directement en place au départ
@@ -294,5 +323,5 @@
     boite.onclick = function () { if (anim && anim.fin !== null) anim.debut = performance.now() - anim.duree; };   // toucher = arriver tout de suite
     return true;
   }
-  window.Voyage3D = { init: init, monter: monter, avatarCanvas: function () { return etu ? etu.userData.cv : null; } };
+  window.Voyage3D = { init: init, monter: monter, avatarCanvas: function () { return etu ? etu.userData.cv : null; }, etat: function () { return etu ? { c: anim && anim.c, x: etu.position.x, z: etu.position.z, y: etu.userData.sprite.position.y } : null; } };
 })();

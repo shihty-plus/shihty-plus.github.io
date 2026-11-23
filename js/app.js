@@ -536,6 +536,7 @@
       barreProgression(),
       h('section', { class: 'v3d', style: '--accent:' + th.couleur }, [
         h('div', { class: 'v3d-scene' }),
+        T.ditto && !SAISIE ? h('p', { class: 'v3d-bulle', text: T.ditto.stations[(num - 1) % T.ditto.stations.length] }) : null,
         h('div', { class: 'v3d-carte', 'aria-hidden': 'true' }),
         h('p', { class: 'v3d-route' }, [h('span', { class: 'v3d-route-t', text: v.en_route.replace('{n}', num) }), h('span', { class: 'v3d-passer', text: v.passer })]),
         h('div', { class: 'v3d-panneau' }, [
@@ -819,6 +820,7 @@
       echant.forEach(function (e) { var dd = (e[1] - pt.x) * (e[1] - pt.x) + (e[2] - pt.y) * (e[2] - pt.y); if (dd < bd) { bd = dd; best = e[0]; } });
       return best;
     }
+    if (depart && T.ditto) av.appendChild(h('span', { class: 'carte-bulle', text: T.ditto.carte.replace('{n}', PARTIES.length) }));
     var L0 = longueurA(de), L1 = longueurA(a), termine = false;
     fait.style.strokeDasharray = total; 
     function placer(l) {
@@ -954,7 +956,7 @@
   function visuelAddiction() {
     var boite = h('div', { class: 'viv' });
     var cadre = h('div', { class: 'ac-visuel apparait', style: '--k:4' }, [h('div', { class: 'viv-cadre' }, [h('span', { class: 'viv-halo', 'aria-hidden': 'true' }), boite])]);
-    setTimeout(function () { if (window.Avatar) window.Avatar.portrait(boite); else if (window.Vivant) window.Vivant.monter(boite); }, 0);
+    setTimeout(function () { if (window.Avatar) window.Avatar.portrait(boite, T.ditto); else if (window.Vivant) window.Vivant.monter(boite); }, 0);
     return cadre;
   }
   function pageAccueil() {
@@ -1331,7 +1333,10 @@
     var cartes = F.ordre.map(function (cle) { return cle === 'BFI' ? carteBFI(sc) : carteEchelle(cle, sc); });
     afficher([
       h('div', { class: 'tete-resultats' }, [
-        autocollant('🏆', ['🎉', '⭐', '💚'], 'grand'),
+        window.Avatar && T.ditto ? h('div', { class: 'ditto-merci' }, [
+          h('img', { class: 'ditto-merci-img', src: window.Avatar.src('saute'), alt: '' }),
+          h('div', { class: 'ditto-merci-bulle' }, [h('strong', { text: T.ditto.fin_titre }), h('span', { text: T.ditto.fin_texte })])
+        ]) : autocollant('🏆', ['🎉', '⭐', '💚'], 'grand'),
         h('h1', { class: 'revelation-titre', text: t.titre }),
         h('p', { class: 'revelation-sur', text: res.prenom ? t.titre_prenom.replace('{prenom}', res.prenom) : t.sous_titre })
       ]),
