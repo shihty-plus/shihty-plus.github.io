@@ -160,7 +160,7 @@
         if (actuelle === 'yeux' && Math.random() < .0008) saut = t;
         var s = saut ? (t - saut) / 560 : 1, h = s < 1 ? Math.sin(s * Math.PI) : 0;
         var ecr = s < 1 ? (s < .15 ? s / .15 : s > .85 ? (1 - s) / .15 : 0) * .06 : 0;
-        corps.style.transform = 'translate(' + (inclS.x * 2.5).toFixed(3) + '%, ' + (-h * 9 + inclS.y * 1.2).toFixed(3) + '%) rotate(' + (inclS.x * 4 + Math.sin(t / 1300) * .6).toFixed(3) + 'deg) scale(' + (1 + ecr).toFixed(4) + ',' + (1 - ecr + Math.sin(t / 700) * .008).toFixed(4) + ')';
+        corps.style.transform = 'translateY(' + (-h * 9).toFixed(3) + '%) scale(' + (1 + ecr).toFixed(4) + ',' + (1 - ecr + Math.sin(t / 700) * .008).toFixed(4) + ')';   // seuls les yeux suivent le curseur
         boite.querySelector('.btt-ombre').style.transform = 'scale(' + (1 - h * .35).toFixed(3) + ')';
       }
       if (t > prochaineNotif && !endormi && actuelle !== 'fatigue') { prochaineNotif = t + 2600 + Math.random() * 2600; bulle(NOTIFS[Math.floor(Math.random() * NOTIFS.length)], 'monte', 40 + Math.random() * 30, 22); }
