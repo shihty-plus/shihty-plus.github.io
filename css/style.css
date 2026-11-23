@@ -1539,3 +1539,4 @@ body.clair .ac-sous, body.clair .ac-texte p { color: #D5E6E2; }
 body.clair .ac-lien { color: #FFFCF7; background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .35); }
 .intertitre { margin: 4px 0 14px; padding: 8px 14px; font-size: 17px; font-weight: 800; color: #0F766E; background: #E7F7F4; border-inline-start: 4px solid #0D9488; border-radius: 10px; }
 .carte-intro { width: min(100%, 440px); margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; background: rgba(255, 255, 255, .1); color: #FFFCF7; font-size: 14.5px; line-height: 1.7; text-align: center; }
+body.clair .ac-reprise { background: rgba(255, 252, 247, .1); border: 1px solid rgba(255, 127, 107, .55); border-inline-start: 4px solid #FF7F6B; color: #FFFCF7; backdrop-filter: blur(8px); }
