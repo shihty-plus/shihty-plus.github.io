@@ -10,7 +10,21 @@
   <link rel="icon" href="assets/logo-shihty-32.png?v=2" type="image/png" sizes="32x32">
   <link rel="apple-touch-icon" href="assets/logo-shihty-180.png?v=2">
   <link rel="preload" href="assets/fonts/tajawal-arabic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=20">
+  <script>
+    /* mise à jour : si une version plus récente est en ligne, on recharge la page (contourne le cache) */
+    window.SHIHTY_VERSION = '21';
+    (function () {
+      try {
+        fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+          if (!j || !j.v || j.v === window.SHIHTY_VERSION) return;
+          var u = new URL(location.href);
+          if (u.searchParams.get('maj') === j.v) return;
+          u.searchParams.set('maj', j.v); location.replace(u.toString());
+        }).catch(function () {});
+      } catch (e) { /* rien */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="css/style.css?v=21">
 </head>
 <body>
   <div class="decor" aria-hidden="true"><span class="d1"></span><span class="d2"></span><span class="d3"></span><span class="d4"></span></div>
@@ -43,20 +57,20 @@
   <dialog id="dialogue-aide" class="dialogue" aria-labelledby="aide-titre"></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=20"></script>
-  <script src="js/icones.js?v=20"></script>
-  <script src="js/emoji3d.js?v=20"></script>
-  <script src="js/sphere.js?v=20"></script>
-  <script src="js/vivant.js?v=20"></script>
-  <script src="js/avatar.js?v=20"></script>
-  <script src="js/fx.js?v=20"></script>
-  <script src="js/etudiants.js?v=20"></script>
-  <script src="js/jeux.js?v=20"></script>
-  <script src="js/vendor/three.min.js?v=20"></script>
-  <script src="js/accueil3d.js?v=20"></script>
-  <script src="js/voyage3d.js?v=20"></script>
-  <script src="js/schema.js?v=20"></script>
-  <script src="js/scoring.js?v=20"></script>
-  <script src="js/app.js?v=20"></script>
+  <script src="js/config.js?v=21"></script>
+  <script src="js/icones.js?v=21"></script>
+  <script src="js/emoji3d.js?v=21"></script>
+  <script src="js/sphere.js?v=21"></script>
+  <script src="js/vivant.js?v=21"></script>
+  <script src="js/avatar.js?v=21"></script>
+  <script src="js/fx.js?v=21"></script>
+  <script src="js/etudiants.js?v=21"></script>
+  <script src="js/jeux.js?v=21"></script>
+  <script src="js/vendor/three.min.js?v=21"></script>
+  <script src="js/accueil3d.js?v=21"></script>
+  <script src="js/voyage3d.js?v=21"></script>
+  <script src="js/schema.js?v=21"></script>
+  <script src="js/scoring.js?v=21"></script>
+  <script src="js/app.js?v=21"></script>
 </body>
 </html>
