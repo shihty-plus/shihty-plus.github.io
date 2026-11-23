@@ -1557,3 +1557,4 @@ body.clair .ac-reprise { background: rgba(255, 252, 247, .1); border: 1px solid 
 .opts-v.avec-barre .option.riche, .opts-duo.avec-barre .option.riche { min-height: 0; padding: 12px 14px; justify-content: flex-start; }
 .opts-duo.avec-barre .option.riche { justify-content: center; }
 .avec-barre .option.riche input { position: absolute; opacity: 0; pointer-events: none; }
+.consigne { white-space: pre-line; }
