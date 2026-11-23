@@ -646,7 +646,7 @@
       "parties": [
         {
           "id": "1A",
-          "titre": "البيانات الديمغرافية",
+          "titre": "معلوماتك الشخصية",
           "ecrans": [
             [
               {
@@ -795,14 +795,13 @@
                 ],
                 "emoji": "🏢"
               }
-            ]
-          ]
-        },
-        {
-          "id": "1B",
-          "titre": "البيانات الاجتماعية-الأسرية",
-          "ecrans": [
+            ],
             [
+              {
+                "type": "message",
+                "intertitre": true,
+                "texte": "البيانات الاجتماعية-الأسرية"
+              },
               {
                 "type": "choix",
                 "var": "SF_parents",
@@ -928,14 +927,13 @@
                 "options": "education",
                 "emoji": "👩‍🏫"
               }
-            ]
-          ]
-        },
-        {
-          "id": "1C",
-          "titre": "البيانات الاجتماعية-الاقتصادية والأكاديمية",
-          "ecrans": [
+            ],
             [
+              {
+                "type": "message",
+                "intertitre": true,
+                "texte": "البيانات الاجتماعية-الاقتصادية والأكاديمية"
+              },
               {
                 "type": "choix",
                 "var": "SE_niveau_eco",
@@ -1269,14 +1267,13 @@
                 "options": "oui_non",
                 "emoji": "🪑"
               }
-            ]
-          ]
-        },
-        {
-          "id": "1D",
-          "titre": "البيانات الاجتماعية-العلائقية",
-          "ecrans": [
+            ],
             [
+              {
+                "type": "message",
+                "intertitre": true,
+                "texte": "البيانات الاجتماعية-العلائقية"
+              },
               {
                 "type": "choix",
                 "var": "SR_temps_libre",

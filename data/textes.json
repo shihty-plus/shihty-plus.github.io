@@ -543,7 +543,9 @@
     "fermer": "إغلاق",
     "ouverture": "جاري فتح المحطة...",
     "passer": "اضغط(ي) للوصول مباشرة",
-    "en_route": "في الطريق إلى المحطة {n}..."
+    "en_route": "في الطريق إلى المحطة {n}...",
+    "carte_intro": "رحلتك فيها {n} محطة موزعة على {s} جزر. كل محطة فيها مجموعة صغيرة من الأسئلة، ونتيجتك كتبان مباشرة من بعد كل محطة.",
+    "commencer_route": "يلا نبداو الرحلة ➜"
   },
   "etudiants": {
     "_aide": "Illustrations d'étudiants affichées sur les îles des stations. Mettez les fichiers PNG (fond transparent) dans assets/etudiants/ puis listez-les ici, par ex. \"assets/etudiants/etudiant-1.png\". Tant que la liste est vide, des personnages emoji sont utilisés.",

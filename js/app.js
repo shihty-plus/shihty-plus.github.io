@@ -418,7 +418,7 @@
       case 'liste': return rendreListe(el);
       case 'multiple': return rendreMultiple(el);
       case 'reseaux': return rendreReseaux(el);
-      case 'message': return h('p', { class: 'message', text: el.texte });
+      case 'message': return el.intertitre ? h('h2', { class: 'intertitre', text: el.texte }) : h('p', { class: 'message', text: el.texte });
       default: return null;
     }
   }
@@ -766,11 +766,12 @@
     if (window.Avatar) avatar.appendChild(window.Avatar.pose('salut'));
     return { el: h('div', { class: 'carte-monde-boite' }, [h('div', { class: 'carte-plan', html: svg }), avatar]), pts: pts };
   }
-  function voyageCarte(de, a, fini, statique) {
+  function voyageCarte(de, a, fini, statique, depart) {
     var v = T.voyage, c = construireCarte(de, a);
-    var fermer = h('button', { type: 'button', class: 'btn btn-principal carte-btn', text: statique ? v.fermer : v.continuer });
+    var fermer = h('button', { type: 'button', class: 'btn btn-principal carte-btn', text: statique ? v.fermer : depart ? v.commencer_route : v.continuer });
     var fond = h('div', { class: 'carte-jeu' + (statique ? ' statique' : ''), role: 'dialog', 'aria-label': v.carte_titre }, [
       h('div', { class: 'carte-tete' }, [h('strong', { text: v.carte_titre }), h('span', { class: 'carte-compte', dir: 'ltr', text: (a + 1) + ' / ' + PARTIES.length })]),
+      depart ? h('p', { class: 'carte-intro', text: v.carte_intro.replace('{n}', PARTIES.length).replace('{s}', Q.sections.length) }) : null,
       h('div', { class: 'carte-defile' }, [c.el]),
       fermer
     ]);
@@ -1051,7 +1052,8 @@
           bouton(c.bouton_accepter, 'btn-principal', function () {
             if (!cb.checked) { err.hidden = false; return; }
             etat.etape = 'questionnaire'; etat.i = 0; etat.prenom = ''; etat.dernier = Date.now(); sauver(); majSalutation();
-            rendreQuestionnaire(false);
+            // la carte de toute la route s'affiche d'abord : on voit combien de stations il y a
+            voyageCarte(-1, 0, function () { rendreQuestionnaire(false); }, false, true);
           })
         ])
       ])
