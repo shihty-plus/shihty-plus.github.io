@@ -271,7 +271,7 @@
     return h('div', { class: 'options ' + classe, style: '--n:' + n }, opts.map(function (o, i) {
       var id = v + '__' + o.c;
       var input = h('input', { type: 'radio', name: v, id: id, value: String(o.c), checked: Number(etat.reponses[v]) === o.c && !vide(etat.reponses[v]) });
-      var avecEmoji = riche && o.e && !CTX.sansEmoji;
+      var avecEmoji = false;   // réponses sans emoji : plus compact, le questionnaire paraît moins long
       var auto = CTX.auto;
       input.addEventListener('change', function () {
         definir(v, o.c);
@@ -346,8 +346,7 @@
       h('div', { class: 'options opts-v' }, el.choix.map(function (c) {
         var input = h('input', { type: 'checkbox', id: 'c_' + c.var, checked: Number(etat.reponses[c.var]) === 1 });
         input.addEventListener('change', function () { definir(c.var, input.checked ? 1 : 0); apresChangement(c.var, input); });
-        return h('label', { class: 'option riche' + (c.e ? ' avec-emoji' : ''), for: 'c_' + c.var }, [input,
-          c.e ? h('span', { class: 'opt-emoji', 'aria-hidden': 'true', text: c.e }) : null,
+        return h('label', { class: 'option riche', for: 'c_' + c.var }, [input,
           h('span', { class: 'pastille-opt p-simple p-case', 'aria-hidden': 'true' }), h('span', { class: 'option-texte', text: c.t })]);
       }))
     ]);
@@ -605,7 +604,7 @@
         h('div', { class: 'tete-section' }, [h('p', { class: 'nom-section', text: ecran.section.titre }), stepper(ecran)]),
         SAISIE ? null : cotes(ecran.partie),
         h('section', { class: 'carte carte-theme glisse-' + SENS + (ecran.unique ? ' carte-question' : '') }, [
-          SAISIE ? null : bandeauTheme(ecran.partie),
+          SAISIE || !ecran.debutPartie ? null : bandeauTheme(ecran.partie),   // bannière seulement sur la 1re page de la station
           h('h2', { class: 'titre-partie' }, [h('span', { class: 'titre-partie-icone', 'aria-hidden': 'true', text: icone(ecran.partie.id) }), h('span', { text: ecran.partie.titre }),
             ecran.unique ? compteurPartie(ecran, eff) : null])
         ].concat(contenu)),
