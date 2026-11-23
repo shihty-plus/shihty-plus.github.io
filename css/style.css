@@ -1501,7 +1501,7 @@ body.clair .entete, .page, .pied { position: relative; z-index: 1; }
 
 
 /* ===== v15 — fond sarcelle animé (formes flottantes) sur tout le site ; les cartes restent claires ===== */
-body.clair { background: #04201F; color: #FFFCF7; }
+body.clair { background: #04201F; color: #17302F; }
 body.clair .decor { display: block; }
 body.clair .halo { display: block; }
 body.clair::after { opacity: .05; mix-blend-mode: normal; }
