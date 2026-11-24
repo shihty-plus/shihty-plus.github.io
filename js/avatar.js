@@ -18,7 +18,7 @@
   ];
   var RATIO = 682 / 720;
   /* barre de réactions (comme sur les réseaux sociaux) : emoji, expression de Dittou, nom affiché */
-  var REACTIONS = [['😂', 'rit', 'هههه'], ['😍', 'coeurs', 'كنبغيك'], ['😮', 'surpris', 'واو'], ['🎉', 'saute', 'برافو'], ['🥱', 'fatigue', 'عييت'], ['😴', 'dort', 'نعسان'], ['😠', 'agace', 'معصب']];   // largeur / hauteur des images d'expression
+  var REACTIONS = [['😂', 'rit', 'هههه'], ['😍', 'coeurs', 'عجبني'], ['😮', 'surpris', 'واو'], ['🤩', 'saute', 'برافو'], ['🥱', 'fatigue', 'عييت'], ['😴', 'dort', 'نعسان'], ['😠', 'agace', 'معصب']];   // largeur / hauteur des images d'expression
 
   function src(nom) { return DOSSIER + nom + '.webp'; }
   function emoji(e) { var s = window.Icones && window.Icones.src(e); return s ? '<img class="em3d" src="' + s + '" alt="">' : e; }

@@ -30,6 +30,8 @@
     else if (yeux === 'coeur') z += P_('M18 25 l-4 -4 a2.300 2.300 0 0 1 4 -2.300 a2.300 2.300 0 0 1 4 2.300z', R) + P_('M30 25 l-4 -4 a2.300 2.300 0 0 1 4 -2.300 a2.300 2.300 0 0 1 4 2.300z', R);
     else if (yeux === 'spirale') z += L_('M18 22 m-3 0 a3 3 0 1 0 3 -3 a1.600 1.600 0 1 1 -1.600 1.600 M30 22 m-3 0 a3 3 0 1 0 3 -3 a1.600 1.600 0 1 1 -1.600 1.600');
     else if (yeux === 'ronds') z += C_(18, 22, 3, W) + C_(30, 22, 3, W) + C_(18, 22.500, 1.300, K) + C_(30, 22.500, 1.300, K);
+    else if (yeux === 'etoile') z += P_('M18 17.500 l1.400 2.900 3.200 .4 -2.300 2.200 .6 3.100 -2.900 -1.500 -2.900 1.500 .6 -3.100 -2.300 -2.200 3.200 -.4z', R) + P_('M30 17.500 l1.400 2.900 3.200 .4 -2.300 2.200 .6 3.100 -2.900 -1.500 -2.900 1.500 .6 -3.100 -2.300 -2.200 3.200 -.4z', R);
+    else if (yeux === 'mi') z += L_('M15 23 h6 M27 23 h6') + P_('M15.500 23 q2.500 2.200 5 0z M27.500 23 q2.500 2.200 5 0z', K);
     if (o.sourcils === 'fache') z += L_('M14 16 l7 3 M34 16 l-7 3');
     if (o.sourcils === 'triste') z += L_('M14 18 l6 -2.500 M34 18 l-6 -2.500');
     var m = o.bouche || 'sourire';
@@ -38,6 +40,7 @@
     else if (m === 'plat') z += L_('M18 32 h12');
     else if (m === 'triste') z += L_('M18 34 q6 -5 12 0');
     else if (m === 'ouvert') z += E_(24, 33, 3.500, 4, K);
+    else if (m === 'baille') z += E_(24, 33, 4.500, 5.500, K) + E_(24, 35.500, 2.800, 2, R);
     else if (m === 'vague') z += L_('M17 33 q2 -2.500 3.500 0 t3.500 0 t3.500 0 t3.500 0');
     if (o.larmes) z += P_('M13 25 q-2.500 4 0 6 q2.500 -2 0 -6z', B) + P_('M35 25 q-2.500 4 0 6 q2.500 -2 0 -6z', B);
     if (o.goutte) z += P_('M37 12 q-3 4.500 0 6.500 q3 -2 0 -6.500z', B);
@@ -117,6 +120,8 @@
     '😞': visage({ yeux: 'ferme', bouche: 'triste', sourcils: 'triste' }), '🙁': visage({ bouche: 'triste' }), '😣': visage({ yeux: 'serre', bouche: 'vague' }),
     '😡': visage({ peau: '#FF9B82', sourcils: 'fache', bouche: 'triste' }), '😢': visage({ bouche: 'triste', sourcils: 'triste', larmes: 1 }),
     '😰': visage({ yeux: 'ronds', bouche: 'ouvert', goutte: 1 }), '😴': visage({ yeux: 'ferme', bouche: 'ouvert', z: 1 }), '😵‍💫': visage({ yeux: 'spirale', bouche: 'vague' }),
+    '😮': visage({ yeux: 'ronds', bouche: 'ouvert' }), '🥱': visage({ yeux: 'mi', bouche: 'baille', sourcils: 'triste' }),
+    '😠': visage({ peau: '#FF9B82', sourcils: 'fache', bouche: 'triste' }), '🤩': visage({ yeux: 'etoile', bouche: 'grand' }),
     '🤗': visage({ yeux: 'heureux', mains: 1 }), '🤫': visage({ bouche: 'plat', doigt: 1 }), '🙈': visage({ cache: 1, bouche: 'grand' }),
     // personnes
     '👨': buste({ cheveux: 'court' }), '👩': buste({ cheveux: 'long', habit: C }), '🧑': buste({ cheveux: 'court', habit: S }), '👶': buste({ cheveux: 'bebe', habit: b }),
