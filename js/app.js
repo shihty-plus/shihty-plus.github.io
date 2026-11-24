@@ -405,6 +405,16 @@
   /* Une question répondue se replie en une fine ligne (question + réponse choisie) et la suivante remonte.
      Toucher la ligne la rouvre pour changer la réponse. Uniquement pour les questions à choix unique. */
   var REPLI = false, ECLATEES = {};   // questions éclatées pendant la visite de la page en cours
+  /* Une question répondue reste à l'écran et se distingue (fond teinté + coche). */
+  function marquerRepondues() {
+    app.querySelectorAll('.question').forEach(function (q) {
+      function maj() {
+        var ok = !!q.querySelector('input:checked') || [].some.call(q.querySelectorAll('input[type=number], input[type=text], select'), function (c) { return c.value !== ''; });
+        q.classList.toggle('repondue', ok);
+      }
+      maj(); q.addEventListener('change', maj); q.addEventListener('input', maj);
+    });
+  }
   function replierReponses() {
     REPLI = true;
     var qs = [];
@@ -677,7 +687,7 @@
     majAlbum(!SAISIE);
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (ecran.type === 'station' && !SAISIE) lancerVoyage3D(ecran);
-    if (ecran.type === 'q' && !SAISIE && !ecran.unique) replierReponses();
+    if (ecran.type === 'q' && !SAISIE) marquerRepondues();
     if (conserverDefilement) {
       window.scrollTo(0, y);
       if (focusId) { var f = document.getElementById(focusId); if (f) try { f.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }

@@ -1614,3 +1614,8 @@ body.clair .ac-reprise { background: rgba(255, 252, 247, .1); border: 1px solid 
 .revoir-rep { display: block; margin: 0 auto 12px; padding: 6px 14px; border: 1px dashed #B9CFCB; border-radius: 999px; background: #F4FBFA; color: #0F766E; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
 .revoir-rep[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .question.ballon.pop, .question.ballon.vide { animation: none; transition: none; } }
+/* v21 — retour : la question répondue reste visible et se distingue (coche à côté du titre) */
+.question.repondue > legend::after, .question.repondue > .titre-question::after { content: "✓"; display: inline-grid; place-items: center; vertical-align: middle;
+  width: 21px; height: 21px; margin-inline-start: 8px; border-radius: 50%; background: #0D9488; color: #fff; font-size: 12px; font-weight: 800; animation: rep-coche .35s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes rep-coche { from { transform: scale(0); } to { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .question.repondue > legend::after, .question.repondue > .titre-question::after { animation: none; } }
