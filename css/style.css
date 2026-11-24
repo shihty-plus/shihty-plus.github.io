@@ -1604,3 +1604,13 @@ body.clair .ac-reprise { background: rgba(255, 252, 247, .1); border: 1px solid 
 @media (prefers-reduced-motion: reduce) { .ditto-merci-img, .carte-bulle { animation: none; } }
 .carte-bulle { left: auto; right: -6px; translate: none; white-space: normal; width: max-content; max-width: 190px; }
 .carte-bulle::after { left: auto; right: 22px; }
+/* v20 — la question répondue éclate comme un ballon et disparaît */
+.question.ballon { transform-origin: 50% 50%; }
+.question.ballon.pop { animation: ballon-pop .2s cubic-bezier(.3, 1.6, .5, 1) forwards; overflow: hidden; }
+@keyframes ballon-pop { 0% { transform: scale(1); } 55% { transform: scale(1.06); filter: brightness(1.04); } 100% { transform: scale(1.1); opacity: 0; } }
+.question.ballon.vide { opacity: 0; transition: height .36s cubic-bezier(.4, 0, .2, 1), margin .36s, padding .36s; margin-top: 0 !important; margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; border-width: 0 !important; }
+.question.ballon.eclatee { display: none; }
+.revoir-on .question.ballon.eclatee { display: block; animation: rep-entre .3s ease both; }
+.revoir-rep { display: block; margin: 0 auto 12px; padding: 6px 14px; border: 1px dashed #B9CFCB; border-radius: 999px; background: #F4FBFA; color: #0F766E; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.revoir-rep[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .question.ballon.pop, .question.ballon.vide { animation: none; transition: none; } }

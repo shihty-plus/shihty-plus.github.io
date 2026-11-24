@@ -407,28 +407,45 @@
   var REPLI = false;
   function replierReponses() {
     REPLI = true;
+    var qs = [];
     app.querySelectorAll('fieldset.question').forEach(function (q) {
       if (q.querySelector('input[type=checkbox], input[type=number], select') || q.dataset.reseaux) return;
-      var radios = q.querySelectorAll('input[type=radio]'); if (!radios.length) return;
-      q.classList.add('repliable');
-      var resume = h('button', { type: 'button', class: 'rep-resume', 'aria-label': T.navigation.modifier || 'تعديل' }, [h('span', { class: 'rep-coche', 'aria-hidden': 'true', text: '✓' }), h('span', { class: 'rep-texte' }), h('span', { class: 'rep-modif', 'aria-hidden': 'true', text: '✎' })]);
-      q.appendChild(resume);
-      function maj() {
-        var c = q.querySelector('input[type=radio]:checked'); if (!c) return false;
-        var lab = c.closest('label');
-        resume.querySelector('.rep-texte').textContent = lab ? (lab.querySelector('.option-texte') || lab).textContent : '';
-        resume.style.setProperty('--t', lab ? (lab.style.getPropertyValue('--t') || 0) : 0);
-        return true;
-      }
-      if (maj()) q.classList.add('repondu');
+      if (!q.querySelector('input[type=radio]')) return;
+      q.classList.add('ballon'); qs.push(q);
+    });
+    if (!qs.length) return;
+    // lien discret pour revoir (et corriger) les questions déjà répondues
+    var revoir = h('button', { type: 'button', class: 'revoir-rep', hidden: true });
+    var premier = qs[0], parent = premier.parentNode;
+    parent.insertBefore(revoir, premier);
+    function majRevoir() {
+      var n = qs.filter(function (q) { return q.classList.contains('eclatee'); }).length;
+      revoir.hidden = n === 0;
+      revoir.textContent = app.classList.contains('revoir-on') ? (T.navigation.masquer_rep || 'إخفاء الأجوبة') : (T.navigation.revoir_rep || 'راجع(ي) أجوبتك ({n})').replace('{n}', n);
+    }
+    revoir.addEventListener('click', function () { app.classList.toggle('revoir-on'); majRevoir(); });
+    qs.forEach(function (q) {
+      if (q.querySelector('input[type=radio]:checked')) q.classList.add('eclatee');   // déjà répondue (retour sur la page)
       var minut = null;
       q.addEventListener('change', function (ev) {
-        if (ev.target.type !== 'radio' || !maj()) return;
+        if (ev.target.type !== 'radio' || app.classList.contains('revoir-on')) return;
         clearTimeout(minut);
-        minut = setTimeout(function () { q.classList.add('repondu'); }, 380);   // on laisse voir le choix, puis la carte se replie
+        minut = setTimeout(function () { crever(q); }, 260);   // on laisse voir le choix une fraction de seconde
       });
-      resume.addEventListener('click', function () { clearTimeout(minut); q.classList.remove('repondu'); });
     });
+    function crever(q) {
+      if (CALME) { q.classList.add('eclatee'); majRevoir(); return; }
+      var r = q.getBoundingClientRect();
+      q.style.height = r.height + 'px';
+      q.classList.add('pop');                         // il gonfle puis éclate
+      setTimeout(function () {
+        if (window.FX) window.FX.eclat(r.left + r.width / 2, r.top + r.height / 2, 22);
+        q.classList.add('vide');                      // la place se referme : la suivante remonte
+        requestAnimationFrame(function () { q.style.height = '0px'; });
+      }, 170);
+      setTimeout(function () { q.classList.remove('pop', 'vide'); q.style.height = ''; q.classList.add('eclatee'); majRevoir(); }, 560);
+    }
+    majRevoir();
   }
   function allerAuSuivant(input) {
     var item = input.closest('.item'); if (!item) return;
@@ -586,6 +603,7 @@
   }
   function rendreQuestionnaire(conserverDefilement) {
     REPLI = false;
+    if (!conserverDefilement) app.classList.remove('revoir-on');
     var y = window.scrollY;
     var focusId = document.activeElement && document.activeElement.id;
     var ecran = ECRANS[etat.i];

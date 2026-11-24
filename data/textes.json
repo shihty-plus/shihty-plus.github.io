@@ -129,7 +129,9 @@
     "precedent": "السابق",
     "envoyer": "إرسال إجاباتي",
     "commencer_section": "لنبدأ 🚀",
-    "progression": "التقدم"
+    "progression": "التقدم",
+    "revoir_rep": "👁 راجع(ي) أجوبتك ({n})",
+    "masquer_rep": "إخفاء الأجوبة"
   },
   "sections_intro": {
     "S1": {
