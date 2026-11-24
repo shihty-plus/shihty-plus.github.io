@@ -1619,3 +1619,20 @@ body.clair .ac-reprise { background: rgba(255, 252, 247, .1); border: 1px solid 
   width: 21px; height: 21px; margin-inline-start: 8px; border-radius: 50%; background: #0D9488; color: #fff; font-size: 12px; font-weight: 800; animation: rep-coche .35s cubic-bezier(.3, 1.6, .5, 1); }
 @keyframes rep-coche { from { transform: scale(0); } to { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .question.repondue > legend::after, .question.repondue > .titre-question::after { animation: none; } }
+/* v22 — Dittou compagnon (js/compagnon.js) */
+.dt { position: fixed; left: 0; top: 0; z-index: 45; width: 140px; transform-origin: 0 0; pointer-events: none; opacity: 0; will-change: transform; }
+.dt-corps { transform-origin: 50% 100%; }
+.dt-img { display: block; width: 100%; height: auto; filter: drop-shadow(0 14px 18px rgba(0, 0, 0, .3)); user-select: none; }
+.dt.peek .dt-img { filter: drop-shadow(0 -4px 12px rgba(0, 0, 0, .25)); }
+.dt.dt-cache { visibility: hidden; }
+.dt-bulle { position: absolute; bottom: 100%; left: 30%; margin: 0 0 6px; width: max-content; max-width: 260px; padding: 9px 15px; border-radius: 18px; background: #fff; color: #17302F;
+  font-size: 19px; font-weight: 800; line-height: 1.45; direction: rtl; box-shadow: 0 10px 26px rgba(0, 0, 0, .25); opacity: 0; transform: translateY(10px) scale(.85); transform-origin: 0 100%;
+  transition: opacity .25s, transform .35s cubic-bezier(.3, 1.6, .5, 1); }
+.dt-bulle::after { content: ""; position: absolute; bottom: -7px; left: 22px; width: 14px; height: 14px; background: #fff; transform: rotate(45deg); }
+.dt-bulle.on { opacity: 1; transform: none; }
+@media (max-width: 899px) { .dt-bulle { font-size: 31px; max-width: 380px; padding: 12px 20px; } }
+body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opacity: 0; transition: opacity .25s; }
+.viv-cadre .btt-corps, .viv-cadre .btt-ombre { transition: opacity .25s; }
+/* la nouvelle page arrive en 3D */
+@keyframes glisse-avant { from { opacity: 0; transform: perspective(1400px) translateX(90px) rotateY(-30deg) scale(.95); } }
+@media (prefers-reduced-motion: reduce) { .dt-bulle { transition: none; } }

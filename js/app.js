@@ -57,6 +57,7 @@
     clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove('visible'); }, 2600);
   }
   function afficher(noeuds, classe) {
+    if (window.Compagnon) window.Compagnon.page(classe === 'page-accueil' ? 'accueil' : 'cache');
     app.className = 'page ' + (classe || '');
     document.body.classList.add('clair');
     app.style.removeProperty('--accent');
@@ -670,6 +671,7 @@
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (ecran.type === 'station' && !SAISIE) lancerVoyage3D(ecran);
     if (ecran.type === 'q' && !SAISIE && !ecran.unique) replierReponses();
+    if (window.Compagnon) window.Compagnon.page(ecran.type === 'resultat' ? 'resultat' : ecran.type === 'station' ? 'cache' : 'question');
     if (conserverDefilement) {
       window.scrollTo(0, y);
       if (focusId) { var f = document.getElementById(focusId); if (f) try { f.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
@@ -705,6 +707,8 @@
     sauver();
     var e2 = ECRANS[suivant];
     function montrer() {
+      // l'ancienne page part en 3D et Dittou traverse l'écran
+      if (window.Compagnon && !SAISIE && avant.type !== 'station' && (e2.type === 'q' || e2.type === 'resultat')) window.Compagnon.traverser();
       rendreQuestionnaire(false);
       annoncerAutocollants(gagnes);
       if (e2.type === 'resultat' && e2.cle !== 'SOUTIEN') { confettis(); return; }
@@ -823,6 +827,7 @@
       fermer
     ]);
     document.body.appendChild(fond);
+    if (window.Compagnon) window.Compagnon.masquer(true);
     var defile = fond.querySelector('.carte-defile'), chemin = fond.querySelector('.carte-chemin'), fait = fond.querySelector('.carte-chemin-fait'), av = fond.querySelector('.carte-avatar');
     var total = chemin.getTotalLength(), echant = [];
     for (var l = 0; l <= total; l += 3) { var q = chemin.getPointAtLength(l); echant.push([l, q.x, q.y]); }
@@ -842,6 +847,7 @@
     }
     function finir() {
       if (termine) return; termine = true;
+      if (window.Compagnon) window.Compagnon.masquer(false);
       fond.classList.add('sortie');
       setTimeout(function () { fond.remove(); }, 380);
       if (fini) fini();
@@ -1387,6 +1393,7 @@
   Promise.all(['questions', 'textes', 'feedback', 'ressources'].map(charger)).then(function (d) {
     Q = d[0]; T = d[1]; F = d[2]; R = d[3];
     construireEcrans();
+    if (window.Compagnon && !SAISIE) window.Compagnon.init((T.ditto || {}).compagnon);
     if (window.Voyage3D && !SAISIE) window.Voyage3D.init({ parties: PARTIES, couleur: function (p) { return theme(p).couleur; }, icone: function (p) { return icone(p.id); },
       monde: function (p) { var s = null; Q.sections.forEach(function (x) { if (x.parties.indexOf(p) >= 0) s = x.id; }); return s; } });
     var nom = document.getElementById('marque-nom');
