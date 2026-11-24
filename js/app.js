@@ -404,7 +404,7 @@
   /* Après un choix sur un item d'échelle : faire défiler jusqu'au prochain item sans réponse. */
   /* Une question répondue se replie en une fine ligne (question + réponse choisie) et la suivante remonte.
      Toucher la ligne la rouvre pour changer la réponse. Uniquement pour les questions à choix unique. */
-  var REPLI = false;
+  var REPLI = false, ECLATEES = {};   // questions éclatées pendant la visite de la page en cours
   function replierReponses() {
     REPLI = true;
     var qs = [];
@@ -425,7 +425,7 @@
     }
     revoir.addEventListener('click', function () { app.classList.toggle('revoir-on'); majRevoir(); });
     qs.forEach(function (q) {
-      if (q.querySelector('input[type=radio]:checked')) q.classList.add('eclatee');   // déjà répondue (retour sur la page)
+      if (ECLATEES[q.dataset.var] && q.querySelector('input[type=radio]:checked')) q.classList.add('eclatee');   // éclatée juste avant un nouvel affichage de la même page
       var minut = null;
       q.addEventListener('change', function (ev) {
         if (ev.target.type !== 'radio' || app.classList.contains('revoir-on')) return;
@@ -434,6 +434,7 @@
       });
     });
     function crever(q) {
+      ECLATEES[q.dataset.var] = 1;
       if (CALME) { q.classList.add('eclatee'); majRevoir(); return; }
       var r = q.getBoundingClientRect();
       q.style.height = r.height + 'px';
@@ -603,7 +604,7 @@
   }
   function rendreQuestionnaire(conserverDefilement) {
     REPLI = false;
-    if (!conserverDefilement) app.classList.remove('revoir-on');
+    if (!conserverDefilement) { app.classList.remove('revoir-on'); ECLATEES = {}; }   // nouvelle page (ou retour) : tout est affiché
     var y = window.scrollY;
     var focusId = document.activeElement && document.activeElement.id;
     var ecran = ECRANS[etat.i];
