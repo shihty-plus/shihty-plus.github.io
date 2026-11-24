@@ -1636,3 +1636,8 @@ body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opa
 /* la nouvelle page arrive en 3D */
 @keyframes glisse-avant { from { opacity: 0; transform: perspective(1400px) translateX(90px) rotateY(-30deg) scale(.95); } }
 @media (prefers-reduced-motion: reduce) { .dt-bulle { transition: none; } }
+/* v23 — transitions plus rapides et plus douces pour les yeux */
+@keyframes glisse-avant { from { opacity: 0; transform: perspective(1400px) translateX(24px) rotateY(-6deg); } }
+@keyframes glisse-arriere { from { opacity: 0; transform: perspective(1400px) translateX(-24px) rotateY(6deg); } }
+.glisse-avant, .glisse-arriere, body.clair .page-questionnaire .carte-theme.glisse-avant, body.clair .page-questionnaire .carte-theme.glisse-arriere { animation-duration: .32s !important; animation-timing-function: cubic-bezier(.2, .7, .2, 1) !important; }
+.dt-bulle { transition: opacity .2s, transform .22s ease-out; }

@@ -87,7 +87,7 @@
   /* ---------- vol en courbe 3D ---------- */
   function voler(depart, opts) {
     opts = opts || {};
-    vol = { t0: performance.now(), dur: opts.dur || 820, de: { x: depart.x, y: depart.y, s: depart.s }, haut: opts.haut, bonds: opts.bonds || 1, tour: opts.tour || 0 };
+    vol = { t0: performance.now(), dur: opts.dur || Math.min(560, 340 + Math.hypot(pos.x - depart.x, pos.y - depart.y) * .25), de: { x: depart.x, y: depart.y, s: depart.s }, haut: opts.haut, bonds: opts.bonds || 1, tour: opts.tour || 0 };
   }
   function poser(x, y, s, o, rotY, rot, sx, sy) {
     el.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) scale(' + (s / B).toFixed(4) + ')';
@@ -102,23 +102,23 @@
     if (img.getAttribute('data-n') !== n) { img.setAttribute('data-n', n); img.src = src(n); }
     el.classList.toggle('peek', !!c.peek && !vol);
     if (vol) {
-      var p = Math.min(1, (now - vol.t0) / vol.dur), e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      var p = Math.min(1, (now - vol.t0) / vol.dur), e = 1 - Math.pow(1 - p, 3);   // part vite, se pose en douceur
       var dx = c.x - vol.de.x, dist = Math.hypot(dx, c.y - vol.de.y);
-      var haut = vol.haut !== undefined ? vol.haut : Math.min(260, 60 + dist * .35);
+      var haut = vol.haut !== undefined ? vol.haut : Math.min(110, 30 + dist * .15);
       var saut = vol.bonds > 1 ? Math.abs(Math.sin(p * Math.PI * vol.bonds)) : Math.sin(p * Math.PI);
       pos.x = vol.de.x + dx * e; pos.y = vol.de.y + (c.y - vol.de.y) * e - saut * haut; pos.s = vol.de.s + (c.s - vol.de.s) * e;
       pos.o = Math.min(1, pos.o + dt * 5); if (c.o === 0 && p > .85) pos.o = Math.max(0, (1 - p) / .15);
-      var dir = dx < 0 ? -1 : 1, rotY = vol.tour ? p * 360 * vol.tour : dir * 28 * Math.sin(p * Math.PI);
-      var ecrase = p < .1 ? 1 - p / .1 : p > .9 ? (p - .9) / .1 : 0;
-      poser(pos.x, pos.y, pos.s, pos.o, rotY, dir * 9 * Math.sin(p * Math.PI * 2), 1 + ecrase * .12, 1 - ecrase * .14 + Math.sin(p * Math.PI) * .06);
-      if (p >= 1) { vol = null; if (corps.animate && !CALME) corps.animate([{ transform: 'scale(1.14,.84)' }, { transform: 'scale(.96,1.05)' }, { transform: 'none' }], { duration: 380, easing: 'ease-out' }); }
+      var dir = dx < 0 ? -1 : 1, rotY = vol.tour ? p * 360 * vol.tour : dir * 12 * Math.sin(p * Math.PI);
+      var ecrase = 0;
+      poser(pos.x, pos.y, pos.s, pos.o, rotY, dir * 3 * Math.sin(p * Math.PI), 1, 1 + Math.sin(p * Math.PI) * .03);
+      if (p >= 1) { vol = null; if (corps.animate && !CALME) corps.animate([{ transform: 'scale(1.05,.95)' }, { transform: 'none' }], { duration: 220, easing: 'ease-out' }); }
       return;
     }
-    var k = CALME ? 1 : 1 - Math.exp(-dt * 9);
+    var k = CALME ? 1 : 1 - Math.exp(-dt * 14);
     if (!CALME && pos.o > .05 && c.o > 0 && Math.hypot(c.x - pos.x, c.y - pos.y) > 240) { voler(pos); return; }   // grand changement : il s'envole
     pos.x += (c.x - pos.x) * k; pos.y += (c.y - pos.y) * k; pos.s += (c.s - pos.s) * k; pos.o += (c.o - pos.o) * Math.min(1, k * 1.4);
-    var flotte = CALME ? 0 : Math.sin(now / 520) * 3;
-    poser(pos.x, pos.y + flotte, pos.s, pos.o, 0, CALME ? 0 : Math.sin(now / 900) * 1.5);
+    var flotte = CALME ? 0 : Math.sin(now / 900) * 2;
+    poser(pos.x, pos.y + flotte, pos.s, pos.o, 0, 0);
     document.body.classList.toggle('dt-dehors', mode === 'accueil' && section >= 0);
   }
 
@@ -126,7 +126,7 @@
   function sautille(force) {
     if (CALME || !corps.animate) return;
     var f = force || 1;
-    corps.animate([{ transform: 'translateY(0) scale(1.08,.9)' }, { transform: 'translateY(' + (-22 * f) + 'px) scale(.94,1.08)' }, { transform: 'translateY(0) scale(1.1,.88)' }, { transform: 'none' }], { duration: 460, easing: 'ease-out' });
+    corps.animate([{ transform: 'none' }, { transform: 'translateY(' + (-10 * f) + 'px)' }, { transform: 'none' }], { duration: 300, easing: 'ease-out' });
   }
   function surReponse(ev) {
     if ((mode !== 'question') || !ev.target.closest || !ev.target.closest('#app')) return;
@@ -158,10 +158,10 @@
       var ton = (document.querySelector('#app .carte-resultat') || {}).className || '';
       var cle = /ton-bon/.test(ton) ? 'bon' : /ton-attention/.test(ton) || document.querySelector('#app .soutien') ? 'attention' : /ton-moyen/.test(ton) ? 'moyen' : 'neutre';
       setTimeout(function () { parler((TX.resultat || {})[cle], 3600); }, 900);
-      if (avant !== 'question' && avant !== 'resultat') voler({ x: -160, y: innerHeight * .4, s: pos.s }, { dur: 900 });
+      if (avant !== 'question' && avant !== 'resultat') voler({ x: -160, y: innerHeight * .4, s: pos.s }, { dur: 480 });
     }
     if (type === 'question' && avant !== 'question' && avant !== 'resultat' && !vol) {
-      voler({ x: innerWidth + 40, y: innerHeight * .45, s: mobile() ? 64 : 112 }, { dur: 1000, bonds: 3, haut: 90 });
+      voler({ x: innerWidth + 40, y: innerHeight * .45, s: mobile() ? 64 : 112 }, { dur: 520, haut: 40 });
       pos.o = 1;
     }
   }
@@ -177,10 +177,10 @@
     c.classList.add('page-sortante');
     c.style.cssText = 'position:fixed;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;margin:0;pointer-events:none;z-index:40;transform-origin:0 50%';
     document.body.appendChild(c);
-    var a = c.animate([{ transform: 'perspective(1400px) rotateY(0) translateX(0)', opacity: 1 }, { transform: 'perspective(1400px) rotateY(55deg) translateX(-40%)', opacity: 0 }], { duration: 560, easing: 'cubic-bezier(.55,0,.75,.2)', fill: 'forwards' });
+    var a = c.animate([{ transform: 'perspective(1400px) rotateY(0) translateX(0)', opacity: 1 }, { transform: 'perspective(1400px) rotateY(18deg) translateX(-12%)', opacity: 0 }], { duration: 320, easing: 'cubic-bezier(.4,0,.75,.2)', fill: 'forwards' });
     a.onfinish = function () { c.remove(); };
-    setTimeout(function () { if (c.parentNode) c.remove(); }, 900);
-    voler({ x: innerWidth + 30, y: innerHeight * .42, s: mobile() ? 70 : 118 }, { dur: 1050, bonds: 3, haut: mobile() ? 70 : 110 });
+    setTimeout(function () { if (c.parentNode) c.remove(); }, 500);
+    voler({ x: innerWidth + 30, y: innerHeight * .42, s: mobile() ? 70 : 118 }, { dur: 480, haut: mobile() ? 30 : 45 });
     pos.o = 1; image('saute', 1000);
   }
   window.Compagnon = { init: init, page: page, masquer: masquer, traverser: traverser, parler: parler };
