@@ -57,7 +57,7 @@
     clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove('visible'); }, 2600);
   }
   function afficher(noeuds, classe) {
-    if (window.Compagnon) window.Compagnon.page(classe === 'page-accueil' ? 'accueil' : 'cache');
+    if (window.Compagnon) window.Compagnon.page('cache');   // sur l'accueil, c'est la troupe (js/troupe.js)
     app.className = 'page ' + (classe || '');
     document.body.classList.add('clair');
     app.style.removeProperty('--accent');
@@ -1046,6 +1046,7 @@
       ])
     ], 'page-accueil');
     animerAccueil();
+    if (window.Troupe) window.Troupe.monter(app);
     if (window.Accueil3D) window.Accueil3D.monter(tunnel);
   }
   /* révélations au défilement, compteurs, texte qui glisse avec le défilement */

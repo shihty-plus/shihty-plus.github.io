@@ -1646,3 +1646,7 @@ body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opa
 .question.repliable { transition: padding .2s, background .15s; }
 .question.repondu .rep-resume { animation-duration: .18s; }
 .option, .option.riche { transition-duration: .06s !important; }
+/* v25 — troupe de Dittou sur l'accueil (js/troupe.js) */
+.troupe { position: fixed; inset: 0; z-index: 25; pointer-events: none; overflow: hidden; }
+.tr-d { position: absolute; left: 0; top: 0; will-change: transform; transform-origin: 50% 60%; }
+.tr-d img { display: block; width: 100%; height: auto; user-select: none; }
