@@ -1641,3 +1641,8 @@ body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opa
 @keyframes glisse-arriere { from { opacity: 0; transform: perspective(1400px) translateX(-24px) rotateY(6deg); } }
 .glisse-avant, .glisse-arriere, body.clair .page-questionnaire .carte-theme.glisse-avant, body.clair .page-questionnaire .carte-theme.glisse-arriere { animation-duration: .32s !important; animation-timing-function: cubic-bezier(.2, .7, .2, 1) !important; }
 .dt-bulle { transition: opacity .2s, transform .22s ease-out; }
+/* v24 — réponse instantanée */
+.question.repliable > .options, .question.repliable > .aide, .question.repliable > .note { transition: max-height .22s cubic-bezier(.4, 0, .2, 1), opacity .14s, margin .2s; }
+.question.repliable { transition: padding .2s, background .15s; }
+.question.repondu .rep-resume { animation-duration: .18s; }
+.option, .option.riche { transition-duration: .06s !important; }

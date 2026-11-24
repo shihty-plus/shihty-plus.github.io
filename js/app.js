@@ -436,7 +436,7 @@
       q.addEventListener('change', function (ev) {
         if (ev.target.type !== 'radio' || !maj()) return;
         clearTimeout(minut);
-        minut = setTimeout(function () { q.classList.add('repondu'); }, 380);   // on laisse voir le choix, puis la carte se replie
+        minut = setTimeout(function () { q.classList.add('repondu'); }, 130);   // on laisse voir le choix, puis la carte se replie
       });
       resume.addEventListener('click', function () { clearTimeout(minut); q.classList.remove('repondu'); });
     });
@@ -448,7 +448,7 @@
     var dest = cible || app.querySelector('.nav');
     if (!dest) return;
     if (REPLI) {   // la carte se replie : on ne fait défiler que si la question suivante sort de l'écran
-      setTimeout(function () { var r = dest.getBoundingClientRect(); if (r.top < 70 || r.bottom > innerHeight - 20) dest.scrollIntoView({ behavior: CALME ? 'auto' : 'smooth', block: cible ? 'center' : 'end' }); }, 820);
+      setTimeout(function () { var r = dest.getBoundingClientRect(); if (r.top < 70 || r.bottom > innerHeight - 20) dest.scrollIntoView({ behavior: CALME ? 'auto' : 'smooth', block: cible ? 'center' : 'end' }); }, 260);
       return;
     }
     setTimeout(function () { dest.scrollIntoView({ behavior: CALME ? 'auto' : 'smooth', block: cible ? 'center' : 'end' }); }, 180);
