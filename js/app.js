@@ -239,8 +239,16 @@
   }
   function apresChangement(v, noeud) {
     if (noeud) { var q = noeud.closest('.question'); if (q) retirerErreur(q); }
-    if (PILOTES.has(v)) rendreQuestionnaire(true);
+    if (PILOTES.has(v) && affichageChange()) rendreQuestionnaire(true);   // on ne redessine la page que si une question apparaît ou disparaît
   }
+  /* Les questions visibles de la page en cours ont-elles changé ? (évite de tout redessiner à chaque réponse) */
+  var SIGNATURE = '';
+  function signatureVisibles() {
+    var e = ECRANS[etat.i]; if (!e || e.type !== 'q') return '';
+    var eff = Schema.effectives(Q, etat.reponses);
+    return e.elements.map(function (el) { return eff.visibles.has(el) ? 1 : 0; }).join('');
+  }
+  function affichageChange() { return signatureVisibles() !== SIGNATURE; }
   function retirerErreur(q) {
     q.classList.remove('en-erreur');
     var e = q.querySelector(':scope > .erreur'); if (e) e.remove();
@@ -631,6 +639,7 @@
     return h('span', { class: 'compteur', dir: 'ltr', text: pos + ' / ' + n });
   }
   function rendreQuestionnaire(conserverDefilement) {
+    SIGNATURE = '';
     REPLI = false;
     if (!conserverDefilement) { app.classList.remove('revoir-on'); ECLATEES = {}; }   // nouvelle page (ou retour) : tout est affiché
     var y = window.scrollY;
@@ -707,6 +716,7 @@
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (ecran.type === 'station' && !SAISIE) lancerVoyage3D(ecran);
     if (ecran.type === 'q' && !SAISIE && !ecran.unique) replierReponses();
+    SIGNATURE = signatureVisibles();
     if (ecran.quiz !== undefined && T.quiz && window.Compagnon) {   // Dittou encourage pendant le quiz
       var paliers = T.quiz.paliers || {}; if (paliers[ecran.quiz]) setTimeout(function () { window.Compagnon.parler(paliers[ecran.quiz], 2200); }, 200);
     }

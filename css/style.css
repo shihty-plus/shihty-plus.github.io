@@ -1768,3 +1768,10 @@ body.mode-quiz .item-unique > legend { font-size: 22px; }
 /* personnalité : pages de 5 */
 body.mode-quiz .item > legend { font-size: 18px; }
 .dem-ruban { direction: ltr; }
+/* v34 — fluidité sur téléphone : effets graphiques coûteux allégés */
+.decor > span { filter: none !important; -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent); mask-image: radial-gradient(closest-side, #000 20%, transparent); will-change: transform; }
+@media (max-width: 900px) {
+  * { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  body.clair .entete { background: rgba(4, 32, 31, .94); }
+  .btt-img, .dt-img, .tr-d img, .dem-perso, .dem-ditto img { filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .28)) !important; }
+}
