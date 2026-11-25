@@ -1694,19 +1694,9 @@ body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opa
 .quiz-intro { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: linear-gradient(90deg, #FFF1E8, #E7F7F4); color: #17302F; font-weight: 800; font-size: 15px; text-align: center; }
 body.mode-quiz .compteur { font-size: 15px; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: #0D9488; color: #fff; }
 body.mode-quiz .item-unique > legend { font-size: 22px; }
-/* v29 — écran de démarrage : on plonge dans l'écran du téléphone de Dittou */
-.dem-ditto { transform-origin: 55% 40%; }
-.dem-ecran { position: absolute; left: 33%; top: 15%; width: 45%; height: 52%; border-radius: 12%; background: #0E1A3A; opacity: 0; }
-.demarrage.plonge .dem-bulle, .demarrage.plonge .dem-btn { opacity: 0; transform: scale(.9); transition: opacity .2s, transform .2s; }
-.demarrage.plonge .dem-ditto { animation: dem-plonge .95s cubic-bezier(.6, 0, .35, 1) forwards; }
-.demarrage.plonge .dem-ecran { animation: dem-ecran .95s ease-in forwards; }
-.demarrage.plonge .dem-halo { opacity: 0; }
-@keyframes dem-plonge { 0% { transform: scale(1); } 15% { transform: scale(.94); } 100% { transform: scale(16); } }
-@keyframes dem-ecran { 0%, 45% { opacity: 0; } 100% { opacity: 1; } }
-.demarrage.sortie { animation: dem-sortie2 .65s ease-out forwards; }
-@keyframes dem-sortie2 { to { opacity: 0; } }
-/* le site « sort » de l'écran : il grandit depuis le centre */
-#app.sort-du-tel { animation: app-du-tel 1.3s cubic-bezier(.2, .8, .2, 1) .55s both; transform-origin: 50% 35vh; }
-@keyframes app-du-tel { from { transform: scale(.82); opacity: 0; filter: blur(6px); } to { transform: none; opacity: 1; filter: none; } }
+/* v29 — écran de démarrage : Mochi s'envole vers sa place sur l'accueil */
 .dem-bulle { font-size: 22px; padding: 12px 22px; }
-@media (prefers-reduced-motion: reduce) { .demarrage.plonge .dem-ditto { animation: none; } #app.sort-du-tel { animation: none; } }
+.demarrage.plonge .dem-bulle, .demarrage.plonge .dem-btn, .demarrage.plonge .dem-halo { opacity: 0; transform: scale(.9); transition: opacity .2s, transform .2s; }
+.demarrage.sortie { animation: dem-sortie2 .7s ease-out forwards; pointer-events: none; }
+@keyframes dem-sortie2 { to { opacity: 0; } }
+.dem-vol { position: fixed; z-index: 101; transform-origin: 0 0; pointer-events: none; filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .35)); }

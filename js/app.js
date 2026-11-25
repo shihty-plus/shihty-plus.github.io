@@ -1016,7 +1016,7 @@
     var ditto = h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' }), h('span', { class: 'dem-ecran' })]);
     var fond = h('div', { class: 'demarrage', role: 'dialog', 'aria-label': D.bulle || 'SHIHTY+' }, [
       h('div', { class: 'dem-centre' }, [
-        h('p', { class: 'dem-bulle', text: D.bulle || 'أنا ديتو، مرحبا بيك 👋' }),
+        h('p', { class: 'dem-bulle', text: D.bulle || 'أنا موتشي، مرحبا بيك 👋' }),
         ditto,
         h('button', { type: 'button', class: 'btn btn-principal dem-btn', text: D.bouton || 'اضغط(ي) هنا للدخول' })
       ])
@@ -1024,11 +1024,30 @@
     function entrer() {
       if (fond.classList.contains('plonge')) return;
       if (window.Sons) { window.Sons.demarrerMusique(); window.Sons.jouer('whoosh'); }
-      // on plonge dans l'écran du téléphone de Dittou, puis le site apparaît à l'intérieur
-      fond.classList.add('plonge'); app.classList.add('sort-du-tel');
-      setTimeout(function () { fond.classList.add('sortie'); }, 820);
-      setTimeout(function () { fond.remove(); app.classList.remove('sort-du-tel'); if (window.Sons) window.Sons.jouer('bonjour'); }, 1500);
-      try { window.dispatchEvent(new PointerEvent('pointermove', { clientX: innerWidth / 2, clientY: innerHeight / 3 })); } catch (e) { /* ancien navigateur */ }   // Dittou se réveille et regarde le visiteur
+      fond.classList.add('plonge');
+      try { window.dispatchEvent(new PointerEvent('pointermove', { clientX: innerWidth / 2, clientY: innerHeight / 3 })); } catch (e) { /* ancien navigateur */ }
+      // Mochi quitte l'écran de départ et vole directement à sa place sur l'accueil
+      var img = ditto.querySelector('img'), de = img.getBoundingClientRect();
+      var cible = app.querySelector('.viv-cadre .btt-corps'), a = cible ? cible.getBoundingClientRect() : null;
+      if (!a || !a.width || !img.animate || (window.FX && window.FX.calme)) { fin(); return; }
+      var vol = img.cloneNode(); vol.className = 'dem-vol';
+      vol.style.cssText = 'left:' + de.left + 'px;top:' + de.top + 'px;width:' + de.width + 'px;height:' + de.height + 'px';
+      document.body.appendChild(vol); img.style.visibility = 'hidden';
+      var hA = a.width * de.height / de.width, dx = a.left - de.left, dy = a.top + a.height - hA - de.top, k = a.width / de.width;
+      var portrait = app.querySelector('.viv'); if (portrait) portrait.style.opacity = '0';
+      vol.animate([
+        { transform: 'translate(0,0) scale(1)' },
+        { transform: 'translate(' + dx * .5 + 'px,' + (dy * .5 - 90) + 'px) scale(' + (1 + (k - 1) * .5) + ') rotate(-8deg)', offset: .5 },
+        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + k + ')' }
+      ], { duration: 900, easing: 'cubic-bezier(.45,0,.25,1)', fill: 'forwards' }).onfinish = function () {
+        if (portrait) { portrait.style.transition = 'opacity .25s'; portrait.style.opacity = ''; }
+        setTimeout(function () { vol.remove(); }, 260);
+        fin();
+      };
+      fond.classList.add('sortie');
+    }
+    function fin() {
+      setTimeout(function () { fond.remove(); if (window.Sons) window.Sons.jouer('bonjour'); }, 200);
     }
     fond.addEventListener('click', entrer);
     fond.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') entrer(); });

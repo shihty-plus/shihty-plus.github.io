@@ -1,4 +1,4 @@
-/* avatar.js — Dittou (ديتو), la mascotte de SHIHTY+ (images dans assets/bitto/, fond retiré).
+/* avatar.js — Dittou (موتشي), la mascotte de SHIHTY+ (images dans assets/bitto/, fond retiré).
    Avatar.src(nom)          chemin d'une image : 'salut', 'yeux', 'rit', 'surpris', 'coeurs', 'fatigue', 'dort', 'agace', 'bas', 'saute', 'dos'
    Avatar.pose(nom)         <span><img></span> d'une image de Dittou
    Avatar.portrait(boite)   accueil : Dittou vivant. Ses pupilles (dessinées par code sur l'image « yeux ») suivent
@@ -57,7 +57,7 @@
     TX = TX || {};
     boite.classList.add('btt');
     boite.innerHTML = '<div class="btt-ombre"></div><div class="btt-corps"><div class="btt-in"><div class="btt-pile"></div>' + yeuxSvg() + '</div></div><div class="viv-effets"></div><p class="btt-bulle" aria-live="polite"></p>' +
-      '<div class="btt-reac" role="group" aria-label="تفاعل مع ديتو">' + REACTIONS.map(function (r, i) {
+      '<div class="btt-reac" role="group" aria-label="تفاعل مع موتشي">' + REACTIONS.map(function (r, i) {
         return '<button type="button" class="btt-r" data-i="' + i + '" style="--i:' + i + '" aria-label="' + r[2] + '"><span class="btt-r-em">' + r[0] + '</span><span class="btt-r-nom">' + r[2] + '</span></button>';
       }).join('') + '</div>';
     var bulleEl = boite.querySelector('.btt-bulle'), bulleMin = null;
