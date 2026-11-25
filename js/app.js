@@ -179,12 +179,12 @@
             return;
           }
           if (!ech) { ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, debutPartie: premier }); premier = false; return; }
-          if (ech.quiz && !SAISIE) {   // une phrase par carte, passage automatique (BFI)
-            ech.items.forEach(function (it, k) {
-              ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, echelle: ech, items: [it],
-                dernierBloc: k === ech.items.length - 1, debutPartie: premier, unique: true, quiz: k });
+          if (ech.quiz && !SAISIE) {   // personnalité : pages de 5 phrases, passage automatique quand les 5 sont répondues
+            for (var q0 = 0, pg = 0; q0 < ech.items.length; q0 += 5, pg++) {
+              ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, echelle: ech, items: ech.items.slice(q0, q0 + 5),
+                dernierBloc: q0 + 5 >= ech.items.length, debutPartie: premier, quiz: pg, quizDe: q0 });
               premier = false;
-            });
+            }
             return;
           }
           var n = ech.items.length;
@@ -466,7 +466,17 @@
       resume.addEventListener('click', function () { clearTimeout(minut); q.classList.remove('repondu'); });
     });
   }
+  /* jeux de pause : la musique de l'accueil joue pendant la pause, puis s'arrête au retour au questionnaire */
+  function ouvrirJeux() {
+    if (!window.Jeux) return;
+    if (window.Sons) window.Sons.ambiance('jeu');
+    window.Jeux.ouvrir(T.jeux, function () { if (window.Sons && !document.querySelector('.page-accueil')) window.Sons.ambiance(null); });
+  }
   function allerAuSuivant(input) {
+    if (document.body.classList.contains('mode-quiz')) {   // page de 5 phrases complète : page suivante toute seule
+      var items = app.querySelectorAll('.question.item');
+      if ([].every.call(items, function (q) { return q.querySelector('input:checked'); })) { setTimeout(avanceAutomatique, 250); return; }
+    }
     var item = input.closest('.item'); if (!item) return;
     var suivants = Array.prototype.slice.call(app.querySelectorAll('.item'));
     var cible = suivants.slice(suivants.indexOf(item) + 1).find(function (n) { return vide(etat.reponses[n.getAttribute('data-var')]); });
@@ -582,7 +592,7 @@
           h('h1', { class: 'station-titre' }, [h('span', { 'aria-hidden': 'true', text: icone(p.id) + ' ' }), p.titre]),
           window.Jeux && T.jeux ? h('div', { class: 'pause-invit' }, [
             h('span', { class: 'pause-invit-t', text: T.jeux.invitation }),
-            bouton(T.jeux.bouton, 'btn-pause', function () { window.Jeux.ouvrir(T.jeux, function () {}); })
+            bouton(T.jeux.bouton, 'btn-pause', ouvrirJeux)
           ]) : null,
           h('div', { class: 'nav' }, [precedent, bouton(v.entrer, 'btn-principal', avancer, { id: 'btn-suivant' })])
         ])
@@ -680,7 +690,7 @@
         h('section', { class: 'carte carte-theme glisse-' + SENS + (ecran.unique ? ' carte-question' : '') }, [
           SAISIE || !ecran.debutPartie ? null : bandeauTheme(ecran.partie),   // bannière seulement sur la 1re page de la station
           h('h2', { class: 'titre-partie' }, [h('span', { class: 'titre-partie-icone', 'aria-hidden': 'true', text: icone(ecran.partie.id) }), h('span', { text: ecran.partie.titre }),
-            ecran.unique ? compteurPartie(ecran, eff) : null])
+            ecran.quiz !== undefined ? h('span', { class: 'compteur', dir: 'ltr', text: (ecran.quizDe + ecran.items.length) + ' / ' + ecran.echelle.items.length }) : ecran.unique ? compteurPartie(ecran, eff) : null])
         ].concat(contenu)),
         h('p', { class: 'resume-erreurs', id: 'resume-erreurs', role: 'alert', hidden: true, text: T.erreurs.resume }),
         h('div', { class: 'nav' }, [
@@ -1024,12 +1034,12 @@
      Ce premier toucher autorise le son : la musique démarre en même temps que l'accueil s'ouvre. */
   function ecranDemarrage() {
     var D = T.demarrage || {};
-    var ditto = h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('span', { class: 'dem-coeurs', 'aria-hidden': 'true' }, ['💚', '✨', '💕', '✨'].map(function (e, i) { return h('i', { style: '--i:' + i, text: e }); })), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' }), h('span', { class: 'dem-ecran' })]);
+    var ditto = h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' }), h('span', { class: 'dem-ecran' })]);
     var flotte = ['❤️', '👍', '💬', '🔔', '📸', '▶️', '🎮', '🎵', '📩', '⭐'];
     var fond = h('div', { class: 'demarrage', role: 'dialog', 'aria-label': D.bulle || 'SHIHTY+' }, [
       h('div', { class: 'dem-deco', 'aria-hidden': 'true' }, flotte.map(function (e, i) { return h('span', { class: 'dem-icone', style: '--i:' + i, text: e }); })),
       h('div', { class: 'dem-rubans', 'aria-hidden': 'true' }, ((T.accueil2 || {}).cinetique || []).slice(0, 2).map(function (ligne, k) {
-        var mots = ligne.map(function (m) { return m[0]; }), suite = mots.concat(mots, mots, mots);
+        var mots = ligne.map(function (m) { return m[0]; }), suite = mots.concat(mots, mots, mots, mots, mots, mots, mots);
         return h('div', { class: 'dem-ruban r' + k }, [h('div', { class: 'dem-ruban-in' }, suite.map(function (m) { return h('span', { text: m }); }))]);
       })),
       h('img', { class: 'dem-perso g', src: 'assets/persos/garcon-face.webp', alt: '', 'aria-hidden': 'true' }),
@@ -1520,7 +1530,7 @@
     document.getElementById('carte-bouton-texte').textContent = T.voyage.bouton_carte;
     document.getElementById('btn-carte').addEventListener('click', ouvrirCarte);
     document.getElementById('jeux-bouton-texte').textContent = T.jeux.entete;
-    document.getElementById('btn-jeux').addEventListener('click', function () { if (window.Jeux) window.Jeux.ouvrir(T.jeux, function () {}); });
+    document.getElementById('btn-jeux').addEventListener('click', ouvrirJeux);
     var lien = document.getElementById('lien-aide');
     lien.textContent = T.aide.lien; lien.addEventListener('click', ouvrirAide);
     var bandeau = document.getElementById('bandeau');

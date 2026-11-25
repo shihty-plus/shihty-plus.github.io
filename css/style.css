@@ -1760,3 +1760,10 @@ body.mode-quiz .item-unique > legend { font-size: 22px; }
 @keyframes dem-defile { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .dem-rubans.part { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .dem-ruban-in { animation: none; } }
+/* v33 — écran de départ : rubans verticaux (légèrement inclinés) */
+.dem-ruban { top: 50%; left: auto; width: 170vh; padding: 10px 0; }
+.dem-ruban.r0 { left: 24%; transform: translate(-50%, -50%) rotate(84deg); }
+.dem-ruban.r1 { top: 50%; left: 76%; transform: translate(-50%, -50%) rotate(-86deg); }
+@media (max-width: 600px) { .dem-ruban.r0 { left: 16%; } .dem-ruban.r1 { left: 84%; } .dem-ruban-in span { font-size: 22px; } }
+/* personnalité : pages de 5 */
+body.mode-quiz .item > legend { font-size: 18px; }
