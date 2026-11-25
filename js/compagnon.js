@@ -72,11 +72,12 @@
     var quiz = document.body.classList.contains('mode-quiz');
     if (mobile()) {
       if (quiz) return { x: 4, y: innerHeight - h * .58, s: s, o: 1, img: imgR, peek: true };   // quiz : il reste en bas, sans cacher les réponses
-      if (btn && visibleR(btn) && btn.top < innerHeight - 30) return { x: btn.left + 4, y: btn.top - h + 10, s: s, o: 1, img: complet ? 'coeurs' : imgR };
       return { x: 4, y: innerHeight - h * (complet || mode === 'resultat' ? .98 : .58), s: s, o: 1, img: imgR, peek: !complet };
     }
-    var x = carte ? Math.max(8, carte.left - s - 22) : 8;
-    if (btn && visibleR(btn) && complet) return { x: Math.max(8, btn.left - s - 10), y: btn.top + btn.height / 2 - h * .55, s: s, o: 1, img: 'coeurs' };
+    // position de la carte SANS ses animations (sinon Mochi suit la carte qui glisse, puis revient)
+    var c0 = document.querySelector('#app .carte'), ra = document.getElementById('app').getBoundingClientRect();
+    var gauche = c0 ? ra.left + c0.offsetLeft : (carte ? carte.left : 30);
+    var x = Math.max(8, gauche - s - 22);
     return { x: x, y: innerHeight - h - 36, s: s, o: 1, img: imgR };
   }
   function cible() {
@@ -165,7 +166,7 @@
       if (avant !== 'question' && avant !== 'resultat') voler({ x: -160, y: innerHeight * .4, s: pos.s }, { dur: 480 });
     }
     if (type === 'question' && avant !== 'question' && avant !== 'resultat' && !vol) {
-      voler({ x: innerWidth + 40, y: innerHeight * .45, s: mobile() ? 64 : 112 }, { dur: 520, haut: 40 });
+      voler({ x: -140, y: innerHeight * .7, s: mobile() ? 64 : 112 }, { dur: 520, haut: 40 });   // il arrive par la gauche, où il reste
       pos.o = 1;
     }
   }
@@ -184,7 +185,7 @@
     var a = c.animate([{ transform: 'perspective(1400px) rotateY(0) translateX(0)', opacity: 1 }, { transform: 'perspective(1400px) rotateY(18deg) translateX(-12%)', opacity: 0 }], { duration: 320, easing: 'cubic-bezier(.4,0,.75,.2)', fill: 'forwards' });
     a.onfinish = function () { c.remove(); };
     setTimeout(function () { if (c.parentNode) c.remove(); }, 500);
-    voler({ x: innerWidth + 30, y: innerHeight * .42, s: mobile() ? 70 : 118 }, { dur: 480, haut: mobile() ? 30 : 45 });
+    sautille(1.2);
     pos.o = 1; image('saute', 1000);
   }
   window.Compagnon = { init: init, page: page, masquer: masquer, traverser: traverser, parler: parler };

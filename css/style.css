@@ -1775,3 +1775,36 @@ body.mode-quiz .item > legend { font-size: 18px; }
   body.clair .entete { background: rgba(4, 32, 31, .94); }
   .btt-img, .dt-img, .tr-d img, .dem-perso, .dem-ditto img { filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .28)) !important; }
 }
+
+/* v35 — réponses toujours horizontales (aussi sur téléphone) */
+.options.opts-v { display: flex !important; flex-wrap: wrap; gap: 8px; }
+.options.opts-v > .option { flex: 1 1 calc(33.333% - 8px); min-width: 0; justify-content: center !important; text-align: center; }
+.options.opts-v:has(> .option:nth-child(4):last-child) > .option, .options.opts-v:has(> .option:nth-child(2):last-child) > .option { flex-basis: calc(50% - 8px); }
+.options.opts-v > .option .option-texte { text-align: center; }
+.options.opts-v.avec-barre > .option.riche { padding: 10px 8px; justify-content: center; }
+@media (max-width: 600px) { .options.opts-v > .option .option-texte { font-size: 14.5px; } }
+/* écran de départ (téléphone) : rubans collés aux bords, pour ne pas passer sous le bouton */
+@media (max-width: 600px) {
+  .dem-ruban { padding: 6px 0; }
+  .dem-ruban.r0 { left: 5%; transform: translate(-50%, -50%) rotate(88deg); }
+  .dem-ruban.r1 { left: 95%; transform: translate(-50%, -50%) rotate(-88deg); }
+  .dem-ruban-in span { font-size: 17px; }
+  .dem-btn { font-size: 17px; padding: 12px 22px; max-width: 76vw; }
+}
+/* v35 — toutes les réponses en ligne, même sur téléphone (échelles de 6 ou 7 choix comprises) */
+.options.opts-likert { display: grid !important; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 4px; }
+.options.opts-likert > .option.riche { flex-direction: column; justify-content: center; text-align: center; padding: 8px 2px; min-width: 0; }
+.options.opts-likert > .option .option-texte { text-align: center; line-height: 1.3; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .options.opts-likert > .option .option-texte { font-size: 11.5px; }
+  .options.opts-likert[style*="--n:7"] > .option .option-texte { font-size: 10.5px; }
+  .options.opts-likert > .option.riche { padding: 7px 1px; border-top-width: 5px; }
+}
+/* écran de départ sur téléphone : les rubans restent sur les bords, le bouton ne les touche pas */
+@media (max-width: 600px) {
+  .dem-ruban { padding: 6px 0; }
+  .dem-ruban.r0 { left: 6%; } .dem-ruban.r1 { left: 94%; }
+  .dem-ruban-in span { font-size: 17px; }
+  .dem-btn { max-width: 70vw; font-size: 17px; padding: 12px 18px; white-space: nowrap; }
+  .dem-bulle { max-width: 70vw; }
+}
