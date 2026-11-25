@@ -1661,3 +1661,7 @@ body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opa
 .tr-onde.d i { left: 0; border-left-color: transparent; border-top-color: transparent; border-bottom-color: transparent; border-radius: 0 100% 100% 0 / 0 50% 50% 0; transform-origin: 0 50%; }
 @keyframes tr-onde { from { transform: scale(.4); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .tr-onde { display: none; } }
+.tr-ondes-portrait { position: absolute; left: 50%; bottom: 5%; height: 90%; aspect-ratio: 682 / 720; translate: -50% 0; pointer-events: none; z-index: 2; --sonne: 0; }
+.tr-ondes-portrait .tr-onde { width: 22%; }
+.tr-ondes-portrait .tr-onde.g { right: 88%; } .tr-ondes-portrait .tr-onde.d { left: 88%; }
+.tr-ondes-portrait .tr-onde i { border-width: 6px; }
