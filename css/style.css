@@ -1671,3 +1671,6 @@ body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opa
 .son-btn.off#btn-musique svg { position: relative; }
 .son-btn.off#btn-musique::after { content: ""; position: absolute; width: 22px; height: 2px; background: currentColor; transform: rotate(-45deg); }
 .son-btn { position: relative; }
+/* bouton musique : clignote doucement quand le navigateur attend un premier toucher pour lancer la musique */
+.son-btn.attend { animation: son-attend 1.4s ease-in-out infinite; }
+@keyframes son-attend { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 127, 107, .55); } 50% { box-shadow: 0 0 0 8px rgba(255, 127, 107, 0); } }

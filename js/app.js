@@ -58,7 +58,7 @@
   }
   function afficher(noeuds, classe) {
     if (window.Compagnon) window.Compagnon.page('cache');   // sur l'accueil, c'est la troupe (js/troupe.js)
-    if (window.Sons && classe) window.Sons.ambiance(classe === 'page-accueil' ? 'jeu' : 'nature');   // musique de jeu : accueil seulement ; nature ensuite
+    if (window.Sons && classe) window.Sons.ambiance(classe === 'page-accueil' ? 'jeu' : null);   // musique : page d'accueil seulement
     app.className = 'page ' + (classe || '');
     document.body.classList.add('clair');
     app.style.removeProperty('--accent');
@@ -672,7 +672,7 @@
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (ecran.type === 'station' && !SAISIE) lancerVoyage3D(ecran);
     if (ecran.type === 'q' && !SAISIE && !ecran.unique) replierReponses();
-    if (window.Sons) window.Sons.ambiance('nature');
+    if (window.Sons) window.Sons.ambiance(null);   // la musique s'arrête dès qu'on commence à répondre
     if (window.Sons) window.Sons.sensible(!!ecran.partie && ['3E', '3F', '3G'].indexOf(ecran.partie.id) >= 0 || ecran.cle === 'SOUTIEN');
     if (window.Compagnon) window.Compagnon.page(ecran.type === 'resultat' ? 'resultat' : ecran.type === 'station' ? 'cache' : 'question');
     if (conserverDefilement) {
@@ -1112,6 +1112,7 @@
             if (!cb.checked) { err.hidden = false; return; }
             etat.etape = 'questionnaire'; etat.i = 0; etat.prenom = ''; etat.dernier = Date.now(); sauver(); majSalutation();
             // la carte de toute la route s'affiche d'abord : on voit combien de stations il y a
+            if (window.Sons) window.Sons.ambiance(null);   // le questionnaire commence : la musique s'arrête
             voyageCarte(-1, 0, function () { rendreQuestionnaire(false); }, false, true);
           })
         ])

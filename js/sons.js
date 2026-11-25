@@ -1,8 +1,8 @@
-/* sons.js — effets sonores et fonds sonores (fichiers dans assets/sons/, générés par IA).
-   - Rien ne joue avant le premier geste du visiteur (règle des navigateurs).
-   - Deux fonds : « jeu » (musique de jeu, page d'accueil seulement) et « nature » (ruisseau, oiseaux, vent ; sans instrument)
-     pendant le questionnaire. On passe de l'un à l'autre par un fondu.
-   - Deux boutons dans l'en-tête : effets sonores (🔊) et fond sonore (🍃) ; le choix est gardé.
+/* sons.js — effets sonores et musique de fond (fichiers dans assets/sons/, générés par IA).
+   - Musique de jeu sur la page d'accueil SEULEMENT : elle tente de démarrer dès l'ouverture ; si le navigateur bloque
+     le son sans geste du visiteur (Chrome, Safari…), elle démarre au premier toucher / clic. Elle s'arrête en fondu
+     dès que le questionnaire commence. Pas d'autre fond sonore.
+   - Deux boutons dans l'en-tête : effets sonores (🔊) et musique (🎵) ; le choix est gardé.
    - Parties sensibles (dépression, anxiété, idées suicidaires) : fond plus bas, seulement le clic discret.
    Sons.jouer(nom, volume) ; Sons.sensible(bool) ; Sons.ambiance('jeu' | 'nature' | null) */
 (function () {
@@ -16,7 +16,7 @@
   function lire(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v === '1'; } catch (e) { return d; } }
   function ecrire(k, v) { try { localStorage.setItem(k, v ? '1' : '0'); } catch (e) { /* rien */ } }
   var SAISIE = /[?&]saisie=/.test(location.search);   // saisie des questionnaires papier : silence par défaut
-  var effets = lire('shihty-effets', !SAISIE), musique = lire('shihty-nature', !SAISIE);
+  var effets = lire('shihty-effets', !SAISIE), musique = lire('shihty-musique2', !SAISIE);
 
   function charger(nom, fichier) {
     return fetch(DOSSIER + fichier + '?v=' + (window.SHIHTY_VERSION || '')).then(function (r) { return r.arrayBuffer(); })
@@ -27,7 +27,7 @@
     if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
     var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     ctx = new AC(); maitre = ctx.createGain(); maitre.connect(ctx.destination);
-    charger('jeu', 'musique.mp3').then(appliquer); charger('nature', 'nature.mp3').then(appliquer);
+
     Promise.all(NOMS.map(function (n) { return charger(n, n + '.mp3'); })).then(function () { if (enAttente && document.querySelector('.page-accueil')) { var a = enAttente; enAttente = null; jouer(a[0], a[1]); } });
   }
   ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(function (ev) { document.addEventListener(ev, deverrouiller, { capture: true, passive: true }); });
@@ -44,31 +44,40 @@
     s.buffer = bufs[nom]; g.gain.value = (VOL[nom] || .5) * (vol === undefined ? 1 : vol) * (enSensible ? .6 : 1);
     s.connect(g); g.connect(maitre); s.start();
   }
-  /* fonds sonores en boucle, avec fondu de l'un à l'autre */
-  function appliquer() {
-    if (!ctx) return;
-    ['jeu', 'nature'].forEach(function (n) {
-      var v = musique && voulue === n ? (enSensible ? SENSIBLE : NIVEAUX[n]) : 0, p = pistes[n];
-      if (!p && v > 0 && bufs[n]) {
-        var src = ctx.createBufferSource(), g = ctx.createGain();
-        src.buffer = bufs[n]; src.loop = true; src.loopStart = .03; src.loopEnd = bufs[n].duration - .03;
-        g.gain.value = 0; src.connect(g); g.connect(maitre); src.start(0, .03);
-        p = pistes[n] = { src: src, gain: g };
-      }
-      if (!p) return;
-      var t = ctx.currentTime; p.gain.gain.cancelScheduledValues(t); p.gain.gain.setValueAtTime(p.gain.gain.value, t);
-      p.gain.gain.linearRampToValueAtTime(v, t + (v > 0 ? 2.5 : 1.5));
-    });
+  /* musique de fond : page d'accueil seulement (lecteur audio du navigateur, qui peut démarrer sans clic quand le
+     navigateur l'autorise) ; elle s'arrête en fondu dès qu'on commence à répondre. */
+  var lecteur = null, fondu = null, VOL_JEU = .12;
+  function lecteurMusique() {
+    if (!lecteur) { lecteur = new Audio('assets/sons/musique.mp3?v=' + (window.SHIHTY_VERSION || '')); lecteur.loop = true; lecteur.preload = 'auto'; lecteur.volume = 0; }
+    return lecteur;
   }
-  function ambiance(nom) { if (nom === voulue) return; voulue = nom; appliquer(); }
+  function volVers(cible, ms, fin) {
+    clearInterval(fondu); var a = lecteurMusique(), v0 = a.volume, t0 = performance.now();
+    fondu = setInterval(function () { var k = Math.min(1, (performance.now() - t0) / ms); a.volume = Math.max(0, Math.min(1, v0 + (cible - v0) * k)); if (k >= 1) { clearInterval(fondu); if (fin) fin(); } }, 40);
+  }
+  function appliquer() {
+    var veut = musique && voulue === 'jeu';
+    var a = lecteurMusique();
+    if (veut) {
+      if (a.paused) {
+        var p = a.play();
+        if (p && p.then) p.then(function () { attente(false); volVers(VOL_JEU, 1500); }).catch(function () { attente(true); });   // bloqué : on attend le premier geste
+        else volVers(VOL_JEU, 1500);
+      } else volVers(VOL_JEU, 800);
+    } else if (!a.paused) volVers(0, 1200, function () { a.pause(); });
+  }
+  function attente(v) { var b = document.getElementById('btn-musique'); if (b) b.classList.toggle('attend', v && musique); }
+  function ambiance(nom) { if (nom === 'nature') nom = null; if (nom === voulue) return; voulue = nom; appliquer(); }
   function demarrerMusique() { deverrouiller(); }
-  function sensible(v) { v = !!v; if (v === enSensible) return; enSensible = v; appliquer(); }
+  function sensible(v) { enSensible = !!v; }
+  // au premier geste (si le navigateur avait bloqué), la musique démarre
+  ['pointerdown', 'click', 'keydown', 'touchend'].forEach(function (ev) { document.addEventListener(ev, function () { if (musique && voulue === 'jeu' && lecteur && lecteur.paused) appliquer(); }, { capture: true, passive: true }); });
 
   /* ---------- boutons de l'en-tête ---------- */
   var SVG = {
     effetsOn: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     effetsOff: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-    musique: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 19C5 10 11 4 20 4c0 9-6 15-15 15z" fill="currentColor"/><path d="M5 19c4-5 7-8 11-11" fill="none" stroke="#0B3B3A" stroke-width="1.6" stroke-linecap="round"/></svg>'
+    musique: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 17V5l11-2v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="2.8" fill="currentColor"/><circle cx="17.5" cy="15" r="2.8" fill="currentColor"/></svg>'
   };
   function boutons() {
     var zone = document.querySelector('.entete-droite'); if (!zone || document.getElementById('btn-effets')) return;
@@ -77,12 +86,12 @@
     be.className = bm.className = 'album-btn son-btn';
     function maj() {
       be.innerHTML = effets ? SVG.effetsOn : SVG.effetsOff; be.setAttribute('aria-pressed', effets); be.setAttribute('aria-label', effets ? 'إيقاف المؤثرات الصوتية' : 'تشغيل المؤثرات الصوتية');
-      bm.innerHTML = SVG.musique; bm.classList.toggle('off', !musique); bm.setAttribute('aria-pressed', musique); bm.setAttribute('aria-label', musique ? 'إيقاف الخلفية الصوتية' : 'تشغيل الخلفية الصوتية');
+      bm.innerHTML = SVG.musique; bm.classList.toggle('off', !musique); bm.setAttribute('aria-pressed', musique); bm.setAttribute('aria-label', musique ? 'إيقاف الموسيقى' : 'تشغيل الموسيقى');
       be.classList.toggle('off', !effets);
     }
     be.addEventListener('click', function () { effets = !effets; ecrire('shihty-effets', effets); maj(); jouer('clic'); });
     bm.addEventListener('click', function () {
-      musique = !musique; ecrire('shihty-nature', musique); maj(); deverrouiller();
+      musique = !musique; ecrire('shihty-musique2', musique); maj(); deverrouiller();
       appliquer();
     });
     zone.insertBefore(bm, zone.firstChild); zone.insertBefore(be, zone.firstChild); maj();
@@ -102,5 +111,5 @@
   }, true);
 
   window.Sons = { jouer: jouer, sensible: sensible, demarrerMusique: demarrerMusique, ambiance: ambiance,
-    etat: function () { return { ctx: ctx && ctx.state, charges: Object.keys(bufs).length, fond: voulue, jeu: pistes.jeu && +pistes.jeu.gain.gain.value.toFixed(3), nature: pistes.nature && +pistes.nature.gain.gain.value.toFixed(3), sensible: enSensible, effets: effets }; } };
+    etat: function () { return { ctx: ctx && ctx.state, charges: Object.keys(bufs).length, fond: voulue, musiqueJoue: !!lecteur && !lecteur.paused, volMusique: lecteur && +lecteur.volume.toFixed(3), sensible: enSensible, effets: effets }; } };
 })();
