@@ -98,7 +98,7 @@
       var s = p.s + (q.s - p.s) * e, r = p.r + (q.r - p.r) * e;
       // sonnerie : forte pendant le vol et quand on fait défiler, s'arrête une fois posé
       vitesse += (Math.abs(y - yPrec) - vitesse) * .25; yPrec = y;
-      var cible = Math.max(enVol ? 1 : Math.min(1, vitesse / 25) * .7, sonnerie(t) * .8);
+      var cible = Math.max(enVol ? 1 : 0, sonnerie(t) * .8);   // il vibre seulement quand il sonne (et pendant son vol) : au repos, on peut essayer les réactions
       sonne += (cible - sonne) * .25;
       var fort = t - sonneFort < DUREE ? 2.2 : 1;   // pendant la sonnerie des 30 s, il vibre beaucoup plus fort
       var vib = CALME ? 0 : sonne, jx = Math.sin(t * .19) * 3.2 * vib * fort, jr = Math.sin(t * .23) * 4.5 * vib * fort;
