@@ -1650,3 +1650,14 @@ body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opa
 .troupe { position: fixed; inset: 0; z-index: 25; pointer-events: none; overflow: hidden; }
 .tr-d { position: absolute; left: 0; top: 0; will-change: transform; transform-origin: 50% 60%; }
 .tr-d img { display: block; width: 100%; height: auto; user-select: none; }
+/* v26 — Dittou qui sonne et vole (accueil) */
+.tr-d { --sonne: 0; }
+.tr-d img { filter: drop-shadow(0 18px 22px rgba(0, 0, 0, .35)); }
+.tr-onde { position: absolute; top: 18%; width: 34%; height: 46%; opacity: var(--sonne); pointer-events: none; }
+.tr-onde.g { right: 96%; } .tr-onde.d { left: 96%; }
+.tr-onde i { position: absolute; top: 50%; width: 60%; aspect-ratio: 1 / 2; translate: 0 -50%; border: 4px solid #5EEAD4; border-radius: 50%; animation: tr-onde .5s ease-out infinite; }
+.tr-onde i + i { animation-delay: .25s; border-color: #FF7F6B; }
+.tr-onde.g i { right: 0; border-right-color: transparent; border-top-color: transparent; border-bottom-color: transparent; border-radius: 100% 0 0 100% / 50% 0 0 50%; transform-origin: 100% 50%; }
+.tr-onde.d i { left: 0; border-left-color: transparent; border-top-color: transparent; border-bottom-color: transparent; border-radius: 0 100% 100% 0 / 0 50% 50% 0; transform-origin: 0 50%; }
+@keyframes tr-onde { from { transform: scale(.4); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tr-onde { display: none; } }
