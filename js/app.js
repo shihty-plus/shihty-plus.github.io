@@ -671,6 +671,7 @@
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (ecran.type === 'station' && !SAISIE) lancerVoyage3D(ecran);
     if (ecran.type === 'q' && !SAISIE && !ecran.unique) replierReponses();
+    if (window.Sons) window.Sons.sensible(!!ecran.partie && ['3E', '3F', '3G'].indexOf(ecran.partie.id) >= 0 || ecran.cle === 'SOUTIEN');
     if (window.Compagnon) window.Compagnon.page(ecran.type === 'resultat' ? 'resultat' : ecran.type === 'station' ? 'cache' : 'question');
     if (conserverDefilement) {
       window.scrollTo(0, y);
@@ -718,7 +719,7 @@
     if (SAISIE) { montrer(); return; }
     // entrer dans une station : une porte s'ouvre
     if (avant.type === 'station' && e2.type === 'q' && window.FX) {
-      var porte = function () { window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer); };
+      var porte = function () { if (window.Sons) window.Sons.jouer('porte'); window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer); };
       porte();
       return;
     }
@@ -892,6 +893,7 @@
     if (liste.length > 1) { liste = liste.slice(-1); majCompteAlbum(); }
     liste.forEach(function (p) {
       toast(T.album.nouveau.replace('{nom}', p.titre));
+      if (window.Sons) window.Sons.jouer('recompense');
       if (window.FX) window.FX.debloquer(icone(p.id), theme(p).couleur, cible, majCompteAlbum);
     });
   }
@@ -980,7 +982,7 @@
     var enCours = etat.etape === 'questionnaire' || etat.etape === 'prenom' || etat.etape === 'envoi';
     var a = T.accueil, A = T.accueil2;
     var commencer = enCours ? reprendre : pageConsentement;
-    var cta = function (classe) { return bouton((enCours ? a.bouton_reprendre : A.cta) + ' ←', 'btn ac-cta ' + (classe || ''), commencer); };
+    var cta = function (classe) { return bouton((enCours ? a.bouton_reprendre : A.cta) + ' ←', 'btn ac-cta ' + (classe || ''), function () { if (window.Sons) window.Sons.demarrerMusique(); commencer(); }); };
     var eventail = h('div', { class: 'ac-eventail', 'aria-hidden': 'true' }, A.cartes.map(function (c, k) {
       return h('div', { class: 'ac-carte', style: '--k:' + k + ';--n:' + A.cartes.length + ';--c:' + c[2] }, [
         h('span', { class: 'ac-carte-em', text: c[0] }), h('span', { class: 'ac-carte-nom', text: c[1] })

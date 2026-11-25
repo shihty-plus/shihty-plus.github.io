@@ -269,7 +269,7 @@
       // un bond : accroupi (immobile) → en l'air (il avance) → atterrissage (immobile)
       var av = c < BOND.decol ? 0 : c > BOND.atterr ? 1 : (function (v) { return v * v * (3 - 2 * v); })((c - BOND.decol) / (BOND.atterr - BOND.decol));
       t = anim.t0 + (anim.t1 - anim.t0) * (k + av) / H; vitesse = x < 1 ? 1 : 0;
-      if (anim.kPrec !== k && anim.kPrec !== undefined) poussiere(courbe.getPoint(Math.max(0, Math.min(1, t))));
+      if (anim.kPrec !== k && anim.kPrec !== undefined) { poussiere(courbe.getPoint(Math.max(0, Math.min(1, t)))); if (window.Sons) window.Sons.jouer('boing'); }
       anim.kPrec = k; anim.c = c;
       if (x >= 1) { anim.fin = null; if (anim.arrivee) { var f = anim.arrivee; anim.arrivee = null; f(); } }
     }

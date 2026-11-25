@@ -59,7 +59,7 @@
       var cy = Math.max(r.top + r.height / 2, Math.min(r.height, innerHeight * .6) / 2 + 70);   // il ne sort pas par le haut de l'écran
       return { x: (r.left + r.width / 2) / innerWidth, y: cy / innerHeight, s: r.width, r: 0, i: 'salut', portrait: true };
     }
-    var yPrec = scrollY, vitesse = 0, sonne = 0;
+    var yPrec = scrollY, vitesse = 0, sonne = 0, segSon = null;
     // le grand Dittou du haut sonne aussi : ondes ajoutées autour du portrait
     var viv = app.querySelector('.viv'), cadre = app.querySelector('.viv-cadre'), ondesP = null;
     if (cadre) { ondesP = document.createElement('div'); ondesP.className = 'tr-ondes-portrait'; ondesP.innerHTML = '<span class="tr-onde g"><i></i><i></i></span><span class="tr-onde d"><i></i><i></i></span>'; cadre.appendChild(ondesP); }
@@ -75,6 +75,8 @@
       var u = b[0] > a[0] ? Math.max(0, Math.min(1, (y - a[0]) / (b[0] - a[0]))) : 0;
       var e = lisse(u), p = scene(a[1]), q = scene(b[1]);
       var enVol = a[1] !== b[1] && u > 0 && u < 1;
+      if (enVol && segSon !== a[0]) { segSon = a[0]; if (window.Sons) window.Sons.jouer('sonnerie'); }   // il sonne en s'envolant
+      if (!enVol) segSon = null;
       // trajet d'abeille : une courbe qui monte un peu, avec une petite vague
       var x = p.x + (q.x - p.x) * e + (enVol ? Math.sin(u * Math.PI * 2) * .035 : 0);
       var yy = p.y + (q.y - p.y) * e - (enVol ? Math.sin(u * Math.PI) * .12 : 0);

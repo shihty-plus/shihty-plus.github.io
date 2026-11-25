@@ -114,8 +114,9 @@
     corps.addEventListener('click', function () {
       geste(); var t = performance.now();
       clics = clics.filter(function (c) { return t - c < 2500; }); clics.push(t);
-      if (clics.length >= 6) { clics = []; montrer('agace', 1800); verrou = t + 1800; parler((TX.reactions || {}).agace, 2000); return; }
+      if (clics.length >= 6) { clics = []; if (window.Sons) window.Sons.jouer('hmph'); montrer('agace', 1800); verrou = t + 1800; parler((TX.reactions || {}).agace, 2000); return; }
       var s = [['surpris', 900, null], ['rit', 1300, null], ['coeurs', 1500, ['❤️', '😍', '💕']]][suite++ % 3];
+      if (window.Sons) window.Sons.jouer({ surpris: 'surpris', rit: 'rit', coeurs: 'aww' }[s[0]]);
       montrer(s[0], s[1]); salve(5, s[2]); verrou = t + s[1];
     });
     boite.querySelectorAll('.btt-r').forEach(function (b) {
@@ -125,6 +126,7 @@
         montrer(r[1], 2200); verrou = performance.now() + 2200; endormi = false;
         parler((TX.reactions || {})[r[1]], 2400);
         if (r[1] === 'saute') saut = performance.now();
+        if (window.Sons) window.Sons.jouer({ rit: 'rit', coeurs: 'aww', surpris: 'surpris', saute: 'succes', fatigue: 'baille', dort: 'ronfle', agace: 'hmph' }[r[1]]);
         for (var k = 0; k < 6; k++) setTimeout(function () { bulle(r[0], 'monte', 35 + Math.random() * 30, 20); }, k * 110);
         b.classList.remove('choisi'); void b.offsetWidth; b.classList.add('choisi');
       });

@@ -1665,3 +1665,9 @@ body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opa
 .tr-ondes-portrait .tr-onde { width: 22%; }
 .tr-ondes-portrait .tr-onde.g { right: 88%; } .tr-ondes-portrait .tr-onde.d { left: 88%; }
 .tr-ondes-portrait .tr-onde i { border-width: 6px; }
+/* v27 — boutons son et musique */
+.son-btn { display: inline-grid; place-items: center; min-width: 40px; padding: 6px 9px; }
+.son-btn.off { opacity: .45; }
+.son-btn.off#btn-musique svg { position: relative; }
+.son-btn.off#btn-musique::after { content: ""; position: absolute; width: 22px; height: 2px; background: currentColor; transform: rotate(-45deg); }
+.son-btn { position: relative; }

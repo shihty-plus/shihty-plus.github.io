@@ -134,7 +134,7 @@
     compteRep++;
     var avant = complet; complet = pageComplete();
     if (complet && !avant) {
-      image('saute', 1300); sautille(1.8); parler(TX.complet, 2600);
+      image('saute', 1300); sautille(1.8); parler(TX.complet, 2600); if (window.Sons) window.Sons.jouer('succes');
       if (window.FX && !CALME) { var r = el.getBoundingClientRect(); window.FX.eclat(r.left + r.width / 2, r.top + r.height / 3, 14); }
       return;
     }
@@ -157,7 +157,7 @@
     if (type === 'resultat') {
       var ton = (document.querySelector('#app .carte-resultat') || {}).className || '';
       var cle = /ton-bon/.test(ton) ? 'bon' : /ton-attention/.test(ton) || document.querySelector('#app .soutien') ? 'attention' : /ton-moyen/.test(ton) ? 'moyen' : 'neutre';
-      setTimeout(function () { parler((TX.resultat || {})[cle], 3600); }, 900);
+      setTimeout(function () { parler((TX.resultat || {})[cle], 3600); if (window.Sons && cle !== 'attention') window.Sons.jouer('revele'); }, 900);
       if (avant !== 'question' && avant !== 'resultat') voler({ x: -160, y: innerHeight * .4, s: pos.s }, { dur: 480 });
     }
     if (type === 'question' && avant !== 'question' && avant !== 'resultat' && !vol) {
