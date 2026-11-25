@@ -56,10 +56,13 @@
       if (sc) return sc;
       var r = (document.querySelector('.viv-cadre .btt-corps') || {}).getBoundingClientRect ? document.querySelector('.viv-cadre .btt-corps').getBoundingClientRect() : null;
       if (!r) return { x: .5, y: -.3, s: 120, r: 0, i: 'salut', portrait: true };
-      var cy = Math.max(r.top + r.height / 2, Math.min(r.height, innerHeight * .6) / 2 + 70);   // il ne sort pas par le haut de l'écran
+      var cy = Math.max(r.top + r.height / 2, Math.min(r.height, innerHeight * .6) / 2 + 140);   // place pour la barre de réactions au-dessus   // il ne sort pas par le haut de l'écran
       return { x: (r.left + r.width / 2) / innerWidth, y: cy / innerHeight, s: r.width, r: 0, i: 'salut', portrait: true };
     }
     var yPrec = scrollY, vitesse = 0, sonne = 0, segSon = null;
+    // une réaction choisie pendant qu'il s'envole change aussi l'expression du petit Dittou
+    var imgReac = null, finReac = 0, EXPR_REAC = ['rit', 'coeurs', 'surpris', 'saute', 'fatigue', 'dort', 'agace'];
+    app.addEventListener('click', function (ev) { var b = ev.target.closest && ev.target.closest('.btt-r'); if (b) { imgReac = EXPR_REAC[+b.getAttribute('data-i')]; finReac = performance.now() + 2200; } });
     // le grand Dittou du haut sonne aussi : ondes ajoutées autour du portrait
     var viv = app.querySelector('.viv'), cadre = app.querySelector('.viv-cadre'), ondesP = null;
     if (cadre) { ondesP = document.createElement('div'); ondesP.className = 'tr-ondes-portrait'; ondesP.innerHTML = '<span class="tr-onde g"><i></i><i></i></span><span class="tr-onde d"><i></i><i></i></span>'; cadre.appendChild(ondesP); }
@@ -95,13 +98,28 @@
       var nom = enVol ? (u < .5 ? p.i : q.i) : (u < .5 ? p.i : q.i);
       if (enVol && u > .3 && u < .85) nom = 'saute';
       if (enVol && (p.portrait && u <= .3 || q.portrait && u >= .7)) nom = 'salut';
+      if (imgReac && t < finReac) nom = imgReac;
       if (nom !== nomImg) { nomImg = nom; img.src = src(nom); }
       dEl.style.width = s.toFixed(1) + 'px';
       dEl.style.opacity = op;
       dEl.style.transform = 'translate3d(' + (x * innerWidth - s / 2 + jx).toFixed(1) + 'px,' + (yy * innerHeight - s / 2 + flotte).toFixed(1) + 'px,0) rotate(' + (r + jr).toFixed(2) + 'deg)';
       dEl.style.setProperty('--sonne', vib.toFixed(3));
       if (viv) {
-        viv.style.opacity = (1 - op).toFixed(3);
+        // seul Dittou s'efface quand il s'envole : la barre de réactions reste à sa place et défile avec la page
+        viv.querySelectorAll('.btt-corps, .btt-ombre, .btt-bulle').forEach(function (n) { n.style.opacity = (1 - op).toFixed(3); });
+        // la barre de réactions reste accrochée sous l'en-tête tant que le haut de la page est visible
+        var reac = viv.querySelector('.btt-reac');
+        if (reac && cadre) {
+          var rc = cadre.getBoundingClientRect(), naturel = rc.top + reac.offsetTop, haut = (document.querySelector('.entete') || { offsetHeight: 64 }).offsetHeight + 10;
+          var cx = rc.left + rc.width / 2, dx = 0, dy = Math.max(0, haut - naturel);
+          if (op > .02) {   // Dittou s'envole : la barre reste juste au-dessus de sa tête
+            var fx = x * innerWidth, fy = yy * innerHeight - s / 2 - reac.offsetHeight - 10;
+            var w = Math.min(1, op * 8); dx = (fx - cx) * w; dy = (Math.max(haut, fy) - naturel) * w + dy * (1 - w);
+          }
+          reac.style.translate = dx || dy ? 'calc(-50% + ' + dx.toFixed(1) + 'px) ' + dy.toFixed(1) + 'px' : '';
+          reac.style.opacity = Math.max(0, Math.min(1, (rc.bottom - 140) / 160)).toFixed(3);
+          reac.style.pointerEvents = rc.bottom < 180 ? 'none' : '';
+        }
         // seul le corps de Dittou vibre (les réactions restent immobiles) ; il se calme quand on le survole pour réagir
         var vp = survol ? 0 : vib;
         if (!corpsP) corpsP = app.querySelector('.viv .btt-in');

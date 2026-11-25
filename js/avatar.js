@@ -179,6 +179,7 @@
       if (endormi && Math.random() < .01) bulle('💤', 'zzz', 66, 14, 2200);
     }
     montrer('salut', 1800);   // il dit bonjour en arrivant
+    if (window.Sons) window.Sons.jouer('bonjour');
     (TX.accueil || []).forEach(function (m, i) { setTimeout(function () { if (document.body.contains(boite) && performance.now() > verrou) parler(m, 2900); }, 700 + i * 3300); });
     requestAnimationFrame(boucle);
   }

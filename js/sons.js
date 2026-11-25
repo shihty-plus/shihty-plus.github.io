@@ -28,11 +28,13 @@
     var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     ctx = new AC(); maitre = ctx.createGain(); maitre.connect(ctx.destination);
     gainMus = ctx.createGain(); gainMus.gain.value = 0; gainMus.connect(maitre);
-    NOMS.forEach(function (n) { charger(n, n + '.mp3'); });
+    Promise.all(NOMS.map(function (n) { return charger(n, n + '.mp3'); })).then(function () { if (enAttente && document.querySelector('.page-accueil')) { var a = enAttente; enAttente = null; jouer(a[0], a[1]); } });
   }
-  ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) { document.addEventListener(ev, deverrouiller, { capture: true, passive: true }); });
+  ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(function (ev) { document.addEventListener(ev, deverrouiller, { capture: true, passive: true }); });
 
+  var enAttente = null;   // un son demandé avant le premier geste (ex. « bonjour » de Dittou) est joué dès que le son est autorisé
   function jouer(nom, vol) {
+    if (effets && (!ctx || !bufs[nom]) && (nom === 'bonjour' || nom === 'rit')) enAttente = [nom, vol];
     if (!effets || !ctx || !bufs[nom]) return;
     if (enSensible && !NEUTRES[nom]) return;
     var t = ctx.currentTime;
