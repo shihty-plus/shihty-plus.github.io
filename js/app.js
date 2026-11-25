@@ -1057,7 +1057,8 @@
       h('div', { class: 'dem-centre' }, [
         h('p', { class: 'dem-bulle', text: D.bulle || 'أنا موتشي، مرحبا بيك 👋' }),
         ditto,
-        h('button', { type: 'button', class: 'btn btn-principal dem-btn', text: D.bouton || 'اضغط(ي) هنا للدخول' })
+        h('button', { type: 'button', class: 'btn btn-principal dem-btn' }, [h('span', { text: D.bouton || 'اضغط(ي) هنا للبدء' }),
+          h('span', { class: 'dem-curseur', 'aria-hidden': 'true', html: '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M5 2.5l13 8.2-5.6 1.3 3.4 6.6-2.6 1.3-3.4-6.6-4.3 3.9z" fill="#fff" stroke="#17302F" stroke-width="1.6" stroke-linejoin="round"/></svg>' })])
       ])
     ]);
     function entrer() {
@@ -1166,20 +1167,17 @@
     animerAccueil();
     if (window.Troupe) window.Troupe.monter(app);
     if (window.Accueil3D) window.Accueil3D.monter(tunnel);
-    // tunnel : un whoosh à l'entrée, puis de rares « pings » de notification quand on y avance (pas de musique en plus)
-    if ('IntersectionObserver' in window && window.Sons) {
-      var dedans = false, dernierPing = 0, yP = scrollY;
-      new IntersectionObserver(function (es) {
-        es.forEach(function (e) {
-          var vu = e.intersectionRect.height / innerHeight;   // le tunnel est très haut : on mesure la part d'écran qu'il occupe
-          if (e.isIntersecting && vu > .5 && !dedans) { dedans = true; window.Sons.jouer('tunnel'); }
-          else if (!e.isIntersecting || vu < .15) dedans = false;
-        });
-      }, { threshold: [0, .02, .05, .08, .1, .12, .15, .2, .3, .5] }).observe(tunnel);
+    // tunnel : le même whoosh, joué au moment où chaque phrase apparaît (une phrase = un son, en alternance)
+    if (window.Sons) {
+      var beats = tunnel.querySelectorAll('.beat'), courant = -1;
       var surDefile = function () {
         if (!document.body.contains(tunnel)) { removeEventListener('scroll', surDefile); return; }
-        var t = performance.now(), d = Math.abs(scrollY - yP); yP = scrollY;
-        if (dedans && d > 4 && t - dernierPing > 1800 + Math.random() * 2500) { dernierPing = t; window.Sons.jouer('ping'); }
+        requestAnimationFrame(function () {
+          var vu = -1;
+          beats.forEach(function (b, i) { if (Number(b.style.opacity || 0) > .6) vu = i; });
+          if (vu >= 0 && vu !== courant) window.Sons.jouer('tunnel');
+          if (vu >= 0 || ![].some.call(beats, function (b) { return Number(b.style.opacity || 0) > .05; })) courant = vu;
+        });
       };
       addEventListener('scroll', surDefile, { passive: true });
     }

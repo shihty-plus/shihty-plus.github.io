@@ -43,7 +43,12 @@
       ORDRE.forEach(function (o, i) {
         var s = app.querySelector(o[1]); if (!s) return;
         var haut = s.getBoundingClientRect().top + scrollY;
-        if (i === 0) { reperes.push([0, o[0]]); return; }
+        if (i === 0) {   // le grand Mochi reste en place tant qu'on voit le haut de la page (le temps d'essayer les réactions)
+          reperes.push([0, o[0]]);
+          var port = app.querySelector('.viv-cadre');
+          if (port && mob) reperes.push([Math.max(0, port.getBoundingClientRect().top + scrollY + port.offsetHeight * .45 - innerHeight * .5), o[0]]);
+          return;
+        }
         reperes.push([haut - innerHeight * (i === 1 ? -.35 : .4), o[0]]);   // sortie du haut : étalée jusqu'à l'entrée dans le tunnel
         if (s.offsetHeight > innerHeight * 1.6) reperes.push([haut + s.offsetHeight - innerHeight * 1.2, o[0]]);   // le tunnel : il reste posé pendant tout le tunnel
       });
