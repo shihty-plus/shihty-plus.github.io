@@ -90,7 +90,7 @@
       var u = b[0] > a[0] ? Math.max(0, Math.min(1, (y - a[0]) / (b[0] - a[0]))) : 0;
       var e = lisse(u), p = scene(a[1]), q = scene(b[1]);
       var enVol = a[1] !== b[1] && u > 0 && u < 1;
-      if (enVol && segSon !== a[0]) { segSon = a[0]; if (window.Sons) window.Sons.jouer('sonnerie'); }   // il sonne en s'envolant
+      if (enVol && segSon !== a[0]) { segSon = a[0]; }   // il vibre en s'envolant, sans son (le son seulement toutes les 30 s)
       if (!enVol) segSon = null;
       // trajet d'abeille : une courbe qui monte un peu, avec une petite vague
       var x = p.x + (q.x - p.x) * e + (enVol ? Math.sin(u * Math.PI * 2) * .035 : 0);

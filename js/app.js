@@ -805,10 +805,14 @@
   }
 
   /* ---------- carte de la route : chemin sinueux à travers les 3 mondes ---------- */
-  var CARTE = { L: 360, pas: 88, haut: 80 };
+  /* Carte horizontale : toute l'aventure d'un coup d'œil, du départ (à droite, sens de lecture) à l'arrivée (à gauche). */
+  var CARTE = { L: 680, H: 270, pas: 92, bord: 62 };
   function pointsCarte() {
-    var pts = [{ x: 180, y: CARTE.haut }];   // index 0 = départ, puis 1..20 = stations
-    PARTIES.forEach(function (p, k) { pts.push({ x: 180 + 112 * Math.sin((k + 1) * 1.05), y: CARTE.haut + (k + 1) * CARTE.pas }); });
+    var mob = innerWidth < 600;   // téléphone : stations plus serrées pour tout voir sans défiler
+    CARTE.pas = mob ? 66 : 92; CARTE.bord = mob ? 44 : 62; CARTE.H = mob ? 240 : 270;
+    CARTE.L = CARTE.bord * 2 + PARTIES.length * CARTE.pas;
+    var pts = [{ x: CARTE.L - CARTE.bord, y: CARTE.H / 2 }];   // index 0 = départ, puis 1..n = stations
+    PARTIES.forEach(function (p, k) { pts.push({ x: CARTE.L - CARTE.bord - (k + 1) * CARTE.pas, y: CARTE.H / 2 + 62 * Math.sin((k + 1) * 1.25) }); });
     return pts;
   }
   function cheminLisse(pts) {
@@ -822,26 +826,26 @@
   }
   /* de, a : index de station (0..19) ; -1 = départ. */
   function construireCarte(de, a) {
-    var pts = pointsCarte(), H = pts[pts.length - 1].y + 80, d = cheminLisse(pts), mondes = '', v = T.voyage;
+    var pts = pointsCarte(), H = CARTE.H, d = cheminLisse(pts), mondes = '', v = T.voyage;
     var couleursMonde = { S1: '#0D9488', S2: '#E0543F', S3: '#C8964A' };
     Q.sections.forEach(function (sec) {
       var idx = PARTIES.filter(function (p) { return p.section === sec; }).map(function (p) { return PARTIES.indexOf(p) + 1; });
-      var y0 = pts[idx[0]].y - CARTE.pas / 2, y1 = pts[idx[idx.length - 1]].y + CARTE.pas / 2;
-      mondes += '<rect x="0" y="' + y0 + '" width="' + CARTE.L + '" height="' + (y1 - y0) + '" fill="' + couleursMonde[sec.id] + '" opacity=".1"/>' +
-        '<text x="' + (CARTE.L / 2) + '" y="' + (y0 + 24) + '" text-anchor="middle" class="carte-monde" fill="' + couleursMonde[sec.id] + '">' + ((v.mondes || {})[sec.id] || '') + '</text>';
+      var x1 = pts[idx[0]].x + CARTE.pas / 2 + (idx[0] === 1 ? CARTE.bord - CARTE.pas / 2 + 30 : 0), x0 = pts[idx[idx.length - 1]].x - CARTE.pas / 2 - (idx[idx.length - 1] === PARTIES.length ? CARTE.bord - CARTE.pas / 2 : 0);
+      mondes += '<rect x="' + x0.toFixed(1) + '" y="0" width="' + (x1 - x0).toFixed(1) + '" height="' + H + '" fill="' + couleursMonde[sec.id] + '" opacity=".1"/>' +
+        '<text x="' + ((x0 + x1) / 2).toFixed(1) + '" y="26" text-anchor="middle" class="carte-monde" fill="' + couleursMonde[sec.id] + '">' + ((v.mondes || {})[sec.id] || '') + '</text>';
     });
     var deco = ['🌴', '☁️', '🌵', '⛰️', '🌲', '🏕️', '🌸', '🪨'];
     var decos = '';
-    for (var k = 1; k < pts.length; k += 2) decos += '<text x="' + (pts[k].x > 180 ? 40 : 320) + '" y="' + (pts[k].y + 10) + '" font-size="26" opacity=".75" text-anchor="middle">' + deco[k % deco.length] + '</text>';
+    for (var k = 1; k < pts.length; k++) decos += '<text x="' + (pts[k].x + CARTE.pas / 2).toFixed(1) + '" y="' + (pts[k].y > H / 2 ? 70 : H - 22) + '" font-size="24" opacity=".7" text-anchor="middle">' + deco[k % deco.length] + '</text>';
     var noeuds = '<g class="carte-noeud depart"><circle cx="' + pts[0].x + '" cy="' + pts[0].y + '" r="22" fill="#FFFCF7"/><text x="' + pts[0].x + '" y="' + (pts[0].y + 9) + '" font-size="24" text-anchor="middle">🚩</text>' +
-      '<text x="' + pts[0].x + '" y="' + (pts[0].y - 30) + '" class="carte-lib" text-anchor="middle">' + v.depart + '</text></g>';
+      '<text x="' + pts[0].x + '" y="' + (pts[0].y + 44) + '" class="carte-lib" text-anchor="middle">' + v.depart + '</text></g>';
     PARTIES.forEach(function (p, k) {
       var pt = pts[k + 1], st = k < a ? 'fait' : (k === a ? 'ici' : 'apres'), c = theme(p).couleur;
       noeuds += '<g class="carte-noeud ' + st + '" style="--c:' + c + '">' +
         '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y + '" r="25" class="cn-fond"/>' +
         '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y + 9) + '" font-size="24" text-anchor="middle">' + (st === 'apres' ? '🔒' : icone(p.id)) + '</text>' +
         (st === 'fait' ? '<circle cx="' + (pt.x + 18).toFixed(1) + '" cy="' + (pt.y - 18) + '" r="9" fill="#2DD4BF" stroke="#fff" stroke-width="2"/><text x="' + (pt.x + 18).toFixed(1) + '" y="' + (pt.y - 14) + '" font-size="11" font-weight="800" text-anchor="middle" fill="#042F2E">✓</text>' : '') +
-        '<text x="' + (pt.x + (pt.x > 180 ? -36 : 36)).toFixed(1) + '" y="' + (pt.y + 5) + '" class="carte-lib" text-anchor="' + (pt.x > 180 ? 'end' : 'start') + '">' + (k + 1) + '</text></g>';
+        '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y > H / 2 ? pt.y + 46 : pt.y - 34) + '" class="carte-lib" text-anchor="middle">' + (innerWidth < 600 && st !== 'ici' ? (k + 1) : (k + 1) + ' · ' + p.titre) + '</text></g>';
     });
     var svg = '<svg viewBox="0 0 ' + CARTE.L + ' ' + H + '" class="carte-svg" aria-hidden="true">' + mondes + decos +
       '<path d="' + d + '" class="carte-chemin-ombre"/><path d="' + d + '" class="carte-chemin"/><path d="' + d + '" class="carte-chemin-fait"/>' + noeuds + '</svg>';
@@ -875,7 +879,7 @@
       var q = chemin.getPointAtLength(l), sc = c.el.clientWidth / CARTE.L;
       av.style.transform = 'translate(' + (q.x * sc).toFixed(1) + 'px,' + (q.y * sc).toFixed(1) + 'px)';
       fait.style.strokeDashoffset = (total - l).toFixed(1);
-      defile.scrollTop = q.y * sc - defile.clientHeight / 2;
+      defile.scrollLeft = q.x * sc - defile.clientWidth / 2;
     }
     function finir() {
       if (termine) return; termine = true;
@@ -1013,7 +1017,7 @@
      Ce premier toucher autorise le son : la musique démarre en même temps que l'accueil s'ouvre. */
   function ecranDemarrage() {
     var D = T.demarrage || {};
-    var ditto = h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' }), h('span', { class: 'dem-ecran' })]);
+    var ditto = h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('span', { class: 'dem-coeurs', 'aria-hidden': 'true' }, ['💚', '✨', '💕', '✨'].map(function (e, i) { return h('i', { style: '--i:' + i, text: e }); })), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' }), h('span', { class: 'dem-ecran' })]);
     var fond = h('div', { class: 'demarrage', role: 'dialog', 'aria-label': D.bulle || 'SHIHTY+' }, [
       h('div', { class: 'dem-centre' }, [
         h('p', { class: 'dem-bulle', text: D.bulle || 'أنا موتشي، مرحبا بيك 👋' }),
