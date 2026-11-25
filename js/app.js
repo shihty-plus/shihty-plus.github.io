@@ -1013,20 +1013,22 @@
      Ce premier toucher autorise le son : la musique démarre en même temps que l'accueil s'ouvre. */
   function ecranDemarrage() {
     var D = T.demarrage || {};
-    var fond = h('div', { class: 'demarrage', role: 'dialog', 'aria-label': 'SHIHTY+' }, [
+    var ditto = h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' }), h('span', { class: 'dem-ecran' })]);
+    var fond = h('div', { class: 'demarrage', role: 'dialog', 'aria-label': D.bulle || 'SHIHTY+' }, [
       h('div', { class: 'dem-centre' }, [
-        h('p', { class: 'dem-marque', dir: 'ltr' }, [h('span', { text: 'SHIHTY' }), h('b', { text: '+' })]),
-        h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' })]),
-        h('p', { class: 'dem-bulle', text: D.bulle || 'مرحبا! أنا ديتو 👋' }),
-        h('button', { type: 'button', class: 'btn btn-principal dem-btn', text: D.bouton || 'اضغط(ي) للبدء ▶' }),
-        h('p', { class: 'dem-note', text: D.note || '' })
+        h('p', { class: 'dem-bulle', text: D.bulle || 'أنا ديتو، مرحبا بيك 👋' }),
+        ditto,
+        h('button', { type: 'button', class: 'btn btn-principal dem-btn', text: D.bouton || 'اضغط(ي) هنا للدخول' })
       ])
     ]);
     function entrer() {
-      if (fond.classList.contains('sortie')) return;
-      if (window.Sons) { window.Sons.demarrerMusique(); window.Sons.jouer('bonjour'); }
-      fond.classList.add('sortie');
-      setTimeout(function () { fond.remove(); }, 650);
+      if (fond.classList.contains('plonge')) return;
+      if (window.Sons) { window.Sons.demarrerMusique(); window.Sons.jouer('whoosh'); }
+      // on plonge dans l'écran du téléphone de Dittou, puis le site apparaît à l'intérieur
+      fond.classList.add('plonge'); app.classList.add('sort-du-tel');
+      setTimeout(function () { fond.classList.add('sortie'); }, 820);
+      setTimeout(function () { fond.remove(); app.classList.remove('sort-du-tel'); if (window.Sons) window.Sons.jouer('bonjour'); }, 1500);
+      try { window.dispatchEvent(new PointerEvent('pointermove', { clientX: innerWidth / 2, clientY: innerHeight / 3 })); } catch (e) { /* ancien navigateur */ }   // Dittou se réveille et regarde le visiteur
     }
     fond.addEventListener('click', entrer);
     fond.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') entrer(); });
