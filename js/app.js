@@ -134,14 +134,31 @@
   }
 
   /* ---------- construction des écrans ---------- */
+  /* Stations : les parties sont regroupées en quelques stations (questions.json → "stations").
+     Une station porte l'id de sa première partie (thème, icône) ; GROUPE[id de partie] = sa station. */
+  var GROUPE = {};
+  function construireStations() {
+    var defs = Q.stations || []; PARTIES = []; GROUPE = {};
+    Q.sections.forEach(function (s) {
+      s.parties.forEach(function (p) {
+        var d = defs.filter(function (x) { return x.parties.indexOf(p.id) >= 0; })[0];
+        var id = d ? d.parties[0] : p.id, st = PARTIES.filter(function (x) { return x.id === id; })[0];
+        if (!st) { st = { id: id, titre: d ? d.titre : p.titre, section: s, sous: [] }; PARTIES.push(st); }
+        st.sous.push(p); GROUPE[p.id] = st;
+      });
+    });
+  }
+  function stationDe(e) { return e && e.partie ? (GROUPE[e.partie.id] || e.partie) : null; }
   function construireEcrans() {
     ECRANS = [];
+    construireStations();
     var apres = (!SAISIE && F.apres_partie) || {};
     Q.sections.forEach(function (s, iS) {
       s.parties.forEach(function (p, iP) {
         var premier = true;
         // une station (île) avant chaque partie : l'étudiant y attend le participant
-        if (!SAISIE) ECRANS.push({ type: 'station', section: s, partie: p, iPartie: iP, iSection: iS, debutSection: iP === 0 });
+        var st = GROUPE[p.id];
+        if (!SAISIE && st.sous[0] === p) ECRANS.push({ type: 'station', section: s, partie: st, iPartie: iP, iSection: iS, debutSection: PARTIES.filter(function (x) { return x.section === s; })[0] === st });
         p.ecrans.forEach(function (elements) {
           var ech = elements.length === 1 && elements[0].type === 'echelle' ? elements[0] : null;
           if (UNE_A_LA_FOIS && !SAISIE) {
@@ -176,9 +193,8 @@
       });
     });
     Schema.elements(Q).forEach(function (x) { collecterPilotes(x.el.si); });
-    PARTIES = []; FIN_PARTIE = {};
-    Q.sections.forEach(function (s) { s.parties.forEach(function (p) { PARTIES.push(p); }); });
-    ECRANS.forEach(function (e, i) { if (e.type === 'q') FIN_PARTIE[e.partie.id] = i; });
+    FIN_PARTIE = {};
+    ECRANS.forEach(function (e, i) { if (e.type === 'q') FIN_PARTIE[stationDe(e).id] = i; });
   }
   function collecterPilotes(c) {
     if (!c) return;
@@ -505,9 +521,9 @@
   /* ---------- écran du questionnaire ---------- */
   function icone(id) { return (T.icones || {})[id] || '⭐'; }
   function stepper(ecran) {
-    var parties = ecran.section.parties;
+    var parties = PARTIES.filter(function (x) { return x.section === ecran.section; }), ici = parties.indexOf(stationDe(ecran));
     return h('ol', { class: 'stepper', 'aria-label': ecran.section.titre }, parties.map(function (p, i) {
-      var st = ecran.type === 'intro' ? 'a-venir' : (i < ecran.iPartie ? 'fait' : (i === ecran.iPartie ? 'en-cours' : 'a-venir'));
+      var st = ecran.type === 'intro' ? 'a-venir' : (i < ici ? 'fait' : (i === ici ? 'en-cours' : 'a-venir'));
       return h('li', { class: 'etape ' + st, 'aria-current': st === 'en-cours' ? 'step' : null, title: p.titre }, [
         h('span', { class: 'rond', 'aria-hidden': 'true', text: st === 'fait' ? '✓' : icone(p.id) }),
         h('span', { class: 'etape-nom', text: p.titre })
@@ -619,7 +635,7 @@
           intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
           h('h1', { class: 'titre-degrade', text: ecran.section.titre }),
           ecran.section.intro ? h('p', { class: 'intro-texte', text: ecran.section.intro }) : null,
-          h('ul', { class: 'missions' }, ecran.section.parties.map(function (p) {
+          h('ul', { class: 'missions' }, PARTIES.filter(function (x) { return x.section === ecran.section; }).map(function (p) {
             return h('li', null, [h('span', { class: 'mission-icone', 'aria-hidden': 'true', text: icone(p.id) }), h('span', { text: p.titre })]);
           })),
           h('div', { class: 'nav' }, [precedent, bouton(T.navigation.commencer_section, 'btn-principal', avancer)])
@@ -796,7 +812,7 @@
     var pts = pointsCarte(), H = pts[pts.length - 1].y + 80, d = cheminLisse(pts), mondes = '', v = T.voyage;
     var couleursMonde = { S1: '#0D9488', S2: '#E0543F', S3: '#C8964A' };
     Q.sections.forEach(function (sec) {
-      var idx = PARTIES.filter(function (p) { return sec.parties.indexOf(p) >= 0; }).map(function (p) { return PARTIES.indexOf(p) + 1; });
+      var idx = PARTIES.filter(function (p) { return p.section === sec; }).map(function (p) { return PARTIES.indexOf(p) + 1; });
       var y0 = pts[idx[0]].y - CARTE.pas / 2, y1 = pts[idx[idx.length - 1]].y + CARTE.pas / 2;
       mondes += '<rect x="0" y="' + y0 + '" width="' + CARTE.L + '" height="' + (y1 - y0) + '" fill="' + couleursMonde[sec.id] + '" opacity=".1"/>' +
         '<text x="' + (CARTE.L / 2) + '" y="' + (y0 + 24) + '" text-anchor="middle" class="carte-monde" fill="' + couleursMonde[sec.id] + '">' + ((v.mondes || {})[sec.id] || '') + '</text>';
@@ -875,7 +891,7 @@
   function ouvrirCarte() {
     var a = 0;
     PARTIES.forEach(function (p, k) { if ((etat.album || []).indexOf(p.id) >= 0) a = Math.min(PARTIES.length - 1, k + 1); });
-    var e = ECRANS[etat.i]; if (e && e.partie) a = PARTIES.indexOf(e.partie);
+    var e = ECRANS[etat.i]; if (e && e.partie) a = PARTIES.indexOf(stationDe(e));
     voyageCarte(a, a, null, true);
   }
 
@@ -1401,7 +1417,7 @@
     construireEcrans();
     if (window.Compagnon && !SAISIE) window.Compagnon.init((T.ditto || {}).compagnon);
     if (window.Voyage3D && !SAISIE) window.Voyage3D.init({ parties: PARTIES, couleur: function (p) { return theme(p).couleur; }, icone: function (p) { return icone(p.id); },
-      monde: function (p) { var s = null; Q.sections.forEach(function (x) { if (x.parties.indexOf(p) >= 0) s = x.id; }); return s; } });
+      monde: function (p) { return p.section ? p.section.id : null; } });
     var nom = document.getElementById('marque-nom');
     nom.replaceChildren(T.marque.replace(/\+$/, ''), h('b', { class: 'plus', 'aria-hidden': 'true', text: '+' }));
     document.getElementById('album-bouton-texte').textContent = T.album.bouton;
