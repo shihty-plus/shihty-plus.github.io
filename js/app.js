@@ -1126,6 +1126,23 @@
     animerAccueil();
     if (window.Troupe) window.Troupe.monter(app);
     if (window.Accueil3D) window.Accueil3D.monter(tunnel);
+    // tunnel : un whoosh à l'entrée, puis de rares « pings » de notification quand on y avance (pas de musique en plus)
+    if ('IntersectionObserver' in window && window.Sons) {
+      var dedans = false, dernierPing = 0, yP = scrollY;
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          var vu = e.intersectionRect.height / innerHeight;   // le tunnel est très haut : on mesure la part d'écran qu'il occupe
+          if (e.isIntersecting && vu > .5 && !dedans) { dedans = true; window.Sons.jouer('tunnel'); }
+          else if (!e.isIntersecting || vu < .15) dedans = false;
+        });
+      }, { threshold: [0, .02, .05, .08, .1, .12, .15, .2, .3, .5] }).observe(tunnel);
+      var surDefile = function () {
+        if (!document.body.contains(tunnel)) { removeEventListener('scroll', surDefile); return; }
+        var t = performance.now(), d = Math.abs(scrollY - yP); yP = scrollY;
+        if (dedans && d > 4 && t - dernierPing > 1800 + Math.random() * 2500) { dernierPing = t; window.Sons.jouer('ping'); }
+      };
+      addEventListener('scroll', surDefile, { passive: true });
+    }
   }
   /* révélations au défilement, compteurs, texte qui glisse avec le défilement */
   function animerAccueil() {
