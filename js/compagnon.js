@@ -69,7 +69,9 @@
     var s = mobile() ? 64 : 112, h = s * RATIO;
     var ton = (document.querySelector('#app .carte-resultat') || {}).className || '';
     var imgR = mode === 'resultat' ? (/ton-bon/.test(ton) ? 'saute' : /ton-attention/.test(ton) || document.querySelector('#app .soutien') ? 'bas' : 'salut') : (complet ? 'saute' : 'salut');
+    var quiz = document.body.classList.contains('mode-quiz');
     if (mobile()) {
+      if (quiz) return { x: 4, y: innerHeight - h * .58, s: s, o: 1, img: imgR, peek: true };   // quiz : il reste en bas, sans cacher les réponses
       if (btn && visibleR(btn) && btn.top < innerHeight - 30) return { x: btn.left + 4, y: btn.top - h + 10, s: s, o: 1, img: complet ? 'coeurs' : imgR };
       return { x: 4, y: innerHeight - h * (complet || mode === 'resultat' ? .98 : .58), s: s, o: 1, img: imgR, peek: !complet };
     }
@@ -132,6 +134,7 @@
     if ((mode !== 'question') || !ev.target.closest || !ev.target.closest('#app')) return;
     if (!/radio|checkbox/.test(ev.target.type) && ev.target.tagName !== 'SELECT') return;
     compteRep++;
+    if (document.body.classList.contains('mode-quiz')) { image('rit', 400); sautille(.7); return; }   // quiz : petit bond seulement
     var avant = complet; complet = pageComplete();
     if (complet && !avant) {
       image('saute', 1300); sautille(1.8); parler(TX.complet, 2600); if (window.Sons) window.Sons.jouer('succes');
@@ -152,7 +155,8 @@
   }
   function page(type) {
     var avant = mode; mode = type;
-    if (!el) return; complet = type === 'question' ? pageComplete() : false;
+    if (el && type === 'question' && document.body.classList.contains('mode-quiz')) { if (bulle) bulle.classList.remove('on'); }
+    if (!el) return; complet = type === 'question' && !document.body.classList.contains('mode-quiz') ? pageComplete() : false;
     if (type === 'accueil') { section = -1; bulleFaite = {}; }
     if (type === 'resultat') {
       var ton = (document.querySelector('#app .carte-resultat') || {}).className || '';

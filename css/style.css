@@ -1674,3 +1674,23 @@ body.dt-dehors .viv-cadre .btt-corps, body.dt-dehors .viv-cadre .btt-ombre { opa
 /* bouton musique : clignote doucement quand le navigateur attend un premier toucher pour lancer la musique */
 .son-btn.attend { animation: son-attend 1.4s ease-in-out infinite; }
 @keyframes son-attend { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 127, 107, .55); } 50% { box-shadow: 0 0 0 8px rgba(255, 127, 107, 0); } }
+/* v28 — écran de démarrage (comme dans les jeux) */
+.demarrage { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; cursor: pointer;
+  background: radial-gradient(90% 70% at 50% 40%, rgba(45, 212, 191, .28), transparent 70%), linear-gradient(160deg, #04201F, #0B3B3A 55%, #116B65); color: #FFFCF7; text-align: center; }
+.demarrage.sortie { animation: dem-sortie .6s cubic-bezier(.5, 0, .3, 1) forwards; }
+@keyframes dem-sortie { to { opacity: 0; transform: scale(1.08); } }
+.dem-centre { display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 420px; }
+.dem-marque { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: 2px; } .dem-marque b { color: #FF7F6B; }
+.dem-ditto { position: relative; width: min(56vw, 240px); animation: dem-saut 1.6s ease-in-out infinite; }
+.dem-ditto img { position: relative; display: block; width: 100%; height: auto; filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .4)); }
+.dem-halo { position: absolute; inset: 8% -10%; border-radius: 50%; background: radial-gradient(closest-side, rgba(94, 234, 212, .45), transparent); animation: halo-respire 3s ease-in-out infinite; }
+@keyframes dem-saut { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+.dem-bulle { margin: 0; padding: 10px 18px; border-radius: 18px; background: #fff; color: #17302F; font-size: 17px; font-weight: 800; box-shadow: 0 10px 26px rgba(0, 0, 0, .3); }
+.dem-btn { font-size: 20px; padding: 14px 34px; min-height: 56px; animation: dem-btn 1.4s ease-in-out infinite; }
+@keyframes dem-btn { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 127, 107, .6); } 50% { box-shadow: 0 0 0 14px rgba(255, 127, 107, 0); } }
+.dem-note { margin: 0; font-size: 13.5px; color: rgba(255, 252, 247, .7); }
+@media (prefers-reduced-motion: reduce) { .dem-ditto, .dem-btn, .dem-halo { animation: none; } }
+/* mode quiz (personnalité) */
+.quiz-intro { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: linear-gradient(90deg, #FFF1E8, #E7F7F4); color: #17302F; font-weight: 800; font-size: 15px; text-align: center; }
+body.mode-quiz .compteur { font-size: 15px; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: #0D9488; color: #fff; }
+body.mode-quiz .item-unique > legend { font-size: 22px; }

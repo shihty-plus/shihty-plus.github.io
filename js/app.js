@@ -179,6 +179,14 @@
             return;
           }
           if (!ech) { ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, debutPartie: premier }); premier = false; return; }
+          if (ech.quiz && !SAISIE) {   // une phrase par carte, passage automatique (BFI)
+            ech.items.forEach(function (it, k) {
+              ECRANS.push({ type: 'q', section: s, partie: p, iPartie: iP, elements: elements, echelle: ech, items: [it],
+                dernierBloc: k === ech.items.length - 1, debutPartie: premier, unique: true, quiz: k });
+              premier = false;
+            });
+            return;
+          }
           var n = ech.items.length;
           var nb = ech.par_ecran && !SAISIE ? Math.ceil(n / ech.par_ecran) : 1;   // longues échelles découpées (BFI : 3 pages de 10)
           var taille = Math.ceil(n / nb);
@@ -322,7 +330,7 @@
   function avanceAutomatique() {
     var i0 = etat.i;
     clearTimeout(avanceAutomatique.t);
-    avanceAutomatique.t = setTimeout(function () { if (etat.i === i0 && document.getElementById('btn-suivant')) avancer(); }, 520);
+    avanceAutomatique.t = setTimeout(function () { if (etat.i === i0 && document.getElementById('btn-suivant')) avancer(); }, document.body.classList.contains('mode-quiz') ? 260 : 520);
   }
   function rendreChoix(el) {
     var opts = Schema.options(Q, el.options);
@@ -661,8 +669,9 @@
       var seule = ecran.echelle ? null : visiblesQ.filter(function (el) { return el.type !== 'message'; });
       CTX.sansEmoji = !!((ecran.echelle && ecran.echelle.sans_emoji) || (seule && seule[0] && seule[0].sans_emoji));
       CTX.heros = theme(ecran.partie).heros;
+      document.body.classList.toggle('mode-quiz', ecran.quiz !== undefined);
       CTX.auto = !!(ecran.unique && (ecran.echelle ? !ecran.echelle.message_apres || !ecran.dernierBloc : (seule.length === 1 && seule[0].type === 'choix')));
-      var contenu = ecran.echelle ? [rendreEchelle(ecran)]
+      var contenu = ecran.echelle ? [ecran.quiz === 0 && T.quiz ? h('p', { class: 'quiz-intro', text: T.quiz.intro.replace('{n}', ecran.echelle.items.length) }) : null, rendreEchelle(ecran)].filter(Boolean)
         : ecran.elements.filter(function (el) { return eff.visibles.has(el); }).map(rendreElement);
       noeuds = [
         barreProgression(),
@@ -688,6 +697,10 @@
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (ecran.type === 'station' && !SAISIE) lancerVoyage3D(ecran);
     if (ecran.type === 'q' && !SAISIE && !ecran.unique) replierReponses();
+    if (ecran.quiz !== undefined && T.quiz && window.Compagnon) {   // Dittou encourage pendant le quiz
+      var paliers = T.quiz.paliers || {}; if (paliers[ecran.quiz]) setTimeout(function () { window.Compagnon.parler(paliers[ecran.quiz], 2200); }, 200);
+    }
+    if (ecran.type !== 'q' || ecran.quiz === undefined) document.body.classList.remove('mode-quiz');
     if (window.Sons) window.Sons.ambiance(null);   // la musique s'arrête dès qu'on commence à répondre
     if (window.Sons) window.Sons.sensible(!!ecran.partie && ['3E', '3F', '3G'].indexOf(ecran.partie.id) >= 0 || ecran.cle === 'SOUTIEN');
     if (window.Compagnon) window.Compagnon.page(ecran.type === 'resultat' ? 'resultat' : ecran.type === 'station' ? 'cache' : 'question');
@@ -727,7 +740,7 @@
     var e2 = ECRANS[suivant];
     function montrer() {
       // l'ancienne page part en 3D et Dittou traverse l'écran
-      if (window.Compagnon && !SAISIE && avant.type !== 'station' && (e2.type === 'q' || e2.type === 'resultat')) window.Compagnon.traverser();
+      if (window.Compagnon && !SAISIE && avant.type !== 'station' && (e2.type === 'q' || e2.type === 'resultat') && !(avant.quiz !== undefined && e2.quiz !== undefined)) window.Compagnon.traverser();
       rendreQuestionnaire(false);
       annoncerAutocollants(gagnes);
       if (e2.type === 'resultat' && e2.cle !== 'SOUTIEN') { confettis(); return; }
@@ -995,6 +1008,30 @@
     var cadre = h('div', { class: 'ac-visuel apparait', style: '--k:4' }, [h('div', { class: 'viv-cadre' }, [h('span', { class: 'viv-halo', 'aria-hidden': 'true' }), boite])]);
     setTimeout(function () { if (window.Avatar) window.Avatar.portrait(boite, T.ditto); else if (window.Vivant) window.Vivant.monter(boite); }, 0);
     return cadre;
+  }
+  /* Écran de démarrage (comme dans les jeux) : Dittou en plein écran et « اضغط(ي) للبدء ».
+     Ce premier toucher autorise le son : la musique démarre en même temps que l'accueil s'ouvre. */
+  function ecranDemarrage() {
+    var D = T.demarrage || {};
+    var fond = h('div', { class: 'demarrage', role: 'dialog', 'aria-label': 'SHIHTY+' }, [
+      h('div', { class: 'dem-centre' }, [
+        h('p', { class: 'dem-marque', dir: 'ltr' }, [h('span', { text: 'SHIHTY' }), h('b', { text: '+' })]),
+        h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' })]),
+        h('p', { class: 'dem-bulle', text: D.bulle || 'مرحبا! أنا ديتو 👋' }),
+        h('button', { type: 'button', class: 'btn btn-principal dem-btn', text: D.bouton || 'اضغط(ي) للبدء ▶' }),
+        h('p', { class: 'dem-note', text: D.note || '' })
+      ])
+    ]);
+    function entrer() {
+      if (fond.classList.contains('sortie')) return;
+      if (window.Sons) { window.Sons.demarrerMusique(); window.Sons.jouer('bonjour'); }
+      fond.classList.add('sortie');
+      setTimeout(function () { fond.remove(); }, 650);
+    }
+    fond.addEventListener('click', entrer);
+    fond.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') entrer(); });
+    document.body.appendChild(fond);
+    setTimeout(function () { var b = fond.querySelector('.dem-btn'); if (b) b.focus(); }, 50);
   }
   function pageAccueil() {
     var enCours = etat.etape === 'questionnaire' || etat.etape === 'prenom' || etat.etape === 'envoi';
@@ -1442,7 +1479,7 @@
       return;
     }
     var res = lire(sessionStorage, CLE_RES);
-    if (res && res.scores) pageResultats(res); else pageAccueil();
+    if (res && res.scores) pageResultats(res); else { pageAccueil(); ecranDemarrage(); }
   }).catch(function (e) {
     app.replaceChildren(h('p', { class: 'carte', text: 'تعذر تحميل الاستبيان. المرجو إعادة تحميل الصفحة. (' + (e && e.message) + ')' }));
   });
