@@ -1716,3 +1716,24 @@ body.mode-quiz .item-unique > legend { font-size: 22px; }
 .dem-coeurs i { position: absolute; left: calc(18% + var(--i) * 20%); top: 30%; font-style: normal; font-size: 22px; opacity: 0; animation: dem-coeur 2.4s ease-out calc(var(--i) * .55s) infinite; }
 @keyframes dem-coeur { 0% { opacity: 0; transform: translateY(10px) scale(.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-90px) scale(1.1); } }
 @media (prefers-reduced-motion: reduce) { .dem-ditto img, .dem-coeurs i { animation: none; } }
+/* v31 — carte : route bien visible, départ 🚩 et arrivée 🏁 */
+.carte-chemin-ombre { stroke: #E8D3A8; stroke-width: 30; }
+.carte-chemin { stroke: #FFFFFF; stroke-width: 5; stroke-dasharray: 10 11; }
+.carte-chemin-fait { stroke: #FF7F6B; stroke-width: 9; filter: drop-shadow(0 0 4px rgba(255, 127, 107, .55)); }
+.carte-lib-fort { font-weight: 800; fill: #17302F; font-size: 14px; }
+.carte-noeud.arrivee, .carte-noeud.depart { transform-box: fill-box; transform-origin: center; }
+.carte-noeud.arrivee { animation: arrivee-flotte 2.2s ease-in-out infinite; }
+@keyframes arrivee-flotte { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+/* écran de départ : deux étudiants 3D de chaque côté + icônes qui flottent */
+.dem-deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.dem-icone { position: absolute; left: calc(6% + var(--i) * 9.5%); bottom: -40px; font-size: 26px; opacity: .55; animation: dem-monte calc(7s + var(--i) * .6s) linear calc(var(--i) * -1.3s) infinite; }
+.dem-icone .em3d { width: 30px; height: 30px; }
+@keyframes dem-monte { from { transform: translateY(0) rotate(-10deg); } to { transform: translateY(-115vh) rotate(14deg); } }
+.dem-perso { position: absolute; bottom: 4%; height: min(46vh, 380px); width: auto; filter: drop-shadow(0 18px 22px rgba(0, 0, 0, .35)); animation: dem-perso 3.2s ease-in-out infinite; transition: opacity .4s, transform .5s; }
+.dem-perso.g { left: max(2%, calc(50% - 360px)); animation-delay: -.8s; }
+.dem-perso.d { right: max(2%, calc(50% - 360px)); }
+@keyframes dem-perso { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+.dem-perso.part, .dem-deco.part { opacity: 0; }
+.dem-centre { position: relative; z-index: 2; }
+@media (max-width: 600px) { .dem-perso { height: 30vh; bottom: 2%; opacity: .95; } .dem-perso.g { left: -4%; } .dem-perso.d { right: -4%; } }
+@media (prefers-reduced-motion: reduce) { .dem-icone, .dem-perso, .carte-noeud.arrivee { animation: none; } }

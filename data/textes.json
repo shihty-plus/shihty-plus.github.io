@@ -547,7 +547,8 @@
     "passer": "اضغط(ي) للوصول مباشرة",
     "en_route": "في الطريق إلى المحطة {n}...",
     "carte_intro": "رحلتك فيها {n} محطات فقط موزعة على {s} جزر. كل محطة فيها مجموعة من الأسئلة، ونتيجتك كتبان مباشرة من بعد كل مقياس.",
-    "commencer_route": "يلا نبداو الرحلة ➜"
+    "commencer_route": "يلا نبداو الرحلة ➜",
+    "arrivee": "الوصول 🏆"
   },
   "etudiants": {
     "_aide": "Illustrations d'étudiants affichées sur les îles des stations. Mettez les fichiers PNG (fond transparent) dans assets/etudiants/ puis listez-les ici, par ex. \"assets/etudiants/etudiant-1.png\". Tant que la liste est vide, des personnages emoji sont utilisés.",

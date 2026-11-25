@@ -82,3 +82,4 @@ node --test tests/scoring.test.js
 - Écran de démarrage (`ecranDemarrage` dans `js/app.js`) : Dittou en plein écran et « اضغط(ي) للبدء » ; ce toucher lance la musique de l'accueil.
 - Personnalité (BFI-2-S, 30 items inchangés) en mode quiz (`"quiz": true`) : une phrase par carte, passage automatique, compteur n / 30, encouragements de Dittou à 10, 20 et 30 (`textes.json` → `quiz`).
 - Tunnel de l'accueil : whoosh (`tunnel.mp3`) à l'entrée et rares pings de notification (`ping.mp3`) quand on y avance ; Mochi sonne (avec le son) toutes les 30 s sur l'accueil.
+- Carte : départ 🚩 et arrivée 🏁 « الوصول 🏆 » bien visibles, route plus marquée. Écran de départ : les deux étudiants 3D (`assets/persos/`) de chaque côté de Mochi et des icônes qui flottent.

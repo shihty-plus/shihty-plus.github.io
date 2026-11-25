@@ -810,10 +810,10 @@
   function pointsCarte() {
     var mob = innerWidth < 600;   // téléphone : stations plus serrées pour tout voir sans défiler
     CARTE.pas = mob ? 66 : 92; CARTE.bord = mob ? 44 : 62; CARTE.H = mob ? 240 : 270;
-    CARTE.L = CARTE.bord * 2 + PARTIES.length * CARTE.pas;
+    CARTE.L = CARTE.bord * 2 + (PARTIES.length + .7) * CARTE.pas;   // + la place de l'arrivée 🏁
     var pts = [{ x: CARTE.L - CARTE.bord, y: CARTE.H / 2 }];   // index 0 = départ, puis 1..n = stations
     PARTIES.forEach(function (p, k) { pts.push({ x: CARTE.L - CARTE.bord - (k + 1) * CARTE.pas, y: CARTE.H / 2 + 62 * Math.sin((k + 1) * 1.25) }); });
-    return pts;
+    return pts;   // la ligne d'arrivée est dessinée au bout de la route (pts[n] + un pas)
   }
   function cheminLisse(pts) {
     var d = 'M' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
@@ -837,8 +837,8 @@
     var deco = ['🌴', '☁️', '🌵', '⛰️', '🌲', '🏕️', '🌸', '🪨'];
     var decos = '';
     for (var k = 1; k < pts.length; k++) decos += '<text x="' + (pts[k].x + CARTE.pas / 2).toFixed(1) + '" y="' + (pts[k].y > H / 2 ? 70 : H - 22) + '" font-size="24" opacity=".7" text-anchor="middle">' + deco[k % deco.length] + '</text>';
-    var noeuds = '<g class="carte-noeud depart"><circle cx="' + pts[0].x + '" cy="' + pts[0].y + '" r="22" fill="#FFFCF7"/><text x="' + pts[0].x + '" y="' + (pts[0].y + 9) + '" font-size="24" text-anchor="middle">🚩</text>' +
-      '<text x="' + pts[0].x + '" y="' + (pts[0].y + 44) + '" class="carte-lib" text-anchor="middle">' + v.depart + '</text></g>';
+    var noeuds = '<g class="carte-noeud depart"><circle cx="' + pts[0].x + '" cy="' + pts[0].y + '" r="27" fill="#FFFCF7" stroke="#FF7F6B" stroke-width="4"/><text x="' + pts[0].x + '" y="' + (pts[0].y + 10) + '" font-size="28" text-anchor="middle">🚩</text>' +
+      '<text x="' + pts[0].x + '" y="' + (pts[0].y + 50) + '" class="carte-lib carte-lib-fort" text-anchor="middle">' + v.depart + '</text></g>';
     PARTIES.forEach(function (p, k) {
       var pt = pts[k + 1], st = k < a ? 'fait' : (k === a ? 'ici' : 'apres'), c = theme(p).couleur;
       noeuds += '<g class="carte-noeud ' + st + '" style="--c:' + c + '">' +
@@ -847,6 +847,13 @@
         (st === 'fait' ? '<circle cx="' + (pt.x + 18).toFixed(1) + '" cy="' + (pt.y - 18) + '" r="9" fill="#2DD4BF" stroke="#fff" stroke-width="2"/><text x="' + (pt.x + 18).toFixed(1) + '" y="' + (pt.y - 14) + '" font-size="11" font-weight="800" text-anchor="middle" fill="#042F2E">✓</text>' : '') +
         '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y > H / 2 ? pt.y + 46 : pt.y - 34) + '" class="carte-lib" text-anchor="middle">' + (innerWidth < 600 && st !== 'ici' ? (k + 1) : (k + 1) + ' · ' + p.titre) + '</text></g>';
     });
+    // arrivée : un grand drapeau 🏁 et la récompense, au bout de la route
+    var fin = pts[pts.length - 1], fx = fin.x - CARTE.pas * .62, fy = H / 2;
+    var dFin = 'M' + fin.x.toFixed(1) + ' ' + fin.y.toFixed(1) + ' Q' + ((fin.x + fx) / 2).toFixed(1) + ' ' + fy + ' ' + fx.toFixed(1) + ' ' + fy;
+    noeuds += '<path d="' + dFin + '" class="carte-chemin-ombre"/><path d="' + dFin + '" class="carte-chemin"/>' +
+      '<g class="carte-noeud arrivee"><circle cx="' + fx.toFixed(1) + '" cy="' + fy + '" r="27" fill="#FFF4D6" stroke="#E2B970" stroke-width="4"/>' +
+      '<text x="' + fx.toFixed(1) + '" y="' + (fy + 10) + '" font-size="28" text-anchor="middle">🏁</text>' +
+      '<text x="' + fx.toFixed(1) + '" y="' + (fy + 50) + '" class="carte-lib carte-lib-fort" text-anchor="middle">' + (v.arrivee || 'الوصول 🏆') + '</text></g>';
     var svg = '<svg viewBox="0 0 ' + CARTE.L + ' ' + H + '" class="carte-svg" aria-hidden="true">' + mondes + decos +
       '<path d="' + d + '" class="carte-chemin-ombre"/><path d="' + d + '" class="carte-chemin"/><path d="' + d + '" class="carte-chemin-fait"/>' + noeuds + '</svg>';
     var avatar = h('div', { class: 'carte-avatar', html: window.Avatar ? '' : window.Etudiant ? Etudiant.svg({ pose: 'salut', genre: (de + a) % 2 ? 'h' : 'f' }) : '🎒' });
@@ -1018,7 +1025,11 @@
   function ecranDemarrage() {
     var D = T.demarrage || {};
     var ditto = h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('span', { class: 'dem-coeurs', 'aria-hidden': 'true' }, ['💚', '✨', '💕', '✨'].map(function (e, i) { return h('i', { style: '--i:' + i, text: e }); })), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' }), h('span', { class: 'dem-ecran' })]);
+    var flotte = ['❤️', '👍', '💬', '🔔', '📸', '▶️', '🎮', '🎵', '📩', '⭐'];
     var fond = h('div', { class: 'demarrage', role: 'dialog', 'aria-label': D.bulle || 'SHIHTY+' }, [
+      h('div', { class: 'dem-deco', 'aria-hidden': 'true' }, flotte.map(function (e, i) { return h('span', { class: 'dem-icone', style: '--i:' + i, text: e }); })),
+      h('img', { class: 'dem-perso g', src: 'assets/persos/garcon-face.webp', alt: '', 'aria-hidden': 'true' }),
+      h('img', { class: 'dem-perso d', src: 'assets/persos/fille-face.webp', alt: '', 'aria-hidden': 'true' }),
       h('div', { class: 'dem-centre' }, [
         h('p', { class: 'dem-bulle', text: D.bulle || 'أنا موتشي، مرحبا بيك 👋' }),
         ditto,
@@ -1029,6 +1040,7 @@
       if (fond.classList.contains('plonge')) return;
       if (window.Sons) { window.Sons.demarrerMusique(); window.Sons.jouer('whoosh'); }
       fond.classList.add('plonge');
+      fond.querySelectorAll('.dem-perso, .dem-deco').forEach(function (n) { n.classList.add('part'); });
       try { window.dispatchEvent(new PointerEvent('pointermove', { clientX: innerWidth / 2, clientY: innerHeight / 3 })); } catch (e) { /* ancien navigateur */ }
       // Mochi quitte l'écran de départ et vole directement à sa place sur l'accueil
       var img = ditto.querySelector('img'), de = img.getBoundingClientRect();
