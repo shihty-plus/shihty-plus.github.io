@@ -1028,6 +1028,10 @@
     var flotte = ['❤️', '👍', '💬', '🔔', '📸', '▶️', '🎮', '🎵', '📩', '⭐'];
     var fond = h('div', { class: 'demarrage', role: 'dialog', 'aria-label': D.bulle || 'SHIHTY+' }, [
       h('div', { class: 'dem-deco', 'aria-hidden': 'true' }, flotte.map(function (e, i) { return h('span', { class: 'dem-icone', style: '--i:' + i, text: e }); })),
+      h('div', { class: 'dem-rubans', 'aria-hidden': 'true' }, ((T.accueil2 || {}).cinetique || []).slice(0, 2).map(function (ligne, k) {
+        var mots = ligne.map(function (m) { return m[0]; }), suite = mots.concat(mots, mots, mots);
+        return h('div', { class: 'dem-ruban r' + k }, [h('div', { class: 'dem-ruban-in' }, suite.map(function (m) { return h('span', { text: m }); }))]);
+      })),
       h('img', { class: 'dem-perso g', src: 'assets/persos/garcon-face.webp', alt: '', 'aria-hidden': 'true' }),
       h('img', { class: 'dem-perso d', src: 'assets/persos/fille-face.webp', alt: '', 'aria-hidden': 'true' }),
       h('div', { class: 'dem-centre' }, [
@@ -1040,7 +1044,7 @@
       if (fond.classList.contains('plonge')) return;
       if (window.Sons) { window.Sons.demarrerMusique(); window.Sons.jouer('whoosh'); }
       fond.classList.add('plonge');
-      fond.querySelectorAll('.dem-perso, .dem-deco').forEach(function (n) { n.classList.add('part'); });
+      fond.querySelectorAll('.dem-perso, .dem-deco, .dem-rubans').forEach(function (n) { n.classList.add('part'); });
       try { window.dispatchEvent(new PointerEvent('pointermove', { clientX: innerWidth / 2, clientY: innerHeight / 3 })); } catch (e) { /* ancien navigateur */ }
       // Mochi quitte l'écran de départ et vole directement à sa place sur l'accueil
       var img = ditto.querySelector('img'), de = img.getBoundingClientRect();
@@ -1093,9 +1097,9 @@
       ])
     ]);
     var cinetique = h('section', { class: 'cinetique', 'aria-hidden': 'true' }, A.cinetique.map(function (ligne, k) {
-      return h('div', { class: 'cin-ligne', 'data-sens': k % 2 ? '1' : '-1' }, ligne.concat(ligne).map(function (m) {
+      return h('div', { class: 'cin-ruban r' + (k % 3) }, [h('div', { class: 'cin-ligne', 'data-sens': k % 2 ? '1' : '-1' }, ligne.concat(ligne).map(function (m) {
         return m[1] === 'tag' ? h('span', { class: 'cin-tag', text: m[0] }) : h('span', { class: 'cin-mot', text: m[0] });
-      }));
+      }))]);   // chaque ligne devient un ruban coloré incliné
     }));
     afficher([
       h('section', { class: 'ac-hero' }, [

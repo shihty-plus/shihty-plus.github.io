@@ -1737,3 +1737,26 @@ body.mode-quiz .item-unique > legend { font-size: 22px; }
 .dem-centre { position: relative; z-index: 2; }
 @media (max-width: 600px) { .dem-perso { height: 30vh; bottom: 2%; opacity: .95; } .dem-perso.g { left: -4%; } .dem-perso.d { right: -4%; } }
 @media (prefers-reduced-motion: reduce) { .dem-icone, .dem-perso, .carte-noeud.arrivee { animation: none; } }
+/* v32 — rubans colorés inclinés (texte animé de l'accueil + écran de départ) */
+.cinetique { gap: 0; padding: 90px 0; }
+.cin-ruban { width: 118%; margin-left: -9%; padding: 12px 0; overflow: hidden; box-shadow: 0 14px 30px rgba(0, 0, 0, .35); position: relative; }
+.cin-ruban.r0 { background: #0D9488; transform: rotate(-4deg); z-index: 2; }
+.cin-ruban.r1 { background: #FF7F6B; transform: rotate(3deg); margin-top: -14px; z-index: 1; }
+.cin-ruban.r2 { background: #E2B970; transform: rotate(-2deg); margin-top: -10px; }
+.cin-ruban .cin-mot { font-size: clamp(30px, 5.6vw, 76px); color: #FFFCF7; }
+.cin-ruban .cin-mot:nth-child(4n+2) { color: rgba(255, 252, 247, .6); }
+.cin-ruban.r2 .cin-mot { color: #3D2A0C; } .cin-ruban.r2 .cin-mot:nth-child(4n+2) { color: rgba(61, 42, 12, .55); }
+.cin-ruban .cin-tag { background: #FFFCF7; color: #17302F; }
+.cin-ruban .cin-tag:nth-of-type(odd) { background: #17302F; color: #FFFCF7; }
+/* écran de départ : deux rubans qui se croisent derrière Mochi */
+.dem-rubans { position: absolute; inset: 0; overflow: hidden; pointer-events: none; transition: opacity .4s; }
+.dem-ruban { position: absolute; left: -10%; width: 120%; padding: 10px 0; overflow: hidden; opacity: .9; box-shadow: 0 10px 24px rgba(0, 0, 0, .3); }
+.dem-ruban.r0 { top: 30%; background: #0D9488; transform: rotate(-8deg); }
+.dem-ruban.r1 { top: 58%; background: #FF7F6B; transform: rotate(6deg); }
+.dem-ruban-in { display: flex; gap: 28px; width: max-content; white-space: nowrap; direction: ltr; animation: dem-defile 26s linear infinite; }
+.dem-ruban.r1 .dem-ruban-in { animation-direction: reverse; animation-duration: 30s; }
+.dem-ruban-in span { font-size: clamp(22px, 3.6vw, 42px); font-weight: 800; color: #FFFCF7; direction: rtl; }
+.dem-ruban-in span:nth-child(2n) { font-weight: 300; opacity: .75; }
+@keyframes dem-defile { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.dem-rubans.part { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .dem-ruban-in { animation: none; } }
