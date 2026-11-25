@@ -58,6 +58,7 @@
   }
   function afficher(noeuds, classe) {
     if (window.Compagnon) window.Compagnon.page('cache');   // sur l'accueil, c'est la troupe (js/troupe.js)
+    if (window.Sons && classe) window.Sons.ambiance(classe === 'page-accueil' ? 'jeu' : 'nature');   // musique de jeu : accueil seulement ; nature ensuite
     app.className = 'page ' + (classe || '');
     document.body.classList.add('clair');
     app.style.removeProperty('--accent');
@@ -671,6 +672,7 @@
     app.replaceChildren.apply(app, noeuds.filter(Boolean));
     if (ecran.type === 'station' && !SAISIE) lancerVoyage3D(ecran);
     if (ecran.type === 'q' && !SAISIE && !ecran.unique) replierReponses();
+    if (window.Sons) window.Sons.ambiance('nature');
     if (window.Sons) window.Sons.sensible(!!ecran.partie && ['3E', '3F', '3G'].indexOf(ecran.partie.id) >= 0 || ecran.cle === 'SOUTIEN');
     if (window.Compagnon) window.Compagnon.page(ecran.type === 'resultat' ? 'resultat' : ecran.type === 'station' ? 'cache' : 'question');
     if (conserverDefilement) {

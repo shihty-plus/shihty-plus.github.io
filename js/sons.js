@@ -1,24 +1,25 @@
-/* sons.js — effets sonores et ambiance de nature (fichiers dans assets/sons/, générés par IA ; aucun instrument).
+/* sons.js — effets sonores et fonds sonores (fichiers dans assets/sons/, générés par IA).
    - Rien ne joue avant le premier geste du visiteur (règle des navigateurs).
-   - Deux boutons dans l'en-tête : effets sonores (🔊) et ambiance nature (🍃) ; le choix est gardé.
-   - Ambiance : ruisseau + léger vent + chants d'oiseaux de temps en temps, sans instrument ; démarre avec « ابدأ الرحلة », très bas.
-   - Parties sensibles (dépression, anxiété, idées suicidaires) : ambiance plus basse, sans oiseaux, seulement le clic discret.
-   Sons.jouer(nom, volume) ; Sons.sensible(bool) ; Sons.demarrerMusique() */
+   - Deux fonds : « jeu » (musique de jeu, page d'accueil seulement) et « nature » (ruisseau, oiseaux, vent ; sans instrument)
+     pendant le questionnaire. On passe de l'un à l'autre par un fondu.
+   - Deux boutons dans l'en-tête : effets sonores (🔊) et fond sonore (🍃) ; le choix est gardé.
+   - Parties sensibles (dépression, anxiété, idées suicidaires) : fond plus bas, seulement le clic discret.
+   Sons.jouer(nom, volume) ; Sons.sensible(bool) ; Sons.ambiance('jeu' | 'nature' | null) */
 (function () {
   'use strict';
   var DOSSIER = 'assets/sons/';
   var NOMS = ['clic', 'succes', 'whoosh', 'sonnerie', 'rit', 'bonjour', 'surpris', 'aww', 'ronfle', 'hmph', 'baille', 'boing', 'revele', 'recompense', 'porte'];
-  var VOL = { clic: .35, succes: .5, whoosh: .3, sonnerie: .32, rit: .55, bonjour: .55, surpris: .5, aww: .5, ronfle: .45, hmph: .5, baille: .5, boing: .22, revele: .45, recompense: .5, porte: .45 };
+  var VOL = { clic: .35, succes: .5, whoosh: .3, sonnerie: .32, rit: .55, bonjour: .55, surpris: .5, aww: .5, ronfle: .45, hmph: .5, baille: .5, boing: .22, revele: .45, recompense: .5, porte: .9 };
   var NEUTRES = { clic: 1, whoosh: 1 };          // les seuls sons gardés dans les parties sensibles
-  var MUSIQUE = .14, MUSIQUE_SENSIBLE = .06;   // ambiance très basse
-  var ctx = null, bufs = {}, maitre = null, gainMus = null, srcMus = null, enSensible = false, derniers = {};
+  var NIVEAUX = { jeu: .09, nature: .14 }, SENSIBLE = .06;   // fonds très bas
+  var ctx = null, bufs = {}, maitre = null, pistes = {}, voulue = null, enSensible = false, derniers = {};
   function lire(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v === '1'; } catch (e) { return d; } }
   function ecrire(k, v) { try { localStorage.setItem(k, v ? '1' : '0'); } catch (e) { /* rien */ } }
   var SAISIE = /[?&]saisie=/.test(location.search);   // saisie des questionnaires papier : silence par défaut
-  var effets = lire('shihty-effets', !SAISIE), musique = lire('shihty-nature', !SAISIE), musiqueVoulue = false;
+  var effets = lire('shihty-effets', !SAISIE), musique = lire('shihty-nature', !SAISIE);
 
   function charger(nom, fichier) {
-    return fetch(DOSSIER + fichier).then(function (r) { return r.arrayBuffer(); })
+    return fetch(DOSSIER + fichier + '?v=' + (window.SHIHTY_VERSION || '')).then(function (r) { return r.arrayBuffer(); })
       .then(function (a) { return new Promise(function (ok, ko) { ctx.decodeAudioData(a, ok, ko); }); })
       .then(function (b) { bufs[nom] = b; }).catch(function () { /* son manquant : on continue sans */ });
   }
@@ -26,8 +27,7 @@
     if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
     var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     ctx = new AC(); maitre = ctx.createGain(); maitre.connect(ctx.destination);
-    gainMus = ctx.createGain(); gainMus.gain.value = 0; gainMus.connect(maitre);
-    charger('nature', 'nature.mp3').then(function () { if (musiqueVoulue) lancerMusique(); });
+    charger('jeu', 'musique.mp3').then(appliquer); charger('nature', 'nature.mp3').then(appliquer);
     Promise.all(NOMS.map(function (n) { return charger(n, n + '.mp3'); })).then(function () { if (enAttente && document.querySelector('.page-accueil')) { var a = enAttente; enAttente = null; jouer(a[0], a[1]); } });
   }
   ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(function (ev) { document.addEventListener(ev, deverrouiller, { capture: true, passive: true }); });
@@ -44,22 +44,25 @@
     s.buffer = bufs[nom]; g.gain.value = (VOL[nom] || .5) * (vol === undefined ? 1 : vol) * (enSensible ? .6 : 1);
     s.connect(g); g.connect(maitre); s.start();
   }
-  /* ambiance de nature (assets/sons/nature.mp3, générée par IA : ruisseau, oiseaux, vent ; aucun instrument), en boucle */
-  function lancerMusique() {
-    if (!ctx || srcMus || !musique || !bufs.nature) return;
-    srcMus = ctx.createBufferSource(); srcMus.buffer = bufs.nature; srcMus.loop = true;
-    srcMus.loopStart = .03; srcMus.loopEnd = bufs.nature.duration - .03;
-    srcMus.connect(gainMus); srcMus.start(0, .03);
-    volumeMusique(3);
+  /* fonds sonores en boucle, avec fondu de l'un à l'autre */
+  function appliquer() {
+    if (!ctx) return;
+    ['jeu', 'nature'].forEach(function (n) {
+      var v = musique && voulue === n ? (enSensible ? SENSIBLE : NIVEAUX[n]) : 0, p = pistes[n];
+      if (!p && v > 0 && bufs[n]) {
+        var src = ctx.createBufferSource(), g = ctx.createGain();
+        src.buffer = bufs[n]; src.loop = true; src.loopStart = .03; src.loopEnd = bufs[n].duration - .03;
+        g.gain.value = 0; src.connect(g); g.connect(maitre); src.start(0, .03);
+        p = pistes[n] = { src: src, gain: g };
+      }
+      if (!p) return;
+      var t = ctx.currentTime; p.gain.gain.cancelScheduledValues(t); p.gain.gain.setValueAtTime(p.gain.gain.value, t);
+      p.gain.gain.linearRampToValueAtTime(v, t + (v > 0 ? 2.5 : 1.5));
+    });
   }
-  function volumeMusique(duree) {
-    if (!gainMus) return;
-    var t = ctx.currentTime, v = musique && srcMus ? (enSensible ? MUSIQUE_SENSIBLE : MUSIQUE) : 0;
-    gainMus.gain.cancelScheduledValues(t); gainMus.gain.setValueAtTime(gainMus.gain.value, t);
-    gainMus.gain.linearRampToValueAtTime(v, t + (duree || 1));
-  }
-  function demarrerMusique() { musiqueVoulue = true; deverrouiller(); lancerMusique(); }
-  function sensible(v) { v = !!v; if (v === enSensible) return; enSensible = v; if (ctx) volumeMusique(1.5); }
+  function ambiance(nom) { if (nom === voulue) return; voulue = nom; appliquer(); }
+  function demarrerMusique() { deverrouiller(); }
+  function sensible(v) { v = !!v; if (v === enSensible) return; enSensible = v; appliquer(); }
 
   /* ---------- boutons de l'en-tête ---------- */
   var SVG = {
@@ -74,14 +77,13 @@
     be.className = bm.className = 'album-btn son-btn';
     function maj() {
       be.innerHTML = effets ? SVG.effetsOn : SVG.effetsOff; be.setAttribute('aria-pressed', effets); be.setAttribute('aria-label', effets ? 'إيقاف المؤثرات الصوتية' : 'تشغيل المؤثرات الصوتية');
-      bm.innerHTML = SVG.musique; bm.classList.toggle('off', !musique); bm.setAttribute('aria-pressed', musique); bm.setAttribute('aria-label', musique ? 'إيقاف أصوات الطبيعة' : 'تشغيل أصوات الطبيعة');
+      bm.innerHTML = SVG.musique; bm.classList.toggle('off', !musique); bm.setAttribute('aria-pressed', musique); bm.setAttribute('aria-label', musique ? 'إيقاف الخلفية الصوتية' : 'تشغيل الخلفية الصوتية');
       be.classList.toggle('off', !effets);
     }
     be.addEventListener('click', function () { effets = !effets; ecrire('shihty-effets', effets); maj(); jouer('clic'); });
     bm.addEventListener('click', function () {
       musique = !musique; ecrire('shihty-nature', musique); maj(); deverrouiller();
-      if (musique) { musiqueVoulue = true; if (!srcMus) lancerMusique(); }
-      volumeMusique(.6);
+      appliquer();
     });
     zone.insertBefore(bm, zone.firstChild); zone.insertBefore(be, zone.firstChild); maj();
   }
@@ -99,6 +101,6 @@
     if (b) jouer(b.classList.contains('rep-resume') ? 'clic' : 'whoosh');
   }, true);
 
-  window.Sons = { jouer: jouer, sensible: sensible, demarrerMusique: demarrerMusique,
-    etat: function () { return { ctx: ctx && ctx.state, charges: Object.keys(bufs).length, musique: !!srcMus, volMusique: gainMus && gainMus.gain.value, sensible: enSensible, effets: effets }; } };
+  window.Sons = { jouer: jouer, sensible: sensible, demarrerMusique: demarrerMusique, ambiance: ambiance,
+    etat: function () { return { ctx: ctx && ctx.state, charges: Object.keys(bufs).length, fond: voulue, jeu: pistes.jeu && +pistes.jeu.gain.gain.value.toFixed(3), nature: pistes.nature && +pistes.nature.gain.gain.value.toFixed(3), sensible: enSensible, effets: effets }; } };
 })();
