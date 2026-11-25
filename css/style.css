@@ -1767,3 +1767,4 @@ body.mode-quiz .item-unique > legend { font-size: 22px; }
 @media (max-width: 600px) { .dem-ruban.r0 { left: 16%; } .dem-ruban.r1 { left: 84%; } .dem-ruban-in span { font-size: 22px; } }
 /* personnalité : pages de 5 */
 body.mode-quiz .item > legend { font-size: 18px; }
+.dem-ruban { direction: ltr; }

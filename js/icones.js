@@ -64,7 +64,7 @@
     z += C_(21, 20, 1, K) + C_(27, 20, 1, K) + L_('M21.500 24 q2.500 2 5 0');
     if (o.toque) z += P_('M12 12 l12 -6 12 6 -12 6z', K) + L_('M33 13 v6');
     if (o.lunettes) z += C_(21, 20, 2.800) + C_(27, 20, 2.800) + L_('M23.800 20 h0.400');
-    if (o.beret) z += E_(24, 11, 10, 3.500, C);
+    if (o.beret) z += P_('M13.5 15 q-1 -9 11 -9.500 q11 .5 11 6.500 q-1 3.500 -9 3.500 q-7 0 -13 -.500z', C) + L_('M14 14.500 q10 1.500 20 -1.500') + C_(25, 5, 1.800, C);   // béret posé sur la tête
     if (o.chapeau) z += P_('M12 13 h24 l-4 -7 h-16z', K);
     if (o.sorcier) z += P_('M13 13 h22 l-9 -12z', P);
     if (o.noeud) z += P_('M20 36 l4 2 4 -2 v4 l-4 -2 -4 2z', K);
@@ -132,7 +132,7 @@
     '🤷': buste({ habit: S, bras: 'hausse' }), '🧍': buste({ habit: B }), '🕵️': buste({ chapeau: 1, habit: N }), '🧙': buste({ sorcier: 1, habit: P }), '🤳': buste({ tel: 1 }),
     '🧑‍🤝‍🧑': duo({}, { cheveux: 'long', habit: C }), '👫': duo({}, { cheveux: 'long', habit: C }), '💑': duo({}, { cheveux: 'long', habit: C }, 1),
     '👪': famille(), '👨‍👩‍👦': famille(), '👨‍👩‍👧': famille(),
-    '🧘': C_(24, 12, 6, F) + P_('M14 30 q10 -12 20 0z', T) + P_('M6 38 q18 -10 36 0 q-18 6 -36 0z', T),
+    '🧘': P_('M6 40 q18 -9 36 0 q-18 6 -36 0z', T) + P_('M15 37 q-1 -14 9 -15 q10 1 9 15z', T) + L_('M16 27 q-6 6 -2 10 M32 27 q6 6 2 10') + C_(14, 37, 2.400, F) + C_(34, 37, 2.400, F) + C_(24, 14, 7, F) + P_('M17 12 q1 -7 7 -7 q6 0 7 7 q-3 -3 -7 -2.500 q-4 -.5 -7 2.500z', N) + L_('M20.500 15 q1.500 1.200 3 0 M24.500 15 q1.500 1.200 3 0'),   // personne assise en méditation, yeux fermés
     '🏃': C_(30, 9, 5, F) + L_('M28 15 l-4 12 -8 6 M24 27 l8 4 0 10 M27 18 l9 4 M26 18 l-8 2'),
     '🚴': C_(12, 36, 7) + C_(36, 36, 7) + L_('M12 36 l8 -12 h10 l6 12 M20 24 l4 12 h6') + C_(29, 12, 4, F),
     // lunes, pastilles, horloges, chiffres
