@@ -1042,6 +1042,42 @@
   }
   /* Écran de démarrage (comme dans les jeux) : Dittou en plein écran et « اضغط(ي) للبدء ».
      Ce premier toucher autorise le son : la musique démarre en même temps que l'accueil s'ouvre. */
+  /* Guide « كيفاش نجاوب؟ » : quelques cartes avec de vraies captures du site (assets/guide/).
+     Affiché après le consentement, et à tout moment par le bouton « دليل الاستعمال » en bas de page. */
+  function ouvrirGuide(fini) {
+    var G = T.guide || {}, etapes = G.etapes || [], k = 0;
+    if (!etapes.length) { if (fini) fini(); return; }
+    var piste = h('div', { class: 'gd-piste' }, etapes.map(function (e, i) {
+      return h('article', { class: 'gd-carte' }, [
+        h('p', { class: 'gd-num', dir: 'ltr', text: (i + 1) + ' / ' + etapes.length }),
+        h('h2', { class: 'gd-titre', text: e.titre }),
+        h('div', { class: 'gd-image' }, [h('img', { src: 'assets/guide/' + e.image + '.webp?v=' + (window.SHIHTY_VERSION || ''), alt: e.titre, loading: 'lazy' })]),
+        h('p', { class: 'gd-texte', text: e.texte })
+      ]);
+    }));
+    var points = h('div', { class: 'gd-points', 'aria-hidden': 'true' }, etapes.map(function () { return h('i'); }));
+    var prec = h('button', { type: 'button', class: 'btn btn-fantome gd-prec', text: G.precedent || 'السابق' });
+    var suiv = h('button', { type: 'button', class: 'btn btn-principal gd-suiv' });
+    var passer = h('button', { type: 'button', class: 'gd-passer', text: G.passer || 'تخطّي ✕' });
+    var fond = h('div', { class: 'gd', role: 'dialog', 'aria-label': G.titre || 'دليل' }, [
+      h('div', { class: 'gd-boite' }, [h('div', { class: 'gd-tete' }, [h('strong', { text: G.titre || '📖 كيفاش نجاوب؟' }), passer]), h('div', { class: 'gd-fenetre' }, [piste]), points, h('div', { class: 'gd-nav' }, [prec, suiv])])
+    ]);
+    function aller(n) {
+      k = Math.max(0, Math.min(etapes.length - 1, n));
+      piste.style.transform = 'translateX(' + (k * 100) + '%)';   // RTL : on avance vers la gauche
+      [].forEach.call(points.children, function (p, i) { p.classList.toggle('on', i === k); });
+      prec.style.visibility = k ? 'visible' : 'hidden';
+      suiv.textContent = k === etapes.length - 1 ? (G.commencer || 'فهمت، يلا نبداو! 🚀') : (G.suivant || 'التالي ←');
+    }
+    function fermer() { fond.classList.add('sortie'); setTimeout(function () { fond.remove(); }, 300); if (fini) fini(); }
+    prec.addEventListener('click', function () { aller(k - 1); });
+    suiv.addEventListener('click', function () { if (k === etapes.length - 1) fermer(); else aller(k + 1); });
+    passer.addEventListener('click', fermer);
+    var x0 = null;   // glisser avec le doigt
+    piste.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    piste.addEventListener('touchend', function (e) { if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 40) aller(k + (dx > 0 ? 1 : -1)); });
+    document.body.appendChild(fond); aller(0);
+  }
   function ecranDemarrage() {
     var D = T.demarrage || {};
     var ditto = h('div', { class: 'dem-ditto' }, [h('span', { class: 'dem-halo' }), h('img', { src: window.Avatar ? window.Avatar.src('salut') : 'assets/bitto/salut.webp', alt: '' }), h('span', { class: 'dem-ecran' })]);
@@ -1242,7 +1278,7 @@
             etat.etape = 'questionnaire'; etat.i = 0; etat.prenom = ''; etat.dernier = Date.now(); sauver(); majSalutation();
             // la carte de toute la route s'affiche d'abord : on voit combien de stations il y a
             if (window.Sons) window.Sons.ambiance(null);   // le questionnaire commence : la musique s'arrête
-            voyageCarte(-1, 0, function () { rendreQuestionnaire(false); }, false, true);
+            ouvrirGuide(function () { voyageCarte(-1, 0, function () { rendreQuestionnaire(false); }, false, true); });   // d'abord le guide, puis la carte
           })
         ])
       ])
@@ -1539,6 +1575,8 @@
     document.getElementById('btn-carte').addEventListener('click', ouvrirCarte);
     document.getElementById('jeux-bouton-texte').textContent = T.jeux.entete;
     document.getElementById('btn-jeux').addEventListener('click', ouvrirJeux);
+    var pied = document.querySelector('.pied');
+    if (pied && !SAISIE && T.guide) pied.insertBefore(h('button', { type: 'button', class: 'lien-aide lien-guide', text: T.guide.lien, onclick: function () { ouvrirGuide(); } }), pied.firstChild);
     var lien = document.getElementById('lien-aide');
     lien.textContent = T.aide.lien; lien.addEventListener('click', ouvrirAide);
     var bandeau = document.getElementById('bandeau');

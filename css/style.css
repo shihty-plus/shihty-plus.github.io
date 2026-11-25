@@ -1813,3 +1813,29 @@ body.mode-quiz .item > legend { font-size: 18px; }
 .dem-curseur { display: inline-grid; place-items: center; transform-origin: 30% 20%; animation: dem-clic 1.2s ease-in-out infinite; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3)); }
 @keyframes dem-clic { 0%, 55%, 100% { transform: translate(0, 0) scale(1); } 70% { transform: translate(-3px, -3px) scale(.82); } 82% { transform: translate(0, 0) scale(1); } }
 @media (prefers-reduced-motion: reduce) { .dem-curseur { animation: none; } }
+/* v36 — guide « كيفاش نجاوب؟ » (cartes avec captures du site) */
+.gd { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 14px; background: rgba(4, 32, 31, .82); animation: gd-in .3s ease; }
+.gd.sortie { animation: gd-out .3s ease forwards; }
+@keyframes gd-in { from { opacity: 0; } } @keyframes gd-out { to { opacity: 0; } }
+.gd-boite { width: min(100%, 460px); max-height: 94vh; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 22px; background: #FBF8F3; color: #17302F; box-shadow: 0 30px 70px rgba(0, 0, 0, .45); }
+.gd-tete { display: flex; justify-content: space-between; align-items: center; font-size: 17px; }
+.gd-passer { border: 0; background: none; color: #5F6F6D; font: inherit; font-size: 14px; cursor: pointer; }
+.gd-fenetre { overflow: hidden; direction: ltr; }
+.gd-piste { display: flex; flex-direction: row-reverse; transition: transform .4s cubic-bezier(.3, .8, .3, 1); }
+.gd-carte { flex: 0 0 100%; direction: rtl; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 2px; }
+.gd-num { margin: 0; font-size: 12px; font-weight: 800; color: #0D9488; }
+.gd-titre { margin: 0; font-size: 20px; }
+.gd-image { width: 100%; max-height: 42vh; overflow: hidden; border-radius: 14px; background: #0B3B3A; border: 3px solid #E7F7F4; display: grid; place-items: center; }
+.gd-image img { display: block; width: 100%; height: auto; max-height: 42vh; object-fit: contain; }
+.gd-texte { margin: 0; font-size: 15.5px; line-height: 1.75; color: #3D4E4C; }
+.gd-points { display: flex; justify-content: center; gap: 6px; }
+.gd-points i { width: 8px; height: 8px; border-radius: 50%; background: #CFE7E3; transition: width .3s, background .3s; }
+.gd-points i.on { width: 22px; border-radius: 999px; background: #0D9488; }
+.gd-nav { display: flex; gap: 10px; justify-content: space-between; }
+.gd-nav .btn { flex: 1; min-height: 48px; }
+.pied .lien-guide { margin-inline-end: 8px; }
+.gd { grid-template-columns: minmax(0, 460px); }
+.gd-boite { width: 100%; min-width: 0; }
+.gd-fenetre { width: 100%; min-width: 0; }
+.gd-carte { min-width: 0; }
+.gd-nav .gd-prec { color: #17302F !important; background: #fff !important; border: 1.5px solid #D8E3E0 !important; }

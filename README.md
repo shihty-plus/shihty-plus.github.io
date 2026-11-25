@@ -84,3 +84,4 @@ node --test tests/scoring.test.js
 - Tunnel de l'accueil : whoosh (`tunnel.mp3`) à l'entrée et rares pings de notification (`ping.mp3`) quand on y avance ; Mochi sonne (avec le son) toutes les 30 s sur l'accueil.
 - Carte : départ 🚩 et arrivée 🏁 « الوصول 🏆 » bien visibles, route plus marquée. Écran de départ : les deux étudiants 3D (`assets/persos/`) de chaque côté de Mochi et des icônes qui flottent.
 - Rubans colorés inclinés : le texte animé de l'accueil (`.cin-ruban`) et deux rubans qui se croisent sur l'écran de départ (`.dem-ruban`).
+- Guide « كيفاش نجاوب؟ » (`ouvrirGuide`, `assets/guide/`, `textes.json` → `guide`) : 5 cartes avec de vraies captures du site (répondre, réponses obligatoires, reprise, pause, PDF), après le consentement et via « 📖 دليل الاستعمال » en bas de page.
