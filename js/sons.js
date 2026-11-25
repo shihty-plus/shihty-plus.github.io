@@ -1,4 +1,5 @@
-/* sons.js — effets sonores (fichiers dans assets/sons/, générés par IA) et ambiance de nature (fabriquée par code).
+/* sons.js — effets sonores (fichiers dans assets/sons/, générés par IA). Pas de son de fond (supprimé à la demande de l'équipe ;
+   le code de l'ambiance nature est gardé mais n'est plus lancé).
    - Rien ne joue avant le premier geste du visiteur (règle des navigateurs).
    - Deux boutons dans l'en-tête : effets sonores (🔊) et ambiance nature (🍃) ; le choix est gardé.
    - Ambiance : ruisseau + léger vent + chants d'oiseaux de temps en temps, sans instrument ; démarre avec « ابدأ الرحلة », très bas.
@@ -83,7 +84,7 @@
     gainMus.gain.cancelScheduledValues(t); gainMus.gain.setValueAtTime(gainMus.gain.value, t);
     gainMus.gain.linearRampToValueAtTime(v, t + (duree || 1));
   }
-  function demarrerMusique() { musiqueVoulue = true; deverrouiller(); lancerMusique(); }
+  function demarrerMusique() { /* plus de son de fond */ }
   function sensible(v) { v = !!v; if (v === enSensible) return; enSensible = v; if (ctx) volumeMusique(1.5); }
 
   /* ---------- boutons de l'en-tête ---------- */
@@ -108,7 +109,7 @@
       if (musique) { musiqueVoulue = true; if (!srcMus) lancerMusique(); }
       volumeMusique(.6);
     });
-    zone.insertBefore(bm, zone.firstChild); zone.insertBefore(be, zone.firstChild); maj();
+    zone.insertBefore(be, zone.firstChild); maj();   // pas de musique ni d'ambiance de fond
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boutons); else boutons();
 

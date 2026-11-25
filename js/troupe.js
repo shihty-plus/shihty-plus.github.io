@@ -63,9 +63,11 @@
     // le grand Dittou du haut sonne aussi : ondes ajoutées autour du portrait
     var viv = app.querySelector('.viv'), cadre = app.querySelector('.viv-cadre'), ondesP = null;
     if (cadre) { ondesP = document.createElement('div'); ondesP.className = 'tr-ondes-portrait'; ondesP.innerHTML = '<span class="tr-onde g"><i></i><i></i></span><span class="tr-onde d"><i></i><i></i></span>'; cadre.appendChild(ondesP); }
-    function sonnerie(t) {   // comme un téléphone : il sonne ~1 s, se tait ~1,4 s, et recommence
-      var c = (t % 2400) / 2400; return c < .42 ? Math.min(1, Math.sin(c / .42 * Math.PI) * 1.6) : 0;
+    function sonnerie(t) {   // comme un téléphone : il sonne ~1,2 s, puis se tait ~5 s
+      var c = (t % 6200) / 6200; return c < .2 ? Math.min(1, Math.sin(c / .2 * Math.PI) * 1.6) : 0;
     }
+    var corpsP = app.querySelector('.viv .btt-in'), survol = false;
+    if (viv) { viv.addEventListener('pointerenter', function () { survol = true; }); viv.addEventListener('pointerleave', function () { survol = false; }); }
     function boucle(t) {
       if (!document.body.contains(app) || !app.classList.contains('page-accueil')) { couche.remove(); removeEventListener('resize', mesurer); document.body.classList.remove('dt-dehors'); return; }
       requestAnimationFrame(boucle);
@@ -100,9 +102,12 @@
       dEl.style.setProperty('--sonne', vib.toFixed(3));
       if (viv) {
         viv.style.opacity = (1 - op).toFixed(3);
-        viv.style.transform = vib > .01 ? 'translate(' + jx.toFixed(1) + 'px,0) rotate(' + (jr * .6).toFixed(2) + 'deg)' : '';
+        // seul le corps de Dittou vibre (les réactions restent immobiles) ; il se calme quand on le survole pour réagir
+        var vp = survol ? 0 : vib;
+        if (!corpsP) corpsP = app.querySelector('.viv .btt-in');
+        if (corpsP) { corpsP.style.translate = vp > .01 ? (jx * vp / Math.max(vib, .01)).toFixed(1) + 'px 0' : ''; corpsP.style.rotate = vp > .01 ? (jr * .6).toFixed(2) + 'deg' : ''; }
       }
-      if (ondesP) { ondesP.style.setProperty('--sonne', (vib * (1 - op)).toFixed(3)); }
+      if (ondesP) { ondesP.style.setProperty('--sonne', ((survol ? 0 : vib) * (1 - op)).toFixed(3)); }
     }
     requestAnimationFrame(boucle);
   }
