@@ -66,8 +66,16 @@
     // le grand Dittou du haut sonne aussi : ondes ajoutées autour du portrait
     var viv = app.querySelector('.viv'), cadre = app.querySelector('.viv-cadre'), ondesP = null;
     if (cadre) { ondesP = document.createElement('div'); ondesP.className = 'tr-ondes-portrait'; ondesP.innerHTML = '<span class="tr-onde g"><i></i><i></i></span><span class="tr-onde d"><i></i><i></i></span>'; cadre.appendChild(ondesP); }
-    function sonnerie(t) {   // comme un téléphone : il sonne ~1,2 s, puis se tait ~5 s
-      var c = (t % 6200) / 6200; return c < .2 ? Math.min(1, Math.sin(c / .2 * Math.PI) * 1.6) : 0;
+    var PERIODE = 30000, DUREE = 1600, debutSonnerie = performance.now() + 4000, sonneeJouee = -1;
+    function sonnerie(t) {   // comme un téléphone : de temps en temps (toutes les 30 s), il sonne ~1,6 s, AVEC le son
+      var k = Math.floor((t - debutSonnerie) / PERIODE), c = (t - debutSonnerie) - k * PERIODE;
+      if (t < debutSonnerie || c > DUREE) return 0;
+      if (k !== sonneeJouee) {
+        var pret = window.Sons && window.Sons.etat && window.Sons.etat().ctx === 'running' && !document.querySelector('.demarrage');
+        if (!pret) { debutSonnerie = t + 3000; return 0; }   // le son n'est pas encore autorisé : il sonnera 3 s après l'entrée
+        sonneeJouee = k; window.Sons.jouer('sonnerie'); setTimeout(function () { window.Sons.jouer('sonnerie'); }, 800);   // « dring dring »
+      }
+      return Math.min(1, Math.sin(c / DUREE * Math.PI) * 1.6);
     }
     var corpsP = app.querySelector('.viv .btt-in'), survol = false;
     if (viv) { viv.addEventListener('pointerenter', function () { survol = true; }); viv.addEventListener('pointerleave', function () { survol = false; }); }

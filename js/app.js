@@ -1047,7 +1047,7 @@
       fond.classList.add('sortie');
     }
     function fin() {
-      setTimeout(function () { fond.remove(); if (window.Sons) window.Sons.jouer('bonjour'); }, 200);
+      setTimeout(function () { fond.remove(); }, 200);   // le « bonjour » est déjà joué par le portrait de Mochi
     }
     fond.addEventListener('click', entrer);
     fond.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') entrer(); });
