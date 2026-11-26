@@ -550,7 +550,16 @@
   function avecNom(txt) {
     if (!txt) return txt;
     var n = etat && etat.prenom;
+    txt = selonSexe(txt);
     return n ? txt.replace(/\{prenom\}/g, n) : txt.replace(/\s*(يا\s*)?\{prenom\}\s*،?/g, ' ').replace(/\s+([!،؟.])/g, '$1').replace(/\s{2,}/g, ' ').trim();
+  }
+  /* {garçon|fille} et les formes « (ي) », « (ة) », « (ين) » : choisies selon le sexe coché (sinon on garde la forme neutre) */
+  function selonSexe(txt) {
+    var s = etat && etat.reponses ? Number(etat.reponses.SD_sexe) : 0;
+    txt = txt.replace(/\{([^{}|]*)\|([^{}|]*)\}/g, function (_, m, f) { return s === 2 ? f : s === 1 ? m : m + '(' + f + ')'; });
+    if (s === 1) return txt.replace(/\((ي|ة|ين)\)/g, '');
+    if (s === 2) return txt.replace(/\((ي|ة|ين)\)/g, '$1');
+    return txt;
   }
   function icone(id) { return (T.icones || {})[id] || '⭐'; }
   function stepper(ecran) {
@@ -698,7 +707,7 @@
       document.body.classList.toggle('mode-quiz', ecran.quiz !== undefined);
       CTX.auto = !!(ecran.unique && (ecran.echelle ? !ecran.echelle.message_apres || !ecran.dernierBloc : (seule.length === 1 && seule[0].type === 'choix')));
       var salut = ecran.debutPartie && etat.prenom && T.prenom.salut ? h('p', { class: 'q-salut', text: avecNom(T.prenom.salut) }) : null;
-      var contenu = ecran.echelle ? [ecran.quiz === 0 && T.quiz ? h('p', { class: 'quiz-intro', text: T.quiz.intro.replace('{n}', ecran.echelle.items.length) }) : null, rendreEchelle(ecran)].filter(Boolean)
+      var contenu = ecran.echelle ? [ecran.quiz === 0 && T.quiz ? h('p', { class: 'quiz-intro', text: avecNom(T.quiz.intro.replace('{n}', ecran.echelle.items.length)) }) : null, rendreEchelle(ecran)].filter(Boolean)
         : ecran.elements.filter(function (el) { return eff.visibles.has(el); }).map(rendreElement);
       noeuds = [
         barreProgression(),
@@ -726,7 +735,7 @@
     if (ecran.type === 'q' && !SAISIE && !ecran.unique) replierReponses();
     SIGNATURE = signatureVisibles();
     if (ecran.quiz !== undefined && T.quiz && window.Compagnon) {   // Dittou encourage pendant le quiz
-      var paliers = T.quiz.paliers || {}; if (paliers[ecran.quiz]) setTimeout(function () { window.Compagnon.parler(paliers[ecran.quiz], 2200); }, 200);
+      var paliers = T.quiz.paliers || {}; if (paliers[ecran.quiz]) setTimeout(function () { window.Compagnon.parler(avecNom(paliers[ecran.quiz]), 2200); }, 200);
     }
     if (ecran.type !== 'q' || ecran.quiz === undefined) document.body.classList.remove('mode-quiz');
     if (window.Sons) window.Sons.ambiance(null);   // la musique s'arrête dès qu'on commence à répondre

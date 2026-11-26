@@ -71,13 +71,13 @@
     // le grand Dittou du haut sonne aussi : ondes ajoutées autour du portrait
     var viv = app.querySelector('.viv'), cadre = app.querySelector('.viv-cadre'), ondesP = null;
     if (cadre) { ondesP = document.createElement('div'); ondesP.className = 'tr-ondes-portrait'; ondesP.innerHTML = '<span class="tr-onde g"><i></i><i></i></span><span class="tr-onde d"><i></i><i></i></span>'; cadre.appendChild(ondesP); }
-    var sonneFort = -1e9, PERIODE = 30000, DUREE = 1600, debutSonnerie = performance.now() + 4000, sonneeJouee = -1;
+    var sonneFort = -1e9, PERIODE = 30000, DUREE = 1600, debutSonnerie = performance.now() + 30000, sonneeJouee = -1;
     function sonnerie(t) {   // comme un téléphone : de temps en temps (toutes les 30 s), il sonne ~1,6 s, AVEC le son
       var k = Math.floor((t - debutSonnerie) / PERIODE), c = (t - debutSonnerie) - k * PERIODE;
       if (t < debutSonnerie || c > DUREE) return 0;
       if (k !== sonneeJouee) {
         var pret = window.Sons && window.Sons.etat && window.Sons.etat().ctx === 'running' && !document.querySelector('.demarrage');
-        if (!pret) { debutSonnerie = t + 3000; return 0; }   // le son n'est pas encore autorisé : il sonnera 3 s après l'entrée
+        if (!pret) { debutSonnerie = t + PERIODE; return 0; }   // le son n'est pas encore autorisé : il sonnera 30 s après l'entrée
         sonneeJouee = k; window.Sons.jouer('sonnerie'); setTimeout(function () { window.Sons.jouer('sonnerie'); }, 800);   // « dring dring »
         sonneFort = t;   // vibration bien visible pendant la sonnerie
         try { if (navigator.vibrate && window.Sons.etat().effets) navigator.vibrate([220, 120, 220, 120, 220]); } catch (e) { /* téléphone sans vibreur */ }   // le téléphone de l'étudiant vibre aussi (Android)

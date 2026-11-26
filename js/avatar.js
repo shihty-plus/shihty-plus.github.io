@@ -178,7 +178,8 @@
       if (actuelle === 'yeux' && calme > 9000) { montrer('fatigue'); parler((TX.reactions || {}).fatigue, 2400); setTimeout(function () { if (actuelle === 'fatigue' && performance.now() - dernierGeste > 9000) { endormi = true; montrer('dort'); } }, 2600); }
       if (endormi && Math.random() < .01) bulle('💤', 'zzz', 66, 14, 2200);
     }
-    montrer('salut', 1800);   // il dit bonjour en arrivant
+    montrer('rit', 2600);   // il sourit en arrivant (la sonnerie ne vient qu'après 30 s)
+    for (var k0 = 0; k0 < 6; k0++) setTimeout(function () { bulle(['😊', '💚', '✨'][Math.floor(Math.random() * 3)], 'monte', 35 + Math.random() * 30, 22); }, 300 + k0 * 140);
     if (window.Sons) window.Sons.jouer('bonjour');
     (TX.accueil || []).forEach(function (m, i) { setTimeout(function () { if (document.body.contains(boite) && performance.now() > verrou) parler(m, 2900); }, 700 + i * 3300); });
     requestAnimationFrame(boucle);
