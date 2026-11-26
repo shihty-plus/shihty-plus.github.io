@@ -63,7 +63,7 @@ node --test tests/scoring.test.js
 ## Choix d'implémentation à connaître
 
 - Tableau des réseaux sociaux : au moins un réseau doit être coché ; « الأقل استخداما » n'est demandé que si deux réseaux ou plus sont cochés.
-- Université : liste des 12 universités publiques (`SE_universite`, codes 1–12) + « أخرى » (13) avec saisie libre dans `SE_universite_autre`.
+- Université : même liste que le Google Forms (23 établissements, dans le même ordre). Les 12 universités publiques gardent leurs codes 1–12, « أخرى » garde le code 13 (saisie libre dans `SE_universite_autre`), les nouveaux établissements ont les codes 14–24.
 - Âges de première utilisation : refusés s'ils dépassent l'âge déclaré.
 - `duree_minutes` : temps actif de remplissage (les pauses de plus de 5 minutes ne sont pas comptées).
 - Niveaux exportés (`NIVEAU_…`) : voir la feuille « Dictionnaire » du tableur pour le sens de chaque code.
