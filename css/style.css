@@ -1876,3 +1876,10 @@ img.dem-curseur { left: -30px; bottom: -36px; }
 /* v83 : titre d'accueil plus long → un peu plus petit */
 .ac-titre.ac-titre-long { font-size: clamp(30px, 8.4vw, 64px); max-width: 15ch; line-height: 1.16; }
 @media (min-width: 900px) { .ac-titre.ac-titre-long, .ac-texte .ac-titre.ac-titre-long { font-size: clamp(38px, 4.4vw, 62px); max-width: 15ch; } }
+
+/* v84 : Mochi timide (حياء) puis il rit, à l'arrivée */
+.btt-pile.timide { animation: btt-timide 1.1s ease-in-out both; transform-origin: 50% 90%; }
+@keyframes btt-timide { 0% { transform: none; } 25% { transform: rotate(-7deg) scale(.94) translateY(3%); } 55% { transform: rotate(-5deg) scale(.95) translateY(3%); } 75% { transform: rotate(-8deg) scale(.94) translateY(3%); } 100% { transform: rotate(-3deg) scale(.97) translateY(1%); } }
+.btt-pile.rire { animation: btt-rire 1.2s ease-out both; transform-origin: 50% 90%; }
+@keyframes btt-rire { 0% { transform: rotate(-3deg) scale(.97); } 12% { transform: rotate(4deg) scale(1.05) translateY(-4%); } 24% { transform: rotate(-4deg) scale(1.03) translateY(-1%); } 36% { transform: rotate(4deg) scale(1.04) translateY(-3%); } 48% { transform: rotate(-3deg) scale(1.02); } 60% { transform: rotate(3deg) scale(1.03) translateY(-2%); } 74% { transform: rotate(-2deg) scale(1.01); } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .btt-pile.timide, .btt-pile.rire { animation: none; } }

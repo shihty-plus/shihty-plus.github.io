@@ -178,9 +178,16 @@
       if (actuelle === 'yeux' && calme > 9000) { montrer('fatigue'); parler((TX.reactions || {}).fatigue, 2400); setTimeout(function () { if (actuelle === 'fatigue' && performance.now() - dernierGeste > 9000) { endormi = true; montrer('dort'); } }, 2600); }
       if (endormi && Math.random() < .01) bulle('💤', 'zzz', 66, 14, 2200);
     }
-    montrer('rit', 2600);   // il sourit en arrivant (la sonnerie ne vient qu'après 30 s)
-    for (var k0 = 0; k0 < 6; k0++) setTimeout(function () { bulle(['😊', '💚', '✨'][Math.floor(Math.random() * 3)], 'monte', 35 + Math.random() * 30, 22); }, 300 + k0 * 140);
-    if (window.Sons) window.Sons.jouer('bonjour');
+    // en arrivant : un petit sourire timide (حياء), puis il rit avec le joli son « rit » (la sonnerie ne vient qu'après 30 s)
+    montrer('rit', 3400);
+    pile.classList.add('timide');
+    bulle('☺️', 'monte', 58, 26, 2000);
+    setTimeout(function () {
+      pile.classList.remove('timide'); void pile.offsetWidth; pile.classList.add('rire');
+      if (window.Sons) window.Sons.jouer('rit');
+      for (var k0 = 0; k0 < 6; k0++) setTimeout(function () { bulle(['😂', '😊', '💚', '✨'][Math.floor(Math.random() * 4)], 'monte', 35 + Math.random() * 30, 22); }, k0 * 130);
+      setTimeout(function () { pile.classList.remove('rire'); }, 1300);
+    }, 1100);
     (TX.accueil || []).forEach(function (m, i) { setTimeout(function () { if (document.body.contains(boite) && performance.now() > verrou) parler(m, 2900); }, 700 + i * 3300); });
     requestAnimationFrame(boucle);
   }
