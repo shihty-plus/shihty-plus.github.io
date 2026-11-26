@@ -128,6 +128,7 @@
     var s = document.getElementById('salutation');
     var p = etat && etat.prenom;
     s.hidden = !p;
+    if (window.Compagnon) window.Compagnon.nom(avecNom);
     if (p) {
       s.replaceChildren(h('span', { text: T.salutation.replace('{prenom}', p) }), h('span', { class: 'pastille', text: p.charAt(0) }));
     }
@@ -545,6 +546,12 @@
   }
 
   /* ---------- écran du questionnaire ---------- */
+  /* remplace {prenom} par le pseudonyme (ou l'enlève proprement s'il n'y en a pas) */
+  function avecNom(txt) {
+    if (!txt) return txt;
+    var n = etat && etat.prenom;
+    return n ? txt.replace(/\{prenom\}/g, n) : txt.replace(/\s*(يا\s*)?\{prenom\}\s*،?/g, ' ').replace(/\s+([!،؟.])/g, '$1').replace(/\s{2,}/g, ' ').trim();
+  }
   function icone(id) { return (T.icones || {})[id] || '⭐'; }
   function stepper(ecran) {
     var parties = PARTIES.filter(function (x) { return x.section === ecran.section; }), ici = parties.indexOf(stationDe(ecran));
@@ -590,7 +597,7 @@
       barreProgression(),
       h('section', { class: 'v3d', style: '--accent:' + th.couleur }, [
         h('div', { class: 'v3d-scene' }),
-        T.ditto && !SAISIE ? h('p', { class: 'v3d-bulle', text: T.ditto.stations[(num - 1) % T.ditto.stations.length] }) : null,
+        T.ditto && !SAISIE ? h('p', { class: 'v3d-bulle', text: avecNom(T.ditto.stations[(num - 1) % T.ditto.stations.length]) }) : null,
         h('div', { class: 'v3d-carte', 'aria-hidden': 'true' }),
         h('p', { class: 'v3d-route' }, [h('span', { class: 'v3d-route-t', text: v.en_route.replace('{n}', num) }), h('span', { class: 'v3d-passer', text: v.passer })]),
         h('div', { class: 'v3d-panneau' }, [
@@ -690,6 +697,7 @@
       CTX.heros = theme(ecran.partie).heros;
       document.body.classList.toggle('mode-quiz', ecran.quiz !== undefined);
       CTX.auto = !!(ecran.unique && (ecran.echelle ? !ecran.echelle.message_apres || !ecran.dernierBloc : (seule.length === 1 && seule[0].type === 'choix')));
+      var salut = ecran.debutPartie && etat.prenom && T.prenom.salut ? h('p', { class: 'q-salut', text: avecNom(T.prenom.salut) }) : null;
       var contenu = ecran.echelle ? [ecran.quiz === 0 && T.quiz ? h('p', { class: 'quiz-intro', text: T.quiz.intro.replace('{n}', ecran.echelle.items.length) }) : null, rendreEchelle(ecran)].filter(Boolean)
         : ecran.elements.filter(function (el) { return eff.visibles.has(el); }).map(rendreElement);
       noeuds = [
@@ -700,7 +708,7 @@
           SAISIE || !ecran.debutPartie ? null : bandeauTheme(ecran.partie),   // bannière seulement sur la 1re page de la station
           h('h2', { class: 'titre-partie' }, [h('span', { class: 'titre-partie-icone', 'aria-hidden': 'true', text: icone(ecran.partie.id) }), h('span', { text: ecran.partie.titre }),
             ecran.quiz !== undefined ? h('span', { class: 'compteur', dir: 'ltr', text: (ecran.quizDe + ecran.items.length) + ' / ' + ecran.echelle.items.length }) : ecran.unique ? compteurPartie(ecran, eff) : null])
-        ].concat(contenu)),
+        ].concat(salut ? [salut] : [], contenu)),
         h('p', { class: 'resume-erreurs', id: 'resume-erreurs', role: 'alert', hidden: true, text: T.erreurs.resume }),
         h('div', { class: 'nav' }, [
           precedent,
@@ -1273,10 +1281,9 @@
           bouton(c.bouton_refuser, 'btn-gris', function () { effacer(localStorage, CLE); etat = nouvelEtat(); pageRefus(); }),
           bouton(c.bouton_accepter, 'btn-principal', function () {
             if (!cb.checked) { err.hidden = false; return; }
-            etat.etape = 'questionnaire'; etat.i = 0; etat.prenom = ''; etat.dernier = Date.now(); sauver(); majSalutation();
-            // la carte de toute la route s'affiche d'abord : on voit combien de stations il y a
+            etat.prenom = ''; sauver();
             if (window.Sons) window.Sons.ambiance(null);   // le questionnaire commence : la musique s'arrête
-            voyageCarte(-1, 0, function () { rendreQuestionnaire(false); }, false, true);
+            pagePrenom();   // pseudonyme imaginaire (facultatif), puis la carte
           })
         ])
       ])
@@ -1293,20 +1300,24 @@
   }
   function pagePrenom() {
     var p = T.prenom;
-    var input = h('input', { type: 'text', class: 'champ', id: 'prenom', maxlength: '24', autocomplete: 'off', placeholder: p.placeholder, value: etat.prenom || '' });
+    var input = h('input', { type: 'text', class: 'champ', id: 'prenom', maxlength: '20', autocomplete: 'off', autocapitalize: 'off', placeholder: p.placeholder, value: etat.prenom || '' });
     function suite(garder) {
-      etat.prenom = garder ? input.value.trim().slice(0, 24) : '';
+      etat.prenom = garder ? input.value.trim().replace(/[<>]/g, '').slice(0, 20) : '';
       etat.etape = 'questionnaire'; etat.i = 0; etat.dernier = Date.now(); sauver(); majSalutation();
-      voyageCarte(-1, 0, function () { rendreQuestionnaire(false); });
+      voyageCarte(-1, 0, function () { rendreQuestionnaire(false); }, false, true);
     }
+    var idees = h('div', { class: 'pseudo-idees' }, (p.suggestions || []).map(function (n) {
+      return h('button', { type: 'button', class: 'pseudo-idee', text: n, onclick: function () { input.value = n; input.focus(); } });
+    }));
     afficher([h('section', { class: 'carte carte-centre' }, [
-      autocollant('😊', ['👋', '✨'], 'moyen'),
+      autocollant('🎭', ['✨', '🌟'], 'moyen'),
       h('h1', { class: 'titre-degrade' }, [h('label', { for: 'prenom', text: p.titre })]),
       h('p', { class: 'aide', text: p.texte }),
-      input,
-      h('div', { class: 'nav' }, [bouton(p.passer, 'btn-gris', function () { suite(false); }), bouton(p.bouton, 'btn-principal', function () { suite(true); })])
-    ])]);
-    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') suite(true); });
+      input, idees,
+      h('p', { class: 'pseudo-attention', text: p.attention }),
+      h('div', { class: 'nav' }, [bouton(p.passer, 'btn-gris', function () { suite(false); }), bouton(p.bouton, 'btn-principal', function () { suite(!!input.value.trim()); })])
+    ])], 'page-prenom');
+    setTimeout(function () { try { input.focus({ preventScroll: true }); } catch (e) { /* rien */ } }, 300);
   }
 
   /* ---------- mode saisie chercheur ---------- */

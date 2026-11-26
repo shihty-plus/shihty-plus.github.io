@@ -1861,3 +1861,14 @@ img.dem-curseur { left: -30px; bottom: -36px; }
 .ev-com { width: 100%; max-width: 420px; resize: vertical; font: inherit; }
 .ev-merci { margin: 6px 0; font-size: 18px; font-weight: 800; color: #0F766E; }
 @media print { .evaluation { display: none !important; } }
+/* fin du tunnel : le texte et le bouton remontent, le téléphone 3D apparaît en dessous sans être caché */
+.tunnel:not(.statique) .beat-fin { align-self: start; margin-top: 15vh; }
+.tunnel:not(.statique) .beat-fin .ac-cta { position: relative; z-index: 2; }
+@media (max-width: 600px) { .tunnel:not(.statique) .beat-fin { margin-top: 11vh; } }
+/* pseudonyme imaginaire */
+.pseudo-idees { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 10px 0 4px; }
+.pseudo-idee { padding: 6px 14px; border-radius: 999px; border: 1.5px solid #BFE6DF; background: #F1FAF8; color: #0F766E; font: inherit; font-weight: 800; font-size: 14px; cursor: pointer; }
+.pseudo-idee:hover, .pseudo-idee:focus-visible { background: #0D9488; color: #fff; outline: none; }
+.pseudo-attention { margin: 8px 0 0; font-size: 13.5px; color: #B2402F; font-weight: 700; }
+.q-salut { margin: 0 0 10px; font-weight: 800; font-size: 16px; color: #0F766E; }
+.q-salut { margin-top: 8px; }

@@ -28,7 +28,9 @@
   function image(n, ms) {
     if (ms) { imgTemp = n; imgTempFin = performance.now() + ms; } else imgBase = n;
   }
+  var nomFn = function (t) { return t; };
   function parler(txt, ms) {
+    txt = nomFn(txt);
     if (!txt || cache) return;
     bulle.textContent = txt; bulle.classList.remove('on'); void bulle.offsetWidth; bulle.classList.add('on');
     clearTimeout(minBulle); minBulle = setTimeout(function () { bulle.classList.remove('on'); }, ms || 2600);
@@ -206,5 +208,5 @@
       if (performance.now() - dernierAide > (mode === 'aide' ? 1200 : 45000)) { dernierAide = performance.now() + (mode === 'aide' ? 20000 : 0); parler(TX.aide || 'تحتاج مساعدة؟ ضغط عليا 📖', mode === 'aide' ? 9000 : 4500); }
     }, 1500);
   }
-  window.Compagnon = { surClic: surClic, init: init, page: page, masquer: masquer, traverser: traverser, parler: parler };
+  window.Compagnon = { nom: function (f) { nomFn = f; }, surClic: surClic, init: init, page: page, masquer: masquer, traverser: traverser, parler: parler };
 })();
