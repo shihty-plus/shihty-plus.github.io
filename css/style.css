@@ -1883,3 +1883,8 @@ img.dem-curseur { left: -30px; bottom: -36px; }
 .btt-pile.rire { animation: btt-rire 1.2s ease-out both; transform-origin: 50% 90%; }
 @keyframes btt-rire { 0% { transform: rotate(-3deg) scale(.97); } 12% { transform: rotate(4deg) scale(1.05) translateY(-4%); } 24% { transform: rotate(-4deg) scale(1.03) translateY(-1%); } 36% { transform: rotate(4deg) scale(1.04) translateY(-3%); } 48% { transform: rotate(-3deg) scale(1.02); } 60% { transform: rotate(3deg) scale(1.03) translateY(-2%); } 74% { transform: rotate(-2deg) scale(1.01); } 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .btt-pile.timide, .btt-pile.rire { animation: none; } }
+
+/* v85 : petit saut joyeux quand il dit « هيّا! » */
+.btt-pile.hop { animation: btt-hop .8s cubic-bezier(.3, 1.5, .5, 1) both; transform-origin: 50% 90%; }
+@keyframes btt-hop { 0% { transform: scale(1, 1); } 25% { transform: scale(1.06, .92); } 50% { transform: translateY(-9%) scale(.96, 1.06); } 80% { transform: translateY(0) scale(1.04, .96); } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .btt-pile.hop { animation: none; } }
