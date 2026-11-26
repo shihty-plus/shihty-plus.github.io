@@ -1092,7 +1092,7 @@
         h('p', { class: 'dem-bulle', text: D.bulle || 'أنا موتشي، مرحبا بيك 👋' }),
         ditto,
         h('button', { type: 'button', class: 'btn btn-principal dem-btn' }, [h('span', { text: D.bouton || 'اضغط(ي) هنا للبدء' }),
-          h('span', { class: 'dem-curseur', 'aria-hidden': 'true', html: '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M5 2.5l13 8.2-5.6 1.3 3.4 6.6-2.6 1.3-3.4-6.6-4.3 3.9z" fill="#fff" stroke="#17302F" stroke-width="1.6" stroke-linejoin="round"/></svg>' })])
+          h('img', { class: 'dem-curseur', src: 'assets/curseur.webp', alt: '', 'aria-hidden': 'true' })])
       ])
     ]);
     function entrer() {

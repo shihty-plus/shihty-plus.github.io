@@ -1842,3 +1842,9 @@ body.mode-quiz .item > legend { font-size: 18px; }
 /* Mochi d'aide (consentement) : bulle sous lui */
 .dt.bulle-bas .dt-bulle { bottom: auto; top: 100%; margin: 6px 0 0; transform-origin: 0 0; }
 .dt.bulle-bas .dt-bulle::after { bottom: auto; top: -7px; }
+/* curseur 3D (main) qui appuie sur le bouton de départ */
+.dem-btn { position: relative; overflow: visible; }
+img.dem-curseur { position: absolute; left: -8px; bottom: -34px; width: 50px; height: auto; transform-origin: 40% 10%; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .35)) !important; animation: dem-clic2 1.3s ease-in-out infinite; }
+@keyframes dem-clic2 { 0%, 50%, 100% { transform: translate(0, 0) scale(1); } 65% { transform: translate(5px, -8px) scale(.88); } 80% { transform: translate(0, 0) scale(1); } }
+@media (prefers-reduced-motion: reduce) { img.dem-curseur { animation: none; } }
+img.dem-curseur { left: -30px; bottom: -36px; }
