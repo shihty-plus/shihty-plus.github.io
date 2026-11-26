@@ -1380,7 +1380,7 @@
         pageSaisie(T.saisie.succes.replace('{num}', num));
         return;
       }
-      var res = { scores: paquet.scores, soutien: paquet.soutien, prenom: etat.prenom };
+      var res = { scores: paquet.scores, soutien: paquet.soutien, prenom: etat.prenom, id: paquet.ligne.id_participation };
       ecrire(sessionStorage, CLE_RES, res);
       toast(CFG.ENDPOINT_URL ? T.envoi.confirmation : T.envoi.demo);
       pageResultats(res);
@@ -1512,6 +1512,36 @@
     phrases.push(s.conclusion);
     return h('section', { class: 'carte synthese' }, [h('h2', { text: T.resultats.synthese_titre })].concat(phrases.map(function (p) { return h('p', { text: p }); })));
   }
+  /* Évaluation du site (1 à 5 étoiles + commentaire facultatif), envoyée à part : feuille « Évaluations » du tableur. */
+  function blocEvaluation(res) {
+    var E = T.evaluation || {}; if (!E.titre) return null;
+    var deja = lire(sessionStorage, 'shihty-eval') === res.id, note = 0;
+    var etoiles = h('div', { class: 'ev-etoiles', role: 'radiogroup', 'aria-label': E.titre, dir: 'ltr' });
+    var legende = h('p', { class: 'ev-legende', text: E.choisir });
+    var com = h('textarea', { class: 'champ ev-com', maxlength: '300', rows: '2', placeholder: E.commentaire });
+    var envoyerBtn = bouton(E.envoyer, 'btn-principal ev-envoyer', function () {
+      if (!note) { legende.textContent = E.choisir; legende.classList.add('ev-alerte'); return; }
+      envoyerBtn.disabled = true;
+      var ligne = { id_participation: res.id || '', etoiles: note, commentaire: com.value.trim().slice(0, 300) };
+      var fin = function () { ecrire(sessionStorage, 'shihty-eval', res.id); boite.replaceChildren(h('p', { class: 'ev-merci', text: E.merci })); if (window.FX) { var r0 = boite.getBoundingClientRect(); window.FX.eclat(r0.left + r0.width / 2, r0.top + 30, 18); } };
+      if (!CFG.ENDPOINT_URL) { fin(); return; }
+      fetch(CFG.ENDPOINT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ evaluation: ligne }), redirect: 'follow' })
+        .then(function () { fin(); }).catch(function () { fin(); });
+    });
+    for (var i = 1; i <= 5; i++) (function (n) {
+      var b = h('button', { type: 'button', class: 'ev-etoile', role: 'radio', 'aria-label': n + ' / 5', 'aria-checked': 'false', text: '★' });
+      b.addEventListener('click', function () {
+        note = n; legende.classList.remove('ev-alerte'); legende.textContent = (E.niveaux || [])[n - 1] || '';
+        [].forEach.call(etoiles.children, function (x, k) { x.classList.toggle('on', k < n); x.setAttribute('aria-checked', k === n - 1 ? 'true' : 'false'); });
+        if (window.Sons) window.Sons.jouer(n >= 4 ? 'succes' : 'clic');
+      });
+      etoiles.appendChild(b);
+    })(i);
+    var boite = h('section', { class: 'carte evaluation' }, deja ? [h('p', { class: 'ev-merci', text: E.merci })] : [
+      h('h2', { class: 'ev-titre', text: E.titre }), h('p', { class: 'ev-sous', text: E.sous }), etoiles, legende, com, envoyerBtn
+    ]);
+    return boite;
+  }
   function pageResultats(res) {
     var t = T.resultats, sc = res.scores;
     function quitter() {
@@ -1537,6 +1567,7 @@
         grilleAlbum(PARTIES.map(function (p) { return p.id; }))
       ])
     ].concat(cartes, [
+      blocEvaluation(res),
       h('div', { class: 'actions-resultats' }, [
         bouton(t.telecharger, 'btn-principal', function () { window.print(); }),
         bouton(t.terminer, 'btn-fantome', quitter),

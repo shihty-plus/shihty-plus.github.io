@@ -71,6 +71,7 @@ function doPost(e) {
     var corps = e && e.postData && e.postData.contents;
     if (!corps || corps.length > TAILLE_MAX) return json_({ ok: false, erreur: 'envoi vide ou trop volumineux' });
     var donnees = JSON.parse(corps);
+    if (donnees && donnees.evaluation) return evaluation_(donnees.evaluation);   // évaluation du site (étoiles)
     var ligne = donnees && donnees.ligne;
     if (!ligne || typeof ligne !== 'object') return json_({ ok: false, erreur: 'format' });
     var id = String(ligne.id_participation || '');
@@ -129,6 +130,25 @@ function nettoyer_(v, numerique) {
 
 function libelle_(c, v) {
   return LIBELLES[c] && v !== '' && LIBELLES[c][v] !== undefined ? LIBELLES[c][v] : v;
+}
+
+/** Évaluation du site : une ligne par participant dans la feuille « Évaluations ». */
+function evaluation_(ev) {
+  var id = String(ev.id_participation || '');
+  var etoiles = Number(ev.etoiles);
+  if (!(etoiles >= 1 && etoiles <= 5)) return json_({ ok: false, erreur: 'etoiles' });
+  var verrou = LockService.getScriptLock();
+  verrou.waitLock(30000);
+  try {
+    var classeur = SpreadsheetApp.getActiveSpreadsheet();
+    var f = classeur.getSheetByName('Évaluations') || classeur.insertSheet('Évaluations');
+    if (f.getLastRow() === 0) { f.appendRow(['Horodatage', 'id_participation', 'etoiles (1-5)', 'commentaire']); f.setFrozenRows(1); }
+    if (id && f.getLastRow() > 1 && f.getRange(2, 2, f.getLastRow() - 1, 1).createTextFinder(id).matchEntireCell(true).findNext()) return json_({ ok: true, doublon: true });
+    f.appendRow([new Date(), id, etoiles, nettoyer_(ev.commentaire, false)]);
+  } finally {
+    verrou.releaseLock();
+  }
+  return json_({ ok: true });
 }
 
 function json_(objet) {

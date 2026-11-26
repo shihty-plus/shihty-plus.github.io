@@ -1848,5 +1848,16 @@ img.dem-curseur { position: absolute; left: -8px; bottom: -34px; width: 50px; he
 @keyframes dem-clic2 { 0%, 50%, 100% { transform: translate(0, 0) scale(1); } 65% { transform: translate(5px, -8px) scale(.88); } 80% { transform: translate(0, 0) scale(1); } }
 @media (prefers-reduced-motion: reduce) { img.dem-curseur { animation: none; } }
 img.dem-curseur { left: -30px; bottom: -36px; }
-/* la main 3D comme curseur de la souris sur tout ce qui se clique (ordinateur) */
-a, button, label, select, summary, [role="button"], input[type="radio"], input[type="checkbox"], .option, .btt-r, .btt-corps, .dt-corps, .carte-noeud, .rep-resume, .demarrage { cursor: url("../assets/curseur-36.png") 12 0, pointer !important; }
+/* évaluation par étoiles (page des résultats) */
+.evaluation { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ev-titre { margin: 0; font-size: 20px; color: #0F766E; }
+.ev-sous { margin: 0; color: #5F6F6D; font-size: 14.5px; }
+.ev-etoiles { display: flex; gap: 6px; }
+.ev-etoile { width: 48px; height: 48px; border: 0; background: none; font-size: 40px; line-height: 1; color: #D9D2C3; cursor: pointer; transition: transform .15s, color .15s; padding: 0; }
+.ev-etoile.on { color: #F5B83D; text-shadow: 0 3px 8px rgba(245, 184, 61, .45); }
+.ev-etoile:hover, .ev-etoile:focus-visible { transform: scale(1.18); outline: none; }
+.ev-legende { margin: 0; min-height: 1.4em; font-weight: 800; color: #17302F; }
+.ev-legende.ev-alerte { color: #B2402F; }
+.ev-com { width: 100%; max-width: 420px; resize: vertical; font: inherit; }
+.ev-merci { margin: 6px 0; font-size: 18px; font-weight: 800; color: #0F766E; }
+@media print { .evaluation { display: none !important; } }
