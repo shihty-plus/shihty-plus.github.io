@@ -1839,3 +1839,6 @@ body.mode-quiz .item > legend { font-size: 18px; }
 .gd-fenetre { width: 100%; min-width: 0; }
 .gd-carte { min-width: 0; }
 .gd-nav .gd-prec { color: #17302F !important; background: #fff !important; border: 1.5px solid #D8E3E0 !important; }
+/* Mochi d'aide (consentement) : bulle sous lui */
+.dt.bulle-bas .dt-bulle { bottom: auto; top: 100%; margin: 6px 0 0; transform-origin: 0 0; }
+.dt.bulle-bas .dt-bulle::after { bottom: auto; top: -7px; }

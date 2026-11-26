@@ -1088,8 +1088,6 @@
         var mots = ligne.map(function (m) { return m[0]; }), suite = mots.concat(mots, mots, mots, mots, mots, mots, mots);
         return h('div', { class: 'dem-ruban r' + k }, [h('div', { class: 'dem-ruban-in' }, suite.map(function (m) { return h('span', { text: m }); }))]);
       })),
-      h('img', { class: 'dem-perso g', src: 'assets/persos/garcon-face.webp', alt: '', 'aria-hidden': 'true' }),
-      h('img', { class: 'dem-perso d', src: 'assets/persos/fille-face.webp', alt: '', 'aria-hidden': 'true' }),
       h('div', { class: 'dem-centre' }, [
         h('p', { class: 'dem-bulle', text: D.bulle || 'أنا موتشي، مرحبا بيك 👋' }),
         ditto,
@@ -1283,6 +1281,7 @@
         ])
       ])
     ]);
+    if (window.Compagnon) window.Compagnon.page('aide');   // Mochi sur le côté : « تحتاج مساعدة؟ »
   }
   function pageRefus() {
     afficher([h('section', { class: 'carte carte-centre' }, [
@@ -1564,7 +1563,7 @@
   Promise.all(['questions', 'textes', 'feedback', 'ressources'].map(charger)).then(function (d) {
     Q = d[0]; T = d[1]; F = d[2]; R = d[3];
     construireEcrans();
-    if (window.Compagnon && !SAISIE) window.Compagnon.init((T.ditto || {}).compagnon);
+    if (window.Compagnon && !SAISIE) { window.Compagnon.init((T.ditto || {}).compagnon); window.Compagnon.surClic(function () { ouvrirGuide(); }); }
     if (window.Voyage3D && !SAISIE) window.Voyage3D.init({ parties: PARTIES, couleur: function (p) { return theme(p).couleur; }, icone: function (p) { return icone(p.id); },
       monde: function (p) { return p.section ? p.section.id : null; } });
     var nom = document.getElementById('marque-nom');
