@@ -1,5 +1,5 @@
 {
-  "_aide": "Bloc de soutien (§7). À COMPLÉTER ET VALIDER PAR L'ÉQUIPE avant la mise en ligne : le message doit être celui approuvé par le comité d'éthique. Une ressource n'est affichée sur le site que si \"verifie\" vaut true : vérifiez chaque numéro, puis passez \"verifie\" à true. Champs possibles : nom, description, telephone, lien.",
+  "_aide": "Bloc de soutien (§7). Conseils généraux sans numéro de téléphone (choix de l'équipe). Pour ajouter un numéro vérifié plus tard : ajouter une entrée avec \"telephone\" et \"verifie\": true.",
   "titre": "لست وحدك 💚",
   "message": "قد تمر(ين) بفترة صعبة، وما تشعر(ين) به مهم. لا تبقَ(ي) وحيدا(ة) مع الأفكار المؤلمة: تحدث(ي) مع شخص تثق(ين) به أو مع مختص. طلب المساعدة علامة قوة.",
   "titre_ressources": "أين تجد(ين) المساعدة؟",
@@ -10,22 +10,14 @@
       "verifie": true
     },
     {
-      "nom": "مصلحة الصحة الجامعية / خلية الاستماع بمؤسستك",
-      "description": "À COMPLÉTER : adresse, horaires et téléphone du service de santé / d'écoute de l'université.",
-      "telephone": "",
-      "verifie": false
+      "nom": "طبيب(ة) أو مختص(ة) في الصحة النفسية",
+      "description": "تقدر(ي) تهضر(ي) مع طبيبك، مع مصلحة الصحة فالجامعة ديالك، أو مع أخصائي(ة) نفسي(ة). ما تبقاش(ي) بوحدك.",
+      "verifie": true
     },
     {
-      "nom": "مركز الطب النفسي الأقرب إليك",
-      "description": "À COMPLÉTER : nom et téléphone du centre de psychiatrie de référence.",
-      "telephone": "",
-      "verifie": false
-    },
-    {
-      "nom": "في حالة الطوارئ",
-      "description": "À COMPLÉTER ET VÉRIFIER : numéro(s) d'urgence au Maroc et consigne (se rendre aux urgences les plus proches).",
-      "telephone": "",
-      "verifie": false
+      "nom": "إلا كنتي فخطر دابا",
+      "description": "توجه(ي) فورا لأقرب مصلحة للمستعجلات، أو طلب(ي) من شي حد قريب منك يبقى معاك ويرافقك.",
+      "verifie": true
     }
   ]
 }
