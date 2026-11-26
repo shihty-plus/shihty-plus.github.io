@@ -1276,12 +1276,13 @@
             etat.etape = 'questionnaire'; etat.i = 0; etat.prenom = ''; etat.dernier = Date.now(); sauver(); majSalutation();
             // la carte de toute la route s'affiche d'abord : on voit combien de stations il y a
             if (window.Sons) window.Sons.ambiance(null);   // le questionnaire commence : la musique s'arrête
-            ouvrirGuide(function () { voyageCarte(-1, 0, function () { rendreQuestionnaire(false); }, false, true); });   // d'abord le guide, puis la carte
+            voyageCarte(-1, 0, function () { rendreQuestionnaire(false); }, false, true);
           })
         ])
       ])
     ]);
-    if (window.Compagnon) window.Compagnon.page('aide');   // Mochi sur le côté : « تحتاج مساعدة؟ »
+    if (window.Compagnon) window.Compagnon.page('aide');   // Mochi en bas de l'écran
+    if (!SAISIE) setTimeout(function () { ouvrirGuide(); }, 350);   // tutoriel avant la question, comme dans les jeux
   }
   function pageRefus() {
     afficher([h('section', { class: 'carte carte-centre' }, [

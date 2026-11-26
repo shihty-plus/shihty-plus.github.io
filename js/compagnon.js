@@ -84,9 +84,9 @@
     if (cache || mode === 'aucun' || mode === 'cache') return { x: pos.x, y: pos.y + 40, s: pos.s, o: 0 };
     if (mode === 'accueil') return cibleAccueil();
     if (mode === 'question' || mode === 'resultat') return cibleQuestion();
-    if (mode === 'aide') {   // consentement : en haut à gauche, à côté du titre (ne cache pas les boutons)
-      var sa = mobile() ? 64 : 110, ca = rect('#app .carte');
-      return { x: ca ? ca.left + 6 : 8, y: ca ? Math.max(70, ca.top + 6) : 80, s: sa, o: 1, img: 'salut' };
+    if (mode === 'aide') {   // consentement : en bas à gauche, il dépasse du bas de l'écran (ne cache pas les boutons)
+      var sa = mobile() ? 64 : 110;
+      return { x: 6, y: innerHeight - sa * RATIO * .55, s: sa, o: 1, img: 'salut', peek: true };
     }
     return { x: pos.x, y: pos.y, s: pos.s, o: 0 };
   }
@@ -108,7 +108,7 @@
     var n = imgTemp && now < imgTempFin ? imgTemp : (c.img || imgBase);
     if (img.getAttribute('data-n') !== n) { img.setAttribute('data-n', n); img.src = src(n); }
     el.classList.toggle('peek', !!c.peek && !vol);
-    el.classList.toggle('bulle-bas', mode === 'aide');
+
     if (vol) {
       var p = Math.min(1, (now - vol.t0) / vol.dur), e = 1 - Math.pow(1 - p, 3);   // part vite, se pose en douceur
       var dx = c.x - vol.de.x, dist = Math.hypot(dx, c.y - vol.de.y);
@@ -202,7 +202,7 @@
     corps.addEventListener('click', function () { if (auClic && !cache && mode !== 'accueil') { sautille(1); auClic(); } });
     document.addEventListener('pointerdown', function () { dernierAide = performance.now(); }, true);
     setInterval(function () {   // il propose son aide quand on ne bouge plus depuis un moment
-      if (cache || (mode !== 'question' && mode !== 'aide')) return;
+      if (cache || mode !== 'question') return;
       if (performance.now() - dernierAide > (mode === 'aide' ? 1200 : 45000)) { dernierAide = performance.now() + (mode === 'aide' ? 20000 : 0); parler(TX.aide || 'تحتاج مساعدة؟ ضغط عليا 📖', mode === 'aide' ? 9000 : 4500); }
     }, 1500);
   }
