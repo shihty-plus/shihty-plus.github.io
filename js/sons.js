@@ -8,8 +8,8 @@
 (function () {
   'use strict';
   var DOSSIER = 'assets/sons/';
-  var NOMS = ['clic', 'succes', 'whoosh', 'sonnerie', 'rit', 'bonjour', 'surpris', 'aww', 'ronfle', 'hmph', 'baille', 'boing', 'revele', 'recompense', 'porte', 'tunnel', 'ping'];
-  var VOL = { clic: .35, succes: .5, whoosh: .3, sonnerie: .32, rit: .55, bonjour: .55, surpris: .5, aww: .5, ronfle: .45, hmph: .5, baille: .5, boing: .22, revele: .45, recompense: .5, porte: .9, tunnel: .6, ping: .16 };
+  var NOMS = ['clic', 'succes', 'whoosh', 'sonnerie', 'rit', 'bonjour', 'surpris', 'aww', 'ronfle', 'hmph', 'baille', 'boing', 'revele', 'recompense', 'porte', 'tunnel', 'ping', 'hayaa'];
+  var VOL = { clic: .35, succes: .5, whoosh: .3, sonnerie: .32, rit: .55, bonjour: .55, surpris: .5, aww: .5, ronfle: .45, hmph: .5, baille: .5, boing: .22, revele: .45, recompense: .5, porte: .9, tunnel: .6, ping: .16, hayaa: .6 };
   var NEUTRES = { clic: 1, whoosh: 1 };          // les seuls sons gardés dans les parties sensibles
   var NIVEAUX = { jeu: .09, nature: .14 }, SENSIBLE = .06;   // fonds très bas
   var ctx = null, bufs = {}, maitre = null, pistes = {}, voulue = null, enSensible = false, derniers = {};
@@ -34,7 +34,7 @@
 
   var enAttente = null;   // un son demandé avant le premier geste (ex. « bonjour » de Dittou) est joué dès que le son est autorisé
   function jouer(nom, vol) {
-    if (effets && (!ctx || !bufs[nom]) && (nom === 'bonjour' || nom === 'rit')) enAttente = [nom, vol];
+    if (effets && (!ctx || !bufs[nom]) && (nom === 'bonjour' || nom === 'hayaa' || nom === 'rit')) enAttente = [nom, vol];
     if (!effets || !ctx || !bufs[nom]) return;
     if (enSensible && !NEUTRES[nom]) return;
     var t = ctx.currentTime;

@@ -187,7 +187,7 @@
       // en arrivant : il dit « هيّا! » (son « bonjour ») en souriant, puis il rit avec le joli son « rit » (la sonnerie ne vient qu'après 30 s)
       montrer('rit', 3400);
       pile.classList.add('hop');
-      if (window.Sons) window.Sons.jouer('bonjour');
+      if (window.Sons) window.Sons.jouer('hayaa');   // sa voix : « هيّا! »
       parler(TX.hayaa || 'هيّا! 😄', 1500);
       bulle('😊', 'monte', 58, 26, 2000);
       setTimeout(function () {
@@ -195,7 +195,7 @@
         if (window.Sons) window.Sons.jouer('rit');
         for (var k0 = 0; k0 < 6; k0++) setTimeout(function () { bulle(['😂', '😊', '💚', '✨'][Math.floor(Math.random() * 4)], 'monte', 35 + Math.random() * 30, 22); }, k0 * 130);
         setTimeout(function () { pile.classList.remove('rire'); }, 1300);
-      }, 800);
+      }, 1000);
       (TX.accueil || []).forEach(function (m, i) { setTimeout(function () { if (document.body.contains(boite) && performance.now() > verrou) parler(m, 2900); }, 1900 + i * 3300); });
     })();
     requestAnimationFrame(boucle);
