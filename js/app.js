@@ -938,14 +938,16 @@
       placer(statique || (window.FX && window.FX.calme) ? L1 : L0);
       fermer.focus();
       if (statique || (window.FX && window.FX.calme)) return;
-      var t0 = performance.now() + 450, duree = 1700;
+      var t0 = performance.now() + 450, duree = 1700, prochainSaut = t0;
       (function pas(t) {
         if (termine) return;
         var x = Math.max(0, Math.min(1, (t - t0) / duree)), e = x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
         placer(L0 + (L1 - L0) * e);
         av.classList.toggle('marche', x > 0 && x < 1);
+        // un petit « boop » à chaque saut de Mochi (un saut = 2 × 0,32 s de l'animation pas-marche)
+        if (x > 0 && x < 1 && t >= prochainSaut && L1 !== L0) { prochainSaut = t + 640; if (window.Sons) window.Sons.jouer('saut'); }
         if (x < 1) requestAnimationFrame(pas);
-        else { av.classList.add('arrive'); if (window.FX) { var r = av.getBoundingClientRect(); window.FX.eclat(r.left + r.width / 2, r.top + r.height / 2, 16); } }
+        else { av.classList.add('arrive'); if (window.Sons && L1 !== L0) window.Sons.jouer('arrivee'); if (window.FX) { var r = av.getBoundingClientRect(); window.FX.eclat(r.left + r.width / 2, r.top + r.height / 2, 16); } }
       })(performance.now());
     });
   }

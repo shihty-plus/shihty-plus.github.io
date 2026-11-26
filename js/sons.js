@@ -8,8 +8,8 @@
 (function () {
   'use strict';
   var DOSSIER = 'assets/sons/';
-  var NOMS = ['clic', 'succes', 'whoosh', 'sonnerie', 'rit', 'bonjour', 'surpris', 'aww', 'ronfle', 'hmph', 'baille', 'boing', 'revele', 'recompense', 'porte', 'tunnel', 'ping', 'hayaa'];
-  var VOL = { clic: .35, succes: .5, whoosh: .3, sonnerie: .32, rit: .55, bonjour: .55, surpris: .5, aww: .5, ronfle: .45, hmph: .5, baille: .5, boing: .22, revele: .45, recompense: .5, porte: .9, tunnel: .6, ping: .16, hayaa: .6 };
+  var NOMS = ['clic', 'succes', 'whoosh', 'sonnerie', 'rit', 'bonjour', 'surpris', 'aww', 'ronfle', 'hmph', 'baille', 'boing', 'revele', 'recompense', 'porte', 'tunnel', 'ping', 'hayaa', 'saut', 'arrivee'];
+  var VOL = { clic: .35, succes: .5, whoosh: .3, sonnerie: .32, rit: .55, bonjour: .55, surpris: .5, aww: .5, ronfle: .45, hmph: .5, baille: .5, boing: .22, revele: .45, recompense: .5, porte: .9, tunnel: .6, ping: .16, hayaa: .6, saut: .22, arrivee: .5 };
   var NEUTRES = { clic: 1, whoosh: 1 };          // les seuls sons gardés dans les parties sensibles
   var NIVEAUX = { jeu: .09, nature: .14 }, SENSIBLE = .06;   // fonds très bas
   var ctx = null, bufs = {}, maitre = null, pistes = {}, voulue = null, enSensible = false, derniers = {};
