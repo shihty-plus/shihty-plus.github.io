@@ -1872,3 +1872,7 @@ img.dem-curseur { left: -30px; bottom: -36px; }
 .pseudo-attention { margin: 8px 0 0; font-size: 13.5px; color: #B2402F; font-weight: 700; }
 .q-salut { margin: 0 0 10px; font-weight: 800; font-size: 16px; color: #0F766E; }
 .q-salut { margin-top: 8px; }
+
+/* v83 : titre d'accueil plus long → un peu plus petit */
+.ac-titre.ac-titre-long { font-size: clamp(30px, 8.4vw, 64px); max-width: 15ch; line-height: 1.16; }
+@media (min-width: 900px) { .ac-titre.ac-titre-long, .ac-texte .ac-titre.ac-titre-long { font-size: clamp(38px, 4.4vw, 62px); max-width: 15ch; } }

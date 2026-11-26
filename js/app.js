@@ -1026,7 +1026,7 @@
     }).reduce(function (acc, x) { acc.push(x, ' '); return acc; }, []));
   }
   function titreAccueil(mots) {
-    return h('h1', { class: 'ac-titre' }, mots.filter(function (m) { return m[1] !== 'chip'; }).map(function (m, k) {
+    return h('h1', { class: 'ac-titre' + (mots.length > 9 ? ' ac-titre-long' : '') }, mots.filter(function (m) { return m[1] !== 'chip'; }).map(function (m, k) {
       if (m[1] === 'chip') return h('span', { class: 'mot ac-chip', style: '--k:' + k, 'aria-hidden': 'true' }, [h('span', { class: 'mot-in' }, [h('span', { class: 'ac-chip-tel' }, [h('span', { text: m[0] })])])]);
       return h('span', { class: 'mot ' + (m[1] === 'b' ? 'fort' : 'leger'), style: '--k:' + k }, [h('span', { class: 'mot-in', text: m[0] })]);
     }).reduce(function (acc, x) { acc.push(x, ' '); return acc; }, []));
