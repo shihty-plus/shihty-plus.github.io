@@ -547,6 +547,10 @@
 
   /* ---------- écran du questionnaire ---------- */
   /* remplace {prenom} par le pseudonyme (ou l'enlève proprement s'il n'y en a pas) */
+  /* parties sensibles (jeux d'argent, pornographie, stress, dépression, anxiété, idées suicidaires, santé mentale) :
+     Mochi ne félicite pas, il reste doux ; pas de confettis */
+  var SENSIBLES = ['2D', '2E', '3D', '3E', '3F', '3G', '3H'];
+  function estSensible(ecran) { return !!(ecran && (ecran.cle === 'SOUTIEN' || (ecran.partie && SENSIBLES.indexOf(ecran.partie.id) >= 0))); }
   function avecNom(txt) {
     if (!txt) return txt;
     var n = etat && etat.prenom;
@@ -740,7 +744,7 @@
     if (ecran.type !== 'q' || ecran.quiz === undefined) document.body.classList.remove('mode-quiz');
     if (window.Sons) window.Sons.ambiance(null);   // la musique s'arrête dès qu'on commence à répondre
     if (window.Sons) window.Sons.sensible(!!ecran.partie && ['3E', '3F', '3G'].indexOf(ecran.partie.id) >= 0 || ecran.cle === 'SOUTIEN');
-    if (window.Compagnon) window.Compagnon.page(ecran.type === 'resultat' ? 'resultat' : ecran.type === 'station' ? 'cache' : 'question');
+    if (window.Compagnon) { window.Compagnon.sensible(estSensible(ecran)); window.Compagnon.page(ecran.type === 'resultat' ? 'resultat' : ecran.type === 'station' ? 'cache' : 'question'); }
     if (conserverDefilement) {
       window.scrollTo(0, y);
       if (focusId) { var f = document.getElementById(focusId); if (f) try { f.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
@@ -780,17 +784,12 @@
       if (window.Compagnon && !SAISIE && avant.type !== 'station' && (e2.type === 'q' || e2.type === 'resultat') && !(avant.quiz !== undefined && e2.quiz !== undefined)) window.Compagnon.traverser();
       rendreQuestionnaire(false);
       annoncerAutocollants(gagnes);
-      if (e2.type === 'resultat' && e2.cle !== 'SOUTIEN') { confettis(); return; }
+      if (e2.type === 'resultat' && !estSensible(e2)) { confettis(); return; }
+      if (e2.type === 'resultat') return;
       var msg = e2.type === 'q' && e2.debutPartie && e2.partie !== avant.partie && (T.encouragements_parties || {})[e2.partie.id];
       if (msg && !SAISIE && !gagnes.length) toast(msg);
     }
     if (SAISIE) { montrer(); return; }
-    // entrer dans une station : une porte s'ouvre
-    if (avant.type === 'station' && e2.type === 'q' && window.FX) {
-      var porte = function () { if (window.Sons) window.Sons.jouer('porte'); window.FX.porte(theme(avant.partie).couleur, icone(avant.partie.id), avant.partie.titre, montrer); };
-      porte();
-      return;
-    }
     // nouvelle station : l'étudiant marche sur la carte de la station précédente à la suivante
     montrer();
   }

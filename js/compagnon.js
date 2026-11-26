@@ -13,7 +13,7 @@
   var el, corps, img, bulle, TX = {};
   var pos = { x: -300, y: -300, s: 90, o: 0 }, vol = null, mode = 'aucun', cache = false;
   var imgBase = 'salut', imgTemp = null, imgTempFin = 0, section = -1, dernier = 0, minBulle = null, bulleFaite = {};
-  var compteRep = 0, complet = false;
+  var compteRep = 0, complet = false, sensible = false;
 
   function src(n) { return window.Avatar ? window.Avatar.src(n) : 'assets/bitto/' + n + '.webp'; }
   function mobile() { return innerWidth < 900; }
@@ -70,7 +70,7 @@
     var carte = rect('#app .carte') || rect('#app'), btn = rect('#btn-suivant');
     var s = mobile() ? 64 : 112, h = s * RATIO;
     var ton = (document.querySelector('#app .carte-resultat') || {}).className || '';
-    var imgR = mode === 'resultat' ? (/ton-bon/.test(ton) ? 'saute' : /ton-attention/.test(ton) || document.querySelector('#app .soutien') ? 'bas' : 'salut') : (complet ? 'saute' : 'salut');
+    var imgR = mode === 'resultat' ? (/ton-bon/.test(ton) && !sensible ? 'saute' : /ton-bon/.test(ton) ? 'salut' : /ton-attention/.test(ton) || document.querySelector('#app .soutien') ? 'bas' : 'salut') : (complet ? 'saute' : 'salut');
     var quiz = document.body.classList.contains('mode-quiz');
     if (mobile()) {
       if (quiz) return { x: 4, y: innerHeight - h * .58, s: s, o: 1, img: imgR, peek: true };   // quiz : il reste en bas, sans cacher les réponses
@@ -144,6 +144,12 @@
     compteRep++;
     if (document.body.classList.contains('mode-quiz')) { image('rit', 400); sautille(.7); return; }   // quiz : petit bond seulement
     var avant = complet; complet = pageComplete();
+    if (sensible) {   // questions sensibles : ni « برافو », ni rire, ni fête — juste un mot doux de temps en temps
+      if (complet && !avant) { parler(TX.complet_doux, 2600); return; }
+      var doux = TX.reponses_doux || [];
+      if (doux.length && compteRep % 6 === 0) parler(doux[(compteRep / 6) % doux.length | 0], 2400);
+      return;
+    }
     if (complet && !avant) {
       image('saute', 1300); sautille(1.8); parler(TX.complet, 2600); if (window.Sons) window.Sons.jouer('succes');
       if (window.FX && !CALME) { var r = el.getBoundingClientRect(); window.FX.eclat(r.left + r.width / 2, r.top + r.height / 3, 14); }
@@ -161,8 +167,9 @@
     document.addEventListener('change', surReponse, true);
     requestAnimationFrame(function (t) { dernier = t; boucle(t); });
   }
+  var jetonPage = 0;
   function page(type) {
-    var avant = mode; mode = type;
+    var avant = mode; mode = type; var jeton = ++jetonPage;
     if (type === 'aide') { dernierAide = 0; if (avant !== 'aide' && el) voler({ x: -140, y: innerHeight * .8, s: 70 }, { dur: 520, haut: 50 }); }
     if (el && type === 'question' && document.body.classList.contains('mode-quiz')) { if (bulle) bulle.classList.remove('on'); }
     if (!el) return; complet = type === 'question' && !document.body.classList.contains('mode-quiz') ? pageComplete() : false;
@@ -170,7 +177,9 @@
     if (type === 'resultat') {
       var ton = (document.querySelector('#app .carte-resultat') || {}).className || '';
       var cle = /ton-bon/.test(ton) ? 'bon' : /ton-attention/.test(ton) || document.querySelector('#app .soutien') ? 'attention' : /ton-moyen/.test(ton) ? 'moyen' : 'neutre';
-      setTimeout(function () { parler((TX.resultat || {})[cle], 3600); if (window.Sons && cle !== 'attention') window.Sons.jouer('revele'); }, 900);
+      var txtRes = sensible && (TX.resultat_doux || {})[cle] || (TX.resultat || {})[cle];
+      setTimeout(function () { if (jeton !== jetonPage) return;   // on a déjà changé de page : pas de bulle en retard
+        parler(txtRes, 3600); if (window.Sons && cle !== 'attention') window.Sons.jouer('revele'); }, 900);
       if (avant !== 'question' && avant !== 'resultat') voler({ x: -160, y: innerHeight * .4, s: pos.s }, { dur: 480 });
     }
     if (type === 'question' && avant !== 'question' && avant !== 'resultat' && !vol) {
@@ -208,5 +217,5 @@
       if (performance.now() - dernierAide > (mode === 'aide' ? 1200 : 45000)) { dernierAide = performance.now() + (mode === 'aide' ? 20000 : 0); parler(TX.aide || 'تحتاج مساعدة؟ ضغط عليا 📖', mode === 'aide' ? 9000 : 4500); }
     }, 1500);
   }
-  window.Compagnon = { nom: function (f) { nomFn = f; }, surClic: surClic, init: init, page: page, masquer: masquer, traverser: traverser, parler: parler };
+  window.Compagnon = { sensible: function (v) { if (v && !sensible && bulle) bulle.classList.remove('on'); sensible = !!v; }, nom: function (f) { nomFn = f; }, surClic: surClic, init: init, page: page, masquer: masquer, traverser: traverser, parler: parler };
 })();
