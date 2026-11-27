@@ -1888,3 +1888,7 @@ img.dem-curseur { left: -30px; bottom: -36px; }
 .btt-pile.hop { animation: btt-hop .8s cubic-bezier(.3, 1.5, .5, 1) both; transform-origin: 50% 90%; }
 @keyframes btt-hop { 0% { transform: scale(1, 1); } 25% { transform: scale(1.06, .92); } 50% { transform: translateY(-9%) scale(.96, 1.06); } 80% { transform: translateY(0) scale(1.04, .96); } 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .btt-pile.hop { animation: none; } }
+
+/* v90 : sur la carte, Mochi MARCHE (il se dandine d'un pied sur l'autre) au lieu de sauter */
+@keyframes pas-dandine { 0% { transform: translateY(0) rotate(-7deg); } 25% { transform: translateY(-2px) rotate(0deg); } 50% { transform: translateY(0) rotate(7deg); } 75% { transform: translateY(-2px) rotate(0deg); } 100% { transform: translateY(0) rotate(-7deg); } }
+.carte-avatar.marche svg, .carte-avatar.marche .avt-pose { animation: pas-dandine .64s linear infinite; transform-origin: 50% 100%; }
