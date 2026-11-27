@@ -55,7 +55,8 @@
      Pendant le trajet : image de dos, petits sauts (étirement en l'air, écrasement à l'atterrissage).
      À l'arrivée : il se retourne vers la caméra et salue. */
   var CW = 360, CH = 400, HAUT = 3.2, charge = false;
-  var BOND = { periode: .56, decol: .16, atterr: .74 };   // un bond = 0,56 s : 16 % accroupi, 58 % en l'air, 26 % atterrissage
+  var BOND = { periode: .56, decol: .16, atterr: .74 };
+  var VOITURE = true;   // Mochi roule dans sa petite voiture (vue de dos) au lieu de sauter   // un bond = 0,56 s : 16 % accroupi, 58 % en l'air, 26 % atterrissage
   var nuages = [];
   function poussiere(p) {   // petit nuage de poussière à chaque atterrissage
     if (!scene || CALME) return;
@@ -89,7 +90,7 @@
   function chargerAvatar() {
     if (charge) return; charge = true;
     var u = etu.userData;
-    ['dos', 'salut'].forEach(function (n) {
+    ['dos', 'salut', 'voiture-dos'].forEach(function (n) {
       var im = new Image(); im.onload = function () { u.img[n] = im; };
       im.src = window.Avatar ? window.Avatar.src(n) : 'assets/bitto/' + n + '.webp';
     });
@@ -101,9 +102,11 @@
     if (u.tour < 1) { u.tour = Math.min(1, u.tour + dt / .4); if (u.tour >= .5) u.vue = u.cible; }
     // sauts de lapin : accroupi → bond (étiré, penché en avant) → atterrissage (écrasé), puis on recommence
     var enSaut = vitesse > .05 && anim && anim.fin !== null;
+    var roule = VOITURE && u.vue === 'dos' && u.img['voiture-dos'];
+    if (roule) enSaut = false;   // en voiture : pas de sauts
     if (enSaut) u.phase = anim.c || 0;
     else if (u.sautRepos) { u.phase += dt * 1.5; if (u.phase >= 1) { u.sautRepos = 0; u.phase = 0; } }
-    else { u.phase = 0; if (!CALME && Math.random() < .003) u.sautRepos = 1; }
+    else { u.phase = 0; if (!CALME && !roule && Math.random() < .003) u.sautRepos = 1; }
     var c = u.phase, actif = enSaut || u.sautRepos, haut = 0, sy = 1, penche = 0;
     if (actif) {
       var D = BOND.decol, A = BOND.atterr;
@@ -112,8 +115,9 @@
         sy = 1 + Math.sin(Math.min(1, v * 2.2) * Math.PI) * .1 - (v > .8 ? (v - .8) / .2 * .04 : 0); penche = (v - .5) * .14; }
       else { var w = (c - A) / (1 - A); sy = 1 - Math.sin(w * Math.PI) * .17 * (1 - w * .3); }  // atterrissage amorti
     }
+    if (roule && vitesse > .05) { sy = 1 + Math.sin(temps * 28) * .012; penche = Math.sin(temps * 9) * .02; }   // le moteur fait vibrer la voiture
     u.sprite.position.y = haut * (enSaut ? 1.25 : .55);
-    var im = u.img[u.vue] || u.img.dos || u.img.salut;
+    var im = (roule ? u.img['voiture-dos'] : u.img[u.vue]) || u.img.dos || u.img.salut;
     x.clearRect(0, 0, CW, CH);
     if (im) {
       var ih = CH * .84, iw = ih * im.width / im.height, sx = u.tour < 1 ? Math.max(.02, Math.abs(1 - 2 * u.tour)) : 1;
@@ -268,8 +272,10 @@
       var H = anim.bonds, k = Math.min(H - 1, Math.floor(x * H)), c = x >= 1 ? 1 : x * H - k;
       // un bond : accroupi (immobile) → en l'air (il avance) → atterrissage (immobile)
       var av = c < BOND.decol ? 0 : c > BOND.atterr ? 1 : (function (v) { return v * v * (3 - 2 * v); })((c - BOND.decol) / (BOND.atterr - BOND.decol));
-      t = anim.t0 + (anim.t1 - anim.t0) * (k + av) / H; vitesse = x < 1 ? 1 : 0;
-      if (anim.kPrec !== k && anim.kPrec !== undefined) { poussiere(courbe.getPoint(Math.max(0, Math.min(1, t)))); if (window.Sons) window.Sons.jouer('boing'); }
+      if (VOITURE) t = anim.t0 + (anim.t1 - anim.t0) * (x < .5 ? 2 * x * x : 1 - 2 * (1 - x) * (1 - x));   // la voiture roule en continu (démarre et freine en douceur)
+      else t = anim.t0 + (anim.t1 - anim.t0) * (k + av) / H;
+      vitesse = x < 1 ? 1 : 0;
+      if (anim.kPrec !== k && anim.kPrec !== undefined) { poussiere(courbe.getPoint(Math.max(0, Math.min(1, t)))); if (window.Sons && !VOITURE) window.Sons.jouer('boing'); }
       anim.kPrec = k; anim.c = c;
       if (x >= 1) { anim.fin = null; if (anim.arrivee) { var f = anim.arrivee; anim.arrivee = null; f(); } }
     }
