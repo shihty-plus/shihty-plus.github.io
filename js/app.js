@@ -893,7 +893,7 @@
     var svg = '<svg viewBox="0 0 ' + CARTE.L + ' ' + H + '" class="carte-svg" aria-hidden="true">' + mondes + decos +
       '<path d="' + d + '" class="carte-chemin-ombre"/><path d="' + d + '" class="carte-chemin"/><path d="' + d + '" class="carte-chemin-fait"/>' + noeuds + '</svg>';
     var avatar = h('div', { class: 'carte-avatar', html: window.Avatar ? '' : window.Etudiant ? Etudiant.svg({ pose: 'salut', genre: (de + a) % 2 ? 'h' : 'f' }) : '🎒' });
-    if (window.Avatar) avatar.appendChild(window.Avatar.pose('salut'));
+    if (window.Avatar) { avatar.appendChild(window.Avatar.pose('salut')); avatar.appendChild(window.Avatar.pose('voiture')); }   // pendant le trajet, Mochi roule dans sa petite voiture
     return { el: h('div', { class: 'carte-monde-boite' }, [h('div', { class: 'carte-plan', html: svg }), avatar]), pts: pts };
   }
   function voyageCarte(de, a, fini, statique, depart) {

@@ -1892,3 +1892,12 @@ img.dem-curseur { left: -30px; bottom: -36px; }
 /* v90 : sur la carte, Mochi MARCHE (il se dandine d'un pied sur l'autre) au lieu de sauter */
 @keyframes pas-dandine { 0% { transform: translateY(0) rotate(-7deg); } 25% { transform: translateY(-2px) rotate(0deg); } 50% { transform: translateY(0) rotate(7deg); } 75% { transform: translateY(-2px) rotate(0deg); } 100% { transform: translateY(0) rotate(-7deg); } }
 .carte-avatar.marche svg, .carte-avatar.marche .avt-pose { animation: pas-dandine .64s linear infinite; transform-origin: 50% 100%; }
+
+/* v91 : sur la carte, Mochi roule dans sa petite voiture pendant le trajet, puis il en sort (salut) à l'arrivée */
+.carte-avatar .avt-voiture { position: absolute; left: -12%; bottom: 0; width: 124%; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.carte-avatar .avt-salut { transition: opacity .2s; }
+.carte-avatar { position: absolute; }
+.carte-avatar.marche .avt-voiture { opacity: 1; animation: voiture-roule .26s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+.carte-avatar.marche .avt-salut { opacity: 0; animation: none; }
+@keyframes voiture-roule { from { transform: translateY(0) rotate(-1.5deg); } to { transform: translateY(-2px) rotate(1deg); } }
+@media (prefers-reduced-motion: reduce) { .carte-avatar.marche .avt-voiture { animation: none; } }
