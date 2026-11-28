@@ -1901,3 +1901,12 @@ img.dem-curseur { left: -30px; bottom: -36px; }
 .carte-avatar.marche .avt-salut { opacity: 0; animation: none; }
 @keyframes voiture-roule { from { transform: translateY(0) rotate(-1.5deg); } to { transform: translateY(-2px) rotate(1deg); } }
 @media (prefers-reduced-motion: reduce) { .carte-avatar.marche .avt-voiture { animation: none; } }
+
+/* v93 : sans la scène 3D, la station montre Mochi qui salue sous sa bulle, au-dessus de la carte de la station */
+.v3d.sans3d { padding-top: 22px; }
+.v3d.sans3d .v3d-bulle { position: relative; left: auto; top: auto; translate: none; display: table; margin: 0 auto 10px; max-width: 86%; text-align: center; }
+.v3d-mochi { width: 92px; margin: 0 auto 6px; opacity: 0; transform: translateY(14px) scale(.85); transition: opacity .3s .15s, transform .5s cubic-bezier(.3, 1.6, .5, 1) .15s; }
+.v3d-mochi .avt-pose { display: block; width: 100%; }
+.v3d-mochi img { width: 100%; display: block; filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .18)); }
+.v3d.arrive .v3d-mochi { opacity: 1; transform: none; }
+@media (max-width: 600px) { .v3d-mochi { width: 78px; } }

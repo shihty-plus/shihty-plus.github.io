@@ -609,10 +609,8 @@
     return [
       barreProgression(),
       h('section', { class: 'v3d', style: '--accent:' + th.couleur }, [
-        h('div', { class: 'v3d-scene' }),
         T.ditto && !SAISIE ? h('p', { class: 'v3d-bulle', text: avecNom(T.ditto.stations[(num - 1) % T.ditto.stations.length]) }) : null,
-        h('div', { class: 'v3d-carte', 'aria-hidden': 'true' }),
-        h('p', { class: 'v3d-route' }, [h('span', { class: 'v3d-route-t', text: v.en_route.replace('{n}', num) }), h('span', { class: 'v3d-passer', text: v.passer })]),
+        window.Avatar && !SAISIE ? h('div', { class: 'v3d-mochi' }, [window.Avatar.pose('salut')]) : null,
         h('div', { class: 'v3d-panneau' }, [
           monde ? h('p', { class: 'monde' }, [h('span', { class: 'monde-em', text: monde })]) : null,
           ecran.debutSection && intro.message ? h('p', { class: 'encouragement', text: intro.message }) : null,
@@ -634,7 +632,7 @@
     var de = SENS === 'avant' && DERNIERE_STATION !== k ? k - 1 : k;
     DERNIERE_STATION = k;
     var arrive = function () { sec.classList.add('arrive'); };
-    if (!window.Voyage3D || !window.Voyage3D.monter(sec.querySelector('.v3d-scene'), de, k, arrive)) { sec.classList.add('sans3d'); arrive(); }
+    sec.classList.add('sans3d'); arrive();   // la scène 3D du trajet a été retirée : la carte (Mochi en voiture) suffit
   }
   /* L'avatar 🎒 saute de la station précédente à la nouvelle. */
   function lancerRoute() {
